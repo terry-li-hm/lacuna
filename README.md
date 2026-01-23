@@ -2,6 +2,9 @@
 
 A production-ready prototype for analyzing and comparing regulatory requirements across different jurisdictions. Cross-jurisdiction regulatory analytics platform for financial institutions.
 
+**🚀 Live Demo:** https://reg-atlas.onrender.com  
+**📦 Repository:** https://github.com/terry-li-hm/reg-atlas
+
 ## Overview
 
 This tool helps banks and financial institutions:
@@ -17,24 +20,41 @@ This tool helps banks and financial institutions:
 - **Vector Search**: ChromaDB-backed semantic search for finding relevant requirements
 - **Cross-Jurisdiction Comparison**: Compare requirements between any two jurisdictions
 - **Clean Web UI**: Simple, responsive interface for all operations
+- **CLI Tool**: Beautiful terminal interface for rapid testing and automation
 - **API-First Design**: FastAPI backend with documented endpoints
-- **Flexible LLM Support**: Works with OpenAI API or fallback to local models
+- **OpenRouter Integration**: Uses OpenRouter for LLM and embeddings (multi-model support)
 
 ## Tech Stack
 
 - **Backend**: FastAPI, Python 3.10+
-- **Vector Database**: ChromaDB with sentence-transformers embeddings
-- **LLM**: OpenAI GPT-3.5/4 (with graceful fallback)
+- **Vector Database**: ChromaDB with OpenAI embeddings via OpenRouter
+- **LLM**: OpenRouter (multi-model access: GPT, Claude, Llama, etc.)
 - **Document Processing**: pypdf for PDF extraction
+- **CLI**: Typer + Rich for beautiful terminal interface
 - **Frontend**: Vanilla HTML/CSS/JavaScript
 - **Package Management**: uv (modern Python package manager)
+- **Deployment**: Render (free tier)
 
 ## Quick Start
+
+**🎯 Fastest Way - Use the CLI:**
+
+```bash
+cd ~/reg-atlas
+source .venv/bin/activate
+
+# Test the deployed service
+python -m cli.main health
+python -m cli.main upload data/documents/sample_hkma_capital.txt -j "Hong Kong"
+python -m cli.main query "What are capital requirements?"
+```
+
+See [CLI.md](CLI.md) for full CLI documentation.
 
 ### Prerequisites
 
 - Python 3.10 or higher
-- (Optional) OpenAI API key for enhanced LLM features
+- OpenRouter API key (required for LLM features)
 
 ### Installation
 
