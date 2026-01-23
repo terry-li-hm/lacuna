@@ -3,6 +3,9 @@ name = "reg-atlas"
 version = "0.1.0"
 description = "RegAtlas - Cross-jurisdiction regulatory analytics platform for financial institutions"
 requires-python = ">=3.10"
+
+[project.scripts]
+regatlas = "cli.main:app"
 dependencies = [
     "fastapi>=0.109.0",
     "uvicorn[standard]>=0.27.0",
@@ -13,6 +16,9 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "pydantic>=2.5.0",
     "pydantic-settings>=2.1.0",
+    "typer[all]>=0.9.0",
+    "httpx>=0.26.0",
+    "rich>=13.7.0",
 ]
 
 [project.optional-dependencies]
