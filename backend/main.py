@@ -1414,6 +1414,8 @@ async def generate_change_impact_brief(change_id: str, request: ChangeImpactBrie
             raw = response.choices[0].message.content or ""
             payload = _extract_json_payload(raw) or {}
             summary_claims = payload.get("summary", []) if isinstance(payload, dict) else []
+            if request.max_claims_per_section > 0:
+                summary_claims = summary_claims[: request.max_claims_per_section]
         except Exception as exc:
             llm_error = str(exc)
             logger.warning(f"Impact brief LLM failed: {exc}")
@@ -2356,6 +2358,11 @@ def _validate_claims(claims: List[Dict[str, Any]], max_citations: int) -> List[D
     remaining = max_citations if max_citations > 0 else None
     for claim in claims:
         citations = claim.get("citations") or []
+        citations = [
+            citation
+            for citation in citations
+            if (citation.get("evidence_text") or "").strip()
+        ]
         if remaining is not None:
             if remaining <= 0:
                 citations = []
