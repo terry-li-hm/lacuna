@@ -1,0 +1,150 @@
+Monetary Authority of Singapore
+Notice 652 - Liquidity Framework
+Liquidity Coverage Ratio (LCR)
+Issued: March 2024
+
+1. Overview
+
+This Notice sets out the requirements for banks incorporated in Singapore to maintain adequate liquidity through compliance with the Liquidity Coverage Ratio (LCR).
+
+2. Scope of Application
+
+2.1 Covered Institutions
+This Notice applies to all banks incorporated in Singapore, including full banks, wholesale banks, and merchant banks.
+
+2.2 Consolidated Basis
+Banks must comply with LCR requirements on both a solo entity and consolidated basis.
+
+3. Minimum LCR Requirement
+
+3.1 Standard Requirement
+Banks must maintain an LCR of at least 100% at all times, calculated as:
+
+LCR = High-Quality Liquid Assets (HQLA) / Total Net Cash Outflows over 30 days
+
+3.2 Enhanced Requirement
+Domestic systemically important banks (D-SIBs) designated by MAS may be subject to higher LCR requirements on a case-by-case basis.
+
+4. High-Quality Liquid Assets (HQLA)
+
+4.1 Level 1 Assets
+Level 1 assets receive 100% weighting and include:
+- Cash
+- Central bank reserves
+- Singapore Government Securities (SGS)
+- MAS bills
+
+4.2 Level 2A Assets
+Level 2A assets receive 85% weighting (15% haircut) and include:
+- AAA to AA- rated sovereign securities
+- AAA to AA- rated covered bonds
+- AAA to AA- rated corporate debt securities
+
+4.3 Level 2B Assets
+Level 2B assets receive weightings between 50% to 75% and include:
+- BBB+ to BBB- rated corporate bonds (50% haircut)
+- Residential mortgage-backed securities rated AA+ or higher (75% weighting)
+- Common equity shares (50% haircut)
+
+4.4 Composition Limits
+- Level 2 assets cannot exceed 40% of total HQLA
+- Level 2B assets cannot exceed 15% of total HQLA
+
+5. Cash Outflows
+
+5.1 Retail Deposits
+- Stable retail deposits: 5% outflow rate
+- Less stable retail deposits: 10% outflow rate
+
+5.2 Wholesale Funding
+- Operational deposits from non-financial corporates: 25% outflow rate
+- Non-operational deposits from non-financial corporates: 40% outflow rate
+- Unsecured wholesale funding from financial institutions: 100% outflow rate
+
+5.3 Secured Funding
+- Transactions with central banks: 0% outflow
+- Transactions backed by Level 1 HQLA: 0% outflow
+- Transactions backed by Level 2A HQLA: 15% outflow
+- Transactions backed by other collateral: 100% outflow
+
+5.4 Additional Requirements
+- Committed credit and liquidity facilities: 5% to 100% depending on counterparty type
+- Contractual obligations: 100% outflow
+- Derivatives cash outflows: 100% of net outflows
+
+6. Cash Inflows
+
+6.1 Inflow Cap
+Total cash inflows are capped at 75% of total cash outflows, ensuring banks maintain a minimum level of HQLA.
+
+6.2 Inflow Rates
+- Retail lending: 50% inflow rate
+- Wholesale lending to non-financial corporates: 50% inflow rate
+- Operational deposits at other financial institutions: 0% inflow
+- Secured lending backed by Level 1 HQLA: 0% inflow
+- Other secured lending: 50% inflow rate
+
+7. Currency Mismatch
+
+7.1 Foreign Currency Exposures
+Banks with significant foreign currency exposures must maintain adequate HQLA in each significant currency, defined as 5% or more of total liabilities.
+
+7.2 Minimum Requirement
+For each significant currency, banks must maintain sufficient HQLA to cover at least 75% of net cash outflows in that currency.
+
+8. Reporting Requirements
+
+8.1 Frequency
+Banks must report their LCR positions to MAS on a daily basis for solo entity and consolidated levels.
+
+8.2 Submission Timeline
+Daily LCR returns (MAS Form LCR-1) must be submitted to MAS within 1 business day.
+
+8.3 Quarterly Detailed Returns
+Comprehensive LCR returns with detailed breakdowns must be submitted quarterly within 20 business days after quarter-end.
+
+9. Disclosure Requirements
+
+9.1 Public Disclosure
+Banks must publicly disclose their average LCR and HQLA composition on a quarterly basis.
+
+9.2 Template Format
+Disclosures must follow the common disclosure template specified in Annex A of this Notice.
+
+10. Internal Liquidity Adequacy Assessment Process (ILAAP)
+
+10.1 Requirement
+Banks must establish and maintain a robust ILAAP that identifies, measures, monitors, and controls liquidity risk.
+
+10.2 Board Oversight
+The Board of Directors must review and approve the ILAAP at least annually.
+
+10.3 Stress Testing
+Banks must conduct regular liquidity stress tests covering both bank-specific and market-wide scenarios, with results reviewed by senior management and the Board.
+
+11. Supervisory Review
+
+11.1 MAS Assessment
+MAS will assess each bank's liquidity risk management and compliance with LCR requirements through ongoing supervision.
+
+11.2 Additional Requirements
+MAS may impose higher LCR requirements or additional liquidity conditions based on a bank's risk profile, business model, or systemic importance.
+
+12. Remedial Measures
+
+12.1 Breach Notification
+Banks must immediately notify MAS if they breach or anticipate breaching the minimum LCR requirement.
+
+12.2 Restoration Plan
+Upon breach, banks must submit a detailed restoration plan to MAS within 5 business days, outlining actions to restore compliance.
+
+12.3 Supervisory Actions
+MAS may take supervisory actions including restrictions on dividend distributions, business activities, or requirements to raise additional capital or liquidity.
+
+13. Effective Date
+
+13.1 Implementation
+This Notice came into full effect on January 1, 2015, replacing earlier interim liquidity requirements.
+
+13.2 Ongoing Updates
+MAS reviews and updates liquidity requirements periodically to reflect international standards and local market conditions.

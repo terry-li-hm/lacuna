@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RegAtlas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .results h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .result-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-meta {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .result-text {
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .summary {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196F3;
+        }
+
+        .summary h3 {
+            color: #1976D2;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>RegAtlas</h1>
+            <p class="subtitle">Cross-jurisdiction regulatory analytics for financial institutions</p>
+            <div class="stats" id="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="docCount">0</div>
+                    <div class="stat-label">Documents</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="chunkCount">0</div>
+                    <div class="stat-label">Chunks</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="jurisdictionCount">0</div>
+                    <div class="stat-label">Jurisdictions</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-grid">
+            <div class="card">
+                <h2>Upload Document</h2>
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label for="document">Regulatory Document (PDF or TXT)</label>
+                        <input type="file" id="document" accept=".pdf,.txt" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="jurisdiction">Jurisdiction</label>
+                        <select id="jurisdiction" required>
+                            <option value="">Select...</option>
+                            <option value="Hong Kong">Hong Kong (HKMA)</option>
+                            <option value="Singapore">Singapore (MAS)</option>
+                            <option value="United Kingdom">United Kingdom (FCA)</option>
+                            <option value="United States">United States (Fed/OCC)</option>
+                            <option value="European Union">European Union (EBA)</option>
+                        </select>
+                    </div>
+                    <button type="submit" id="uploadBtn">Upload & Analyze</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Query Documents</h2>
+                <form id="queryForm">
+                    <div class="form-group">
+                        <label for="query">Question</label>
+                        <input type="text" id="query" placeholder="e.g., What are capital adequacy requirements?" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="filterJurisdiction">Filter by Jurisdiction (Optional)</label>
+                        <select id="filterJurisdiction">
+                            <option value="">All Jurisdictions</option>
+                            <option value="Hong Kong">Hong Kong</option>
+                            <option value="Singapore">Singapore</option>
+                            <option value="United Kingdom">United Kingdom</option>
+                            <option value="United States">United States</option>
+                            <option value="European Union">European Union</option>
+                        </select>
+                    </div>
+                    <button type="submit" id="queryBtn">Search</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Compare Jurisdictions</h2>
+            <form id="compareForm" style="display: flex; gap: 20px; align-items: end;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="jurisdiction1">Jurisdiction 1</label>
+                    <select id="jurisdiction1" required>
+                        <option value="">Select...</option>
+                        <option value="Hong Kong">Hong Kong</option>
+                        <option value="Singapore">Singapore</option>
+                        <option value="United Kingdom">United Kingdom</option>
+                        <option value="United States">United States</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="jurisdiction2">Jurisdiction 2</label>
+                    <select id="jurisdiction2" required>
+                        <option value="">Select...</option>
+                        <option value="Hong Kong">Hong Kong</option>
+                        <option value="Singapore">Singapore</option>
+                        <option value="United Kingdom">United Kingdom</option>
+                        <option value="United States">United States</option>
+                    </select>
+                </div>
+                <button type="submit" id="compareBtn">Compare</button>
+            </form>
+        </div>
+
+        <div id="statusMessage" class="hidden"></div>
+        
+        <div id="results" class="results hidden">
+            <h2>Results</h2>
+            <div id="resultsContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        // Load stats on page load
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE}/stats`);
+                const data = await response.json();
+                
+                document.getElementById('docCount').textContent = data.total_documents || 0;
+                document.getElementById('chunkCount').textContent = data.total_chunks || 0;
+                document.getElementById('jurisdictionCount').textContent = data.jurisdictions.length || 0;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            statusEl.classList.remove('hidden');
+            
+            setTimeout(() => {
+                statusEl.classList.add('hidden');
+            }, 5000);
+        }
+
+        function showResults(content) {
+            const resultsEl = document.getElementById('results');
+            const contentEl = document.getElementById('resultsContent');
+            contentEl.innerHTML = content;
+            resultsEl.classList.remove('hidden');
+        }
+
+        // Upload form handler
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('document');
+            const jurisdiction = document.getElementById('jurisdiction').value;
+            const btn = document.getElementById('uploadBtn');
+            
+            if (!fileInput.files[0]) {
+                showStatus('Please select a file', 'error');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                
+                const response = await fetch(`${API_BASE}/upload?jurisdiction=${encodeURIComponent(jurisdiction)}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) throw new Error('Upload failed');
+                
+                const data = await response.json();
+                
+                showStatus(`Successfully processed ${data.filename}`, 'success');
+                
+                // Display requirements
+                let html = `<h3>Extracted Requirements (${data.jurisdiction})</h3>`;
+                if (data.requirements && data.requirements.requirements) {
+                    data.requirements.requirements.forEach(req => {
+                        html += `
+                            <div class="result-item">
+                                <div class="result-meta"><strong>${req.requirement_type || 'Unknown'}</strong></div>
+                                <div class="result-text">${req.description || 'No description'}</div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    html += '<p>No requirements extracted</p>';
+                }
+                
+                showResults(html);
+                loadStats();
+                
+                // Reset form
+                fileInput.value = '';
+                document.getElementById('jurisdiction').value = '';
+                
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Upload & Analyze';
+            }
+        });
+
+        // Query form handler
+        document.getElementById('queryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const query = document.getElementById('query').value;
+            const jurisdiction = document.getElementById('filterJurisdiction').value;
+            const btn = document.getElementById('queryBtn');
+            
+            btn.disabled = true;
+            btn.textContent = 'Searching...';
+            
+            try {
+                const payload = {
+                    query: query,
+                    jurisdiction: jurisdiction || null,
+                    n_results: 5
+                };
+                
+                const response = await fetch(`${API_BASE}/query`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) throw new Error('Query failed');
+                
+                const data = await response.json();
+                
+                let html = '';
+                
+                if (data.summary) {
+                    html += `
+                        <div class="summary">
+                            <h3>Summary</h3>
+                            <p>${data.summary}</p>
+                        </div>
+                    `;
+                }
+                
+                html += '<h3>Relevant Document Sections</h3>';
+                
+                if (data.results && data.results.length > 0) {
+                    data.results.forEach(result => {
+                        html += `
+                            <div class="result-item">
+                                <div class="result-meta">
+                                    ${result.metadata.jurisdiction || 'Unknown'} | 
+                                    ${result.metadata.filename || 'Unknown file'}
+                                </div>
+                                <div class="result-text">${result.document}</div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    html += '<p>No relevant documents found. Try uploading documents first.</p>';
+                }
+                
+                showResults(html);
+                
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Search';
+            }
+        });
+
+        // Compare form handler
+        document.getElementById('compareForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const j1 = document.getElementById('jurisdiction1').value;
+            const j2 = document.getElementById('jurisdiction2').value;
+            const btn = document.getElementById('compareBtn');
+            
+            if (j1 === j2) {
+                showStatus('Please select different jurisdictions', 'error');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Comparing...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/compare`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        jurisdiction1: j1,
+                        jurisdiction2: j2
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Comparison failed');
+                }
+                
+                const data = await response.json();
+                
+                const html = `
+                    <h3>Comparison: ${j1} vs ${j2}</h3>
+                    <div class="summary">
+                        ${data.comparison.replace(/\n/g, '<br>')}
+                    </div>
+                    <p style="color: #666; font-size: 14px; margin-top: 15px;">
+                        Compared ${data.documents_compared[j1]} document(s) from ${j1} 
+                        with ${data.documents_compared[j2]} document(s) from ${j2}
+                    </p>
+                `;
+                
+                showResults(html);
+                
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Compare';
+            }
+        });
+
+        // Load stats on page load
+        loadStats();
+    </script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+# Quick Start Guide
+
+Get the Regulatory Analytics Tool running in **under 3 minutes**.
+
+## Step 1: Start the Backend (30 seconds)
+
+```bash
+cd ~/reg-atlas
+./run.sh
+```
+
+You should see:
+```
+INFO:     Started server process
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000
+```
+
+Keep this terminal open.
+
+## Step 2: Open the Web UI (10 seconds)
+
+In a new terminal or directly:
+
+```bash
+open ~/reg-atlas/frontend/index.html
+```
+
+The UI will open in your browser and automatically connect to `http://localhost:8000`.
+
+## Step 3: Load Sample Documents (1 minute)
+
+1. Click **"Upload Document"**
+2. Select file: `~/reg-atlas/data/documents/sample_hkma_capital.txt`
+3. Choose jurisdiction: **Hong Kong (HKMA)**
+4. Click **"Upload & Analyze"**
+5. Wait ~10 seconds for processing
+6. See extracted requirements displayed
+
+Repeat for:
+- File: `sample_mas_liquidity.txt`
+- Jurisdiction: **Singapore (MAS)**
+
+## Step 4: Try Queries (30 seconds)
+
+In the **"Query Documents"** section, try:
+
+**Query 1**: `What are the minimum capital requirements?`
+- Filter: Hong Kong
+- Click **"Search"**
+- See relevant text sections + AI summary
+
+**Query 2**: `What is the liquidity coverage ratio requirement?`
+- Filter: Singapore
+- Click **"Search"**
+
+## Step 5: Compare Jurisdictions (30 seconds)
+
+In the **"Compare Jurisdictions"** section:
+
+1. Select **Hong Kong** (Jurisdiction 1)
+2. Select **Singapore** (Jurisdiction 2)
+3. Click **"Compare"**
+4. View side-by-side comparison
+
+## What Just Happened?
+
+You've successfully:
+- ✅ Processed 2 regulatory documents
+- ✅ Extracted requirements using keyword matching (LLM optional)
+- ✅ Performed semantic search with RAG
+- ✅ Compared cross-jurisdiction requirements
+
+## Next Steps
+
+### Add OpenAI for Enhanced Features
+
+1. Get your API key from https://platform.openai.com
+2. Create `.env` file:
+   ```bash
+   cd ~/reg-atlas
+   cp .env.example .env
+   ```
+3. Edit `.env` and add:
+   ```
+   OPENAI_API_KEY=sk-your-key-here
+   ```
+4. Restart the server (`./run.sh`)
+
+With OpenAI enabled:
+- Requirements extraction becomes more detailed
+- Query summaries are AI-generated
+- Comparisons are more nuanced
+
+### Test with Your Own Documents
+
+Upload any regulatory PDF or text file:
+- HKMA circulars
+- MAS notices
+- FCA rulebooks
+- Fed/OCC guidelines
+- EBA standards
+
+## Troubleshooting
+
+**Port 8000 already in use?**
+```bash
+# Kill existing process
+lsof -ti:8000 | xargs kill -9
+
+# Or use a different port
+cd ~/reg-atlas
+source .venv/bin/activate
+python -m uvicorn backend.main:app --reload --port 8001
+```
+
+Then update frontend/index.html line 220:
+```javascript
+const API_BASE = 'http://localhost:8001';  // Changed from 8000
+```
+
+**UI not connecting to backend?**
+- Check backend is running: http://localhost:8000 should show JSON
+- Check browser console for CORS errors
+- Make sure API_BASE in frontend/index.html matches your backend port
+
+**Dependencies not installed?**
+```bash
+cd ~/reg-atlas
+source .venv/bin/activate
+uv pip install -e .
+```
+
+## Demo Script for Capco
+
+**Total time: 5 minutes**
+
+1. **Show the problem** (30 sec)
+   - "Banks need to analyze regulations across HK, SG, UK, US, EU"
+   - "Manual process - reading hundreds of pages, comparing line by line"
+
+2. **Upload documents** (1 min)
+   - "We upload regulatory documents from two jurisdictions"
+   - Show Hong Kong upload → extracted requirements
+   - Show Singapore upload → extracted requirements
+
+3. **Query demonstration** (2 min)
+   - "Natural language queries: 'What are capital requirements?'"
+   - Show RAG results with relevant chunks
+   - "LLM generates summary from actual regulatory text"
+
+4. **Cross-jurisdiction comparison** (1 min)
+   - "Compare HK vs Singapore"
+   - Show automated comparison highlighting differences
+   - "Same process scales to 5, 10, 50 jurisdictions"
+
+5. **Architecture walkthrough** (30 sec)
+   - Show backend code structure
+   - "Production-ready: FastAPI, ChromaDB, proper error handling"
+   - "Can integrate with bank's existing systems"
+
+**Key message**: "From manual comparison taking days → automated analysis in seconds"
