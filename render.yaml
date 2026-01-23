@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: reg-atlas
+    runtime: python
+    region: oregon
+    plan: free
+    branch: main
+    buildCommand: "pip install -e ."
+    startCommand: "uvicorn backend.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.10"
+      - key: LOG_LEVEL
+        value: INFO
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: DATA_DIR
+        value: ./data
+      - key: CHROMA_PERSIST_DIR
+        value: ./data/db/chroma
+    healthCheckPath: /
+    autoDeploy: true
