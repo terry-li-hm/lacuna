@@ -2367,6 +2367,9 @@ def _validate_claims(claims: List[Dict[str, Any]], max_citations: int) -> List[D
             "citations": citations,
         }
         if not citations:
+            base_claim = entry.get("claim") or "No evidence found"
+            if "no evidence found" not in base_claim.lower():
+                entry["claim"] = f"{base_claim} (no evidence found)"
             entry["evidence_gap"] = True
         validated.append(entry)
     return validated
