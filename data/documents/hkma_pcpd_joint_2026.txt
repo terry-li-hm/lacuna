@@ -1,0 +1,16 @@
+# HKMA & PCPD Joint Announcement: Strengthening Collaboration to Combat Fraud and Safeguard Personal Data
+Date: 27 January 2026
+Source: Hong Kong Monetary Authority (HKMA) and Office of the Privacy Commissioner for Personal Data (PCPD)
+
+## Key Measures and Requirements
+
+1. JOINT RISK-BASED EXAMINATIONS: The HKMA and PCPD will conduct joint examinations of banks' anti-fraud systems and controls, focusing on the protection of personal data.
+2. ENHANCED DATA SHARING: Banks are encouraged to share more real-time fraud signals and intelligence through established platforms (e.g., FINEST) while ensuring compliance with data privacy principles.
+3. DATA MINIMIZATION IN ANTI-FRAUD: While combatting fraud, banks must ensure that the collection and use of personal data for anti-fraud purposes are necessary, proportionate, and well-governed.
+4. AUTOMATED FRAUD DETECTION GOVERNANCE: Requirements for regular testing and validation of automated fraud detection models (including AI-driven models) to ensure accuracy and fairness.
+5. VICTIM ASSISTANCE PROTOCOLS: New standards for how banks should handle personal data when assisting victims of fraud to recover funds or prevent further loss.
+6. MANDATORY ANTI-FRAUD TRAINING: Continuous training for bank staff on the intersection of fraud prevention and data privacy.
+7. PHISHING DEFENSE STANDARDS: Strict adherence to the standard that banks will not send SMS/emails with embedded hyperlinks for transaction purposes.
+8. REGULAR CONTROL TESTING: Banks must perform quarterly "stress tests" on their anti-fraud controls specifically targeting evolving deception techniques (e.g., deepfake-enabled phishing).
+9. TRANSPARENT PRIVACY POLICIES: Update privacy policies to explicitly state how data is processed for fraud prevention and what safeguards are in place.
+10. ACCOUNTABILITY FOR THIRD-PARTY FRAUD DATA: Banks remain accountable for the quality and privacy compliance of data sourced from third-party fraud intelligence providers.

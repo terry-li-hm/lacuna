@@ -1,0 +1,17 @@
+# Hong Kong Generative Artificial Intelligence Technical and Application Guideline
+Version: 1.1
+Date: December 2025
+Source: Digital Policy Office (DPO), HKSAR Government
+
+## Key Requirements
+
+1. PROMPT INJECTION DEFENSE: Organizations must implement specific technical controls to detect and mitigate prompt injection and jailbreaking attacks.
+2. HALLUCINATION MONITORING: Automated accuracy checking mechanisms should be in place to detect and flag model hallucinations.
+3. CONFIDENCE SCORING: GenAI outputs provided to users should include a confidence score or indicator of factual reliability.
+4. CONTENT WATERMARKING: All AI-generated content (text, image, or audio) must include visible or invisible watermarks to identify its origin.
+5. DATA POISONING PROTECTION: Technical measures must be implemented to prevent unauthorized modification of training data or fine-tuning datasets.
+6. INTELLECTUAL PROPERTY VERIFICATION: Organizations must verify that GenAI models and their training data do not infringe upon third-party IP rights.
+7. ENERGY EFFICIENCY: Consider the environmental impact and energy consumption when selecting and deploying large-scale GenAI models.
+8. ETHICAL BIAS TESTING: Beyond fairness, models must be explicitly tested against "harmful content" and "illegal instructions" specific to HK local context.
+9. METADATA TAGGING: Ensure AI-generated documents contain standard metadata tags identifying them as machine-produced.
+10. CONTINUOUS RED-TEAMING: Regular adversarial testing (red-teaming) must be performed to identify evolving technical vulnerabilities in GenAI systems.
