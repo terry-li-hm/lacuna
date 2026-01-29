@@ -91,24 +91,12 @@ class RegAtlasClient:
         response.raise_for_status()
         return response.json()
 
-    def list_changes(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """List change items with optional filters."""
-        response = self.client.get(f"{self.base_url}/changes", params=params or {})
-        response.raise_for_status()
-        return response.json()
-
     def requirements_stats(self) -> Dict[str, Any]:
         """Get requirement stats."""
         response = self.client.get(f"{self.base_url}/requirements/stats")
         response.raise_for_status()
         return response.json()
 
-    def changes_stats(self) -> Dict[str, Any]:
-        """Get change stats."""
-        response = self.client.get(f"{self.base_url}/changes/stats")
-        response.raise_for_status()
-        return response.json()
-    
     def gap_analysis(
         self,
         circular_doc_id: str,

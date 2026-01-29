@@ -381,66 +381,6 @@ def list_policies(
 
 
 @app.command()
-def list_changes(
-    jurisdiction: Optional[str] = typer.Option(None, "--jurisdiction", "-j", help="Filter by jurisdiction"),
-    status: Optional[str] = typer.Option(None, "--status", help="Filter by status"),
-    severity: Optional[str] = typer.Option(None, "--severity", help="Filter by severity"),
-    owner: Optional[str] = typer.Option(None, "--owner", help="Filter by owner"),
-    q: Optional[str] = typer.Option(None, "--search", help="Search text"),
-    limit: int = typer.Option(20, "--limit", help="Max rows to display"),
-    api_url: Optional[str] = typer.Option(None, "--api-url", help="Override API URL")
-):
-    """List change items with optional filters."""
-    url = api_url or get_api_url()
-    client = RegAtlasClient(base_url=url)
-
-    params = {
-        "jurisdiction": jurisdiction,
-        "status": status,
-        "severity": severity,
-        "owner": owner,
-        "q": q,
-        "limit": limit
-    }
-
-    try:
-        result = client.list_changes({k: v for k, v in params.items() if v})
-        changes = result.get("changes", [])
-
-        if not changes:
-            console.print("[yellow]No changes found.[/yellow]")
-            return
-
-        table = Table(show_header=True, header_style="bold magenta")
-        table.add_column("ID", style="cyan", no_wrap=True)
-        table.add_column("Title", style="white")
-        table.add_column("Severity", style="red")
-        table.add_column("Status", style="yellow")
-        table.add_column("Owner", style="green")
-        table.add_column("Due", style="blue")
-
-        for change in changes:
-            change_id = (change.get("change_id") or "")[:8]
-            title = (change.get("title") or "—")[:60]
-            table.add_row(
-                f"{change_id}...",
-                title,
-                change.get("severity") or "medium",
-                change.get("status") or "new",
-                change.get("owner") or "—",
-                change.get("due_date") or "—"
-            )
-
-        console.print(table)
-        console.print(f"\n[dim]Total: {result.get('total', len(changes))} changes[/dim]")
-    except Exception as e:
-        console.print(f"[red]Error: {e}[/red]")
-        raise typer.Exit(1)
-    finally:
-        client.close()
-
-
-@app.command()
 def stats_requirements(
     api_url: Optional[str] = typer.Option(None, "--api-url", help="Override API URL")
 ):
@@ -458,33 +398,6 @@ def stats_requirements(
         table.add_row("By Type", ", ".join(data.get("by_type", {}).keys()) or "None")
         table.add_row("By Status", ", ".join(data.get("by_status", {}).keys()) or "None")
         table.add_row("By Mandatory", ", ".join(data.get("by_mandatory", {}).keys()) or "None")
-        console.print(table)
-    except Exception as e:
-        console.print(f"[red]Error: {e}[/red]")
-        raise typer.Exit(1)
-    finally:
-        client.close()
-
-
-@app.command()
-def stats_changes(
-    api_url: Optional[str] = typer.Option(None, "--api-url", help="Override API URL")
-):
-    """Show aggregated change stats."""
-    url = api_url or get_api_url()
-    client = RegAtlasClient(base_url=url)
-
-    try:
-        data = client.changes_stats()
-        table = Table(show_header=False, box=None)
-        table.add_column("Metric", style="cyan", no_wrap=True)
-        table.add_column("Value", style="white")
-        table.add_row("Total", str(data.get("total", 0)))
-        table.add_row("Overdue", str(data.get("overdue", 0)))
-        table.add_row("By Jurisdiction", ", ".join(data.get("by_jurisdiction", {}).keys()) or "None")
-        table.add_row("By Status", ", ".join(data.get("by_status", {}).keys()) or "None")
-        table.add_row("By Severity", ", ".join(data.get("by_severity", {}).keys()) or "None")
-        table.add_row("By Owner", ", ".join(data.get("by_owner", {}).keys()) or "None")
         console.print(table)
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")

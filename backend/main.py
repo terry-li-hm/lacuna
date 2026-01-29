@@ -57,15 +57,12 @@ req_extractor = RequirementExtractor(
 vector_store = VectorStore(settings.chroma_persist_dir)
 
 DOCUMENTS_DB_PATH = settings.data_dir / "documents_db.json"
-CHANGE_DB_PATH = settings.data_dir / "change_log.json"
 AUDIT_LOG_PATH = settings.data_dir / "audit_log.json"
 SOURCES_DB_PATH = settings.data_dir / "sources_db.json"
 EVIDENCE_DB_PATH = settings.data_dir / "evidence_db.json"
 POLICIES_DB_PATH = settings.data_dir / "policies_db.json"
 WEBHOOKS_DB_PATH = settings.data_dir / "webhooks_db.json"
 STARTED_AT = datetime.now(timezone.utc)
-ALLOWED_CHANGE_STATUS = {"new", "triaged", "assessing", "implemented"}
-ALLOWED_CHANGE_SEVERITY = {"low", "medium", "high"}
 ALLOWED_REQ_STATUS = {"new", "reviewed", "action_required"}
 
 
@@ -217,7 +214,6 @@ def _count_by_field(items: Iterable[Dict[str, Any]], field: str) -> Dict[str, in
 
 # Store for processed documents (in production, use a proper database)
 documents_db: Dict[str, Dict[str, Any]] = load_documents_db(DOCUMENTS_DB_PATH)
-change_db: Dict[str, Dict[str, Any]] = load_json_dict(CHANGE_DB_PATH)
 audit_log: List[Dict[str, Any]] = load_json_list(AUDIT_LOG_PATH)
 sources_db: Dict[str, Dict[str, Any]] = load_json_dict(SOURCES_DB_PATH)
 evidence_db: List[Dict[str, Any]] = load_json_list(EVIDENCE_DB_PATH)
@@ -255,36 +251,6 @@ class RequirementReviewRequest(BaseModel):
     policy_refs: List[str] | None = None
 
 
-class ChangeCreateRequest(BaseModel):
-    title: str
-    jurisdiction: str
-    entity: str | None = None
-    business_unit: str | None = None
-    summary: str | None = None
-    source: str | None = None
-    effective_date: str | None = None
-    severity: str | None = None
-    owner: str | None = None
-    due_date: str | None = None
-    status: str | None = None
-    impacted_areas: List[str] | None = None
-    related_requirement_ids: List[str] | None = None
-    policy_refs: List[str] | None = None
-
-
-class ChangeUpdateRequest(BaseModel):
-    status: str | None = None
-    severity: str | None = None
-    owner: str | None = None
-    due_date: str | None = None
-    impact_assessment: str | None = None
-    impacted_areas: List[str] | None = None
-    related_requirement_ids: List[str] | None = None
-    entity: str | None = None
-    business_unit: str | None = None
-    policy_refs: List[str] | None = None
-
-
 class SourceCreateRequest(BaseModel):
     name: str
     url: str
@@ -292,29 +258,6 @@ class SourceCreateRequest(BaseModel):
     entity: str | None = None
     business_unit: str | None = None
     default_severity: str | None = None
-
-
-class ChangeApprovalRequest(BaseModel):
-    approver: str
-    status: str = "pending"
-    notes: str | None = None
-
-
-class ChangeApprovalUpdateRequest(BaseModel):
-    status: str | None = None
-    notes: str | None = None
-
-
-class ChangeSuggestRequest(BaseModel):
-    no_llm: bool | None = None
-    n_results: int = 5
-
-
-class ChangeImpactBriefRequest(BaseModel):
-    no_llm: bool | None = None
-    n_results: int = 5
-    max_claims_per_section: int = 8
-    max_citations: int = 20
 
 
 class PolicyUpdateRequest(BaseModel):
@@ -1073,529 +1016,6 @@ async def export_requirements(
     )
 
 
-@app.post("/changes")
-async def create_change(request: ChangeCreateRequest):
-    """Create a regulatory change item."""
-    _validate_date_str(request.effective_date, "effective_date")
-    _validate_date_str(request.due_date, "due_date")
-    status = _validate_choice(request.status, ALLOWED_CHANGE_STATUS, "status") or "new"
-    severity = _validate_choice(request.severity, ALLOWED_CHANGE_SEVERITY, "severity") or "medium"
-    change_id = str(uuid.uuid4())
-    change = {
-        "change_id": change_id,
-        "title": request.title,
-        "jurisdiction": request.jurisdiction,
-        "entity": _normalize_text(request.entity),
-        "business_unit": _normalize_text(request.business_unit),
-        "summary": request.summary,
-        "source": request.source,
-        "effective_date": request.effective_date,
-        "severity": severity,
-        "owner": request.owner,
-        "due_date": request.due_date,
-        "status": status,
-        "impacted_areas": request.impacted_areas or [],
-        "impact_assessment": None,
-        "related_requirement_ids": request.related_requirement_ids or [],
-        "policy_refs": request.policy_refs or [],
-        "approvals": [],
-        "source_id": None,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "updated_at": None,
-        "risk_score": 0
-    }
-    change["risk_score"] = _compute_risk_score(change)
-    change_db[change_id] = change
-    save_json_dict(CHANGE_DB_PATH, change_db)
-    _append_audit_log(
-        action="change_created",
-        entity_type="change",
-        entity_id=change_id,
-        details={"title": request.title, "jurisdiction": request.jurisdiction}
-    )
-    _dispatch_webhooks("change.created", change)
-    return change
-
-
-@app.get("/changes")
-async def list_changes(
-    jurisdiction: str | None = None,
-    entity: str | None = None,
-    business_unit: str | None = None,
-    status: str | None = None,
-    severity: str | None = None,
-    owner: str | None = None,
-    q: str | None = None,
-    include_overdue: bool = False,
-    limit: int | None = None,
-    offset: int | None = None
-):
-    """List regulatory change items with optional filters."""
-    changes = _sort_by_iso(list(change_db.values()), "created_at")
-    status_norm = _normalize_status(status)
-    severity_norm = _normalize_severity(severity)
-    filtered = []
-    for change in changes:
-        if jurisdiction and change.get("jurisdiction") != jurisdiction:
-            continue
-        if entity and change.get("entity") != entity:
-            continue
-        if business_unit and change.get("business_unit") != business_unit:
-            continue
-        if status_norm and (change.get("status") or "").lower() != status_norm:
-            continue
-        if severity_norm and (change.get("severity") or "").lower() != severity_norm:
-            continue
-        if owner and change.get("owner") != owner:
-            continue
-        if q:
-            haystack = " ".join(
-                [
-                    change.get("title") or "",
-                    change.get("summary") or "",
-                    change.get("source") or ""
-                ]
-            ).lower()
-            if q.lower() not in haystack:
-                continue
-        filtered.append(change)
-
-    if include_overdue:
-        now = datetime.now(timezone.utc).date()
-        for change in filtered:
-            due_date = change.get("due_date")
-            status_val = change.get("status")
-            overdue = False
-            days_overdue = None
-            if due_date and status_val != "implemented":
-                try:
-                    due = datetime.fromisoformat(due_date).date()
-                    if due < now:
-                        overdue = True
-                        days_overdue = (now - due).days
-                except ValueError:
-                    pass
-            change["overdue"] = overdue
-            change["days_overdue"] = days_overdue
-
-    return {
-        "changes": _paginate(filtered, limit, offset),
-        "total": len(filtered),
-        "limit": limit,
-        "offset": offset or 0
-    }
-
-
-
-
-@app.post("/changes/{change_id}")
-async def update_change(change_id: str, request: ChangeUpdateRequest):
-    """Update a regulatory change item."""
-    change = change_db.get(change_id)
-    if not change:
-        raise HTTPException(status_code=404, detail="Change not found")
-
-    if request.status is not None:
-        change["status"] = _validate_choice(request.status, ALLOWED_CHANGE_STATUS, "status")
-    if request.severity is not None:
-        change["severity"] = _validate_choice(request.severity, ALLOWED_CHANGE_SEVERITY, "severity")
-    if request.owner is not None:
-        change["owner"] = request.owner
-    if request.due_date is not None:
-        _validate_date_str(request.due_date, "due_date")
-        change["due_date"] = request.due_date
-    if request.impact_assessment is not None:
-        change["impact_assessment"] = request.impact_assessment
-    if request.impacted_areas is not None:
-        change["impacted_areas"] = request.impacted_areas
-    if request.related_requirement_ids is not None:
-        change["related_requirement_ids"] = request.related_requirement_ids
-    if request.policy_refs is not None:
-        change["policy_refs"] = request.policy_refs
-    if request.entity is not None:
-        change["entity"] = _normalize_text(request.entity)
-    if request.business_unit is not None:
-        change["business_unit"] = _normalize_text(request.business_unit)
-
-    change["updated_at"] = datetime.now(timezone.utc).isoformat()
-    change["risk_score"] = _compute_risk_score(change)
-    save_json_dict(CHANGE_DB_PATH, change_db)
-    _append_audit_log(
-        action="change_updated",
-        entity_type="change",
-        entity_id=change_id,
-        details={"status": request.status, "owner": request.owner}
-    )
-    _dispatch_webhooks("change.updated", change)
-    return change
-
-
-@app.delete("/changes/{change_id}")
-async def delete_change(change_id: str):
-    """Delete a regulatory change item."""
-    if change_id not in change_db:
-        raise HTTPException(status_code=404, detail="Change not found")
-    deleted = change_db.pop(change_id, None)
-    save_json_dict(CHANGE_DB_PATH, change_db)
-    _append_audit_log(
-        action="change_deleted",
-        entity_type="change",
-        entity_id=change_id,
-        details={"title": deleted.get("title") if deleted else None}
-    )
-    _dispatch_webhooks("change.deleted", deleted or {"change_id": change_id})
-    return {"deleted": True, "change_id": change_id}
-
-
-@app.get("/changes/export")
-async def export_changes(
-    jurisdiction: str | None = None,
-    entity: str | None = None,
-    business_unit: str | None = None,
-    status: str | None = None,
-    severity: str | None = None,
-    owner: str | None = None,
-    q: str | None = None,
-    format: str = "csv"
-):
-    """Export regulatory changes in CSV format."""
-    changes = await list_changes(
-        jurisdiction=jurisdiction,
-        entity=entity,
-        business_unit=business_unit,
-        status=status,
-        severity=severity,
-        owner=owner,
-        q=q
-    )
-    items = changes.get("changes", [])
-
-    if format.lower() == "json":
-        return {"changes": items, "total": len(items)}
-    if format.lower() != "csv":
-        raise HTTPException(status_code=400, detail="Only CSV or JSON export is supported")
-
-    buffer = io.StringIO()
-    writer = csv.DictWriter(
-        buffer,
-        fieldnames=[
-            "change_id",
-            "title",
-            "jurisdiction",
-            "summary",
-            "source",
-            "effective_date",
-            "severity",
-            "status",
-            "owner",
-            "due_date",
-            "entity",
-            "business_unit",
-            "impacted_areas",
-            "impact_assessment",
-            "related_requirement_ids",
-            "policy_refs",
-            "risk_score",
-            "created_at",
-            "updated_at"
-        ]
-    )
-    writer.writeheader()
-    for change in items:
-        writer.writerow({
-            "change_id": change.get("change_id"),
-            "title": change.get("title"),
-            "jurisdiction": change.get("jurisdiction"),
-            "summary": change.get("summary"),
-            "source": change.get("source"),
-            "effective_date": change.get("effective_date"),
-            "severity": change.get("severity"),
-            "status": change.get("status"),
-            "owner": change.get("owner"),
-            "due_date": change.get("due_date"),
-            "entity": change.get("entity"),
-            "business_unit": change.get("business_unit"),
-            "impacted_areas": ",".join(change.get("impacted_areas") or []),
-            "impact_assessment": change.get("impact_assessment"),
-            "related_requirement_ids": ",".join(change.get("related_requirement_ids") or []),
-            "policy_refs": ",".join(change.get("policy_refs") or []),
-            "risk_score": change.get("risk_score"),
-            "created_at": change.get("created_at"),
-            "updated_at": change.get("updated_at")
-        })
-
-    buffer.seek(0)
-    return StreamingResponse(
-        iter([buffer.getvalue()]),
-        media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=reg_changes.csv"}
-    )
-
-
-
-
-@app.post("/changes/{change_id}/approvals")
-async def add_change_approval(change_id: str, request: ChangeApprovalRequest):
-    """Add an approval step for a change item."""
-    change = change_db.get(change_id)
-    if not change:
-        raise HTTPException(status_code=404, detail="Change not found")
-
-    approval = {
-        "approval_id": str(uuid.uuid4()),
-        "approver": request.approver,
-        "status": request.status,
-        "notes": request.notes,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "updated_at": None
-    }
-    change.setdefault("approvals", []).append(approval)
-    change["updated_at"] = datetime.now(timezone.utc).isoformat()
-    save_json_dict(CHANGE_DB_PATH, change_db)
-    _append_audit_log(
-        action="change_approval_added",
-        entity_type="change",
-        entity_id=change_id,
-        details={"approval_id": approval["approval_id"], "approver": request.approver}
-    )
-    _dispatch_webhooks("change.approval_added", approval)
-    return approval
-
-
-@app.get("/changes/{change_id}/approvals")
-async def list_change_approvals(change_id: str):
-    """List approvals for a change item."""
-    change = change_db.get(change_id)
-    if not change:
-        raise HTTPException(status_code=404, detail="Change not found")
-    approvals = change.get("approvals") or []
-    return {"approvals": approvals, "total": len(approvals)}
-
-
-@app.post("/changes/{change_id}/approvals/{approval_id}")
-async def update_change_approval(
-    change_id: str,
-    approval_id: str,
-    request: ChangeApprovalUpdateRequest
-):
-    """Update approval status for a change item."""
-    change = change_db.get(change_id)
-    if not change:
-        raise HTTPException(status_code=404, detail="Change not found")
-
-    approvals = change.get("approvals", [])
-    updated = None
-    for approval in approvals:
-        if approval.get("approval_id") == approval_id:
-            if request.status is not None:
-                approval["status"] = request.status
-            if request.notes is not None:
-                approval["notes"] = request.notes
-            approval["updated_at"] = datetime.now(timezone.utc).isoformat()
-            updated = approval
-            break
-
-    if not updated:
-        raise HTTPException(status_code=404, detail="Approval not found")
-
-    change["updated_at"] = datetime.now(timezone.utc).isoformat()
-    save_json_dict(CHANGE_DB_PATH, change_db)
-    _append_audit_log(
-        action="change_approval_updated",
-        entity_type="change",
-        entity_id=change_id,
-        details={"approval_id": approval_id, "status": request.status}
-    )
-    _dispatch_webhooks("change.approval_updated", updated)
-    return updated
-
-
-@app.post("/changes/{change_id}/ai-suggest")
-async def suggest_change_impact(change_id: str, request: ChangeSuggestRequest):
-    """Suggest impacted requirements and impact summary."""
-    change = change_db.get(change_id)
-    if not change:
-        raise HTTPException(status_code=404, detail="Change not found")
-
-    query_text = " ".join(
-        [
-            change.get("title") or "",
-            change.get("summary") or "",
-            change.get("jurisdiction") or "",
-        ]
-    ).strip()
-
-    results = []
-    if query_text:
-        results = vector_store.query(query_text=query_text, n_results=request.n_results)
-
-    matched_requirements = []
-    suggested_controls = set()
-    suggested_policy_refs = set()
-    suggested_impacted_areas = set(change.get("impacted_areas") or [])
-    for item in results:
-        metadata = item.get("metadata") or {}
-        doc_id = metadata.get("doc_id")
-        reqs = _extract_requirements_from_doc(documents_db.get(doc_id, {}))
-        for req in reqs:
-            matched_requirements.append(req)
-            for control in req.get("controls") or []:
-                suggested_controls.add(control)
-            for policy in req.get("policy_refs") or []:
-                suggested_policy_refs.add(policy)
-
-    impact_summary = _basic_impact_summary(change, matched_requirements)
-    use_llm = req_extractor.client is not None and not (request.no_llm or False)
-    if use_llm and matched_requirements:
-        context = "\n".join(
-            f"- {req.get('requirement_type')}: {req.get('description')}" for req in matched_requirements[:5]
-        )
-        prompt = (
-            f"Summarize impact for this regulatory change:\n"
-            f"Title: {change.get('title')}\n"
-            f"Summary: {change.get('summary')}\n"
-            f"Jurisdiction: {change.get('jurisdiction')}\n\n"
-            f"Related requirements:\n{context}\n\n"
-            "Provide a concise impact assessment (2-4 sentences)."
-        )
-        try:
-            from openai import OpenAI
-
-            client = OpenAI(
-                api_key=settings.openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1"
-            )
-            response = client.chat.completions.create(
-                model=settings.llm_model,
-                messages=[
-                    {"role": "system", "content": "You are a regulatory compliance expert."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.2,
-                max_tokens=200
-            )
-            impact_summary = response.choices[0].message.content or impact_summary
-        except Exception as e:
-            logger.warning(f"AI impact summary failed: {e}")
-
-    return {
-        "change_id": change_id,
-        "impact_summary": impact_summary,
-        "suggested_controls": sorted(suggested_controls),
-        "suggested_policy_refs": sorted(suggested_policy_refs),
-        "matched_requirements": matched_requirements[: request.n_results],
-    }
-
-
-@app.post("/changes/{change_id}/impact-brief")
-async def generate_change_impact_brief(change_id: str, request: ChangeImpactBriefRequest):
-    """Generate an audit-grade impact brief with claim-level citations."""
-    change = change_db.get(change_id)
-    if not change:
-        raise HTTPException(status_code=404, detail="Change not found")
-
-    query_text = " ".join(
-        [
-            change.get("title") or "",
-            change.get("summary") or "",
-            change.get("jurisdiction") or "",
-        ]
-    ).strip()
-
-    results = []
-    if query_text:
-        results = vector_store.query(query_text=query_text, n_results=request.n_results)
-
-    matched_requirements = _collect_matched_requirements(results)
-    requirements_context = _requirements_context(
-        matched_requirements,
-        max_items=max(request.max_claims_per_section, 0)
-    )
-
-    use_llm = req_extractor.client is not None and not (request.no_llm or False)
-    summary_claims = []
-    llm_error = None
-    if use_llm and requirements_context:
-        prompt = _impact_brief_prompt(change, requirements_context, request.max_claims_per_section)
-        try:
-            response = req_extractor.client.chat.completions.create(
-                model=settings.llm_model,
-                messages=[
-                    {"role": "system", "content": "You are a regulatory compliance expert. Respond with JSON only."},
-                    {"role": "user", "content": prompt},
-                ],
-                temperature=0.2,
-                max_tokens=800
-            )
-            raw = response.choices[0].message.content or ""
-            payload = _extract_json_payload(raw) or {}
-            summary_claims = payload.get("summary", []) if isinstance(payload, dict) else []
-            if request.max_claims_per_section > 0:
-                summary_claims = summary_claims[: request.max_claims_per_section]
-        except Exception as exc:
-            llm_error = str(exc)
-            logger.warning(f"Impact brief LLM failed: {exc}")
-
-    if not summary_claims:
-        summary_claims = _deterministic_claims(
-            change,
-            matched_requirements,
-            max_claims=request.max_claims_per_section,
-        )
-
-    validated = _validate_claims(summary_claims, max_citations=request.max_citations)
-    validation = _claim_validation_summary(validated)
-
-    return {
-        "change_id": change_id,
-        "change": {
-            "title": change.get("title"),
-            "jurisdiction": change.get("jurisdiction"),
-            "summary": change.get("summary"),
-            "effective_date": change.get("effective_date"),
-            "severity": change.get("severity"),
-        },
-        "brief": {
-            "summary": validated,
-        },
-        "requirements": requirements_context,
-        "validation": validation,
-        "metadata": {
-            "llm_used": bool(use_llm and summary_claims and llm_error is None),
-            "llm_error": llm_error,
-            "n_results": request.n_results,
-            "max_claims_per_section": request.max_claims_per_section,
-            "max_citations": request.max_citations,
-        },
-    }
-
-
-@app.get("/alerts")
-async def get_alerts(
-    jurisdiction: str | None = None,
-    owner: str | None = None,
-    severity: str | None = None,
-    entity: str | None = None,
-    business_unit: str | None = None
-):
-    """Return overdue change items."""
-    overdue = _get_overdue_changes()
-    filtered = []
-    severity_norm = _normalize_severity(severity) if severity else None
-    for change in overdue:
-        if jurisdiction and change.get("jurisdiction") != jurisdiction:
-            continue
-        if owner and change.get("owner") != owner:
-            continue
-        if entity and change.get("entity") != entity:
-            continue
-        if business_unit and change.get("business_unit") != business_unit:
-            continue
-        if severity_norm and (change.get("severity") or "").lower() != severity_norm:
-            continue
-        filtered.append(change)
-    return {"overdue": filtered, "total": len(filtered)}
-
 
 @app.get("/entities")
 async def list_entities():
@@ -1607,11 +1027,6 @@ async def list_entities():
             entities.add(doc["entity"])
         if doc.get("business_unit"):
             business_units.add(doc["business_unit"])
-    for change in change_db.values():
-        if change.get("entity"):
-            entities.add(change["entity"])
-        if change.get("business_unit"):
-            business_units.add(change["business_unit"])
     return {
         "entities": sorted(entities),
         "business_units": sorted(business_units)
@@ -1775,61 +1190,6 @@ async def delete_source(source_id: str):
     return {"deleted": True, "source_id": source_id}
 
 
-@app.post("/scan")
-async def scan_sources(source_id: str | None = None):
-    """Scan regulatory sources and create change items."""
-    sources = [sources_db[source_id]] if source_id and source_id in sources_db else list(sources_db.values())
-    if not sources:
-        raise HTTPException(status_code=404, detail="No sources configured")
-
-    created = []
-    for source in sources:
-        entries = _parse_feed_entries(source["url"])
-        for entry in entries:
-            dedupe_key = entry.get("id") or entry.get("link") or entry.get("title")
-            if not dedupe_key:
-                continue
-            if _change_exists_for_source(source["source_id"], dedupe_key):
-                continue
-            change_id = str(uuid.uuid4())
-            change = {
-                "change_id": change_id,
-                "title": entry.get("title") or "Regulatory update",
-                "jurisdiction": source.get("jurisdiction"),
-                "entity": source.get("entity"),
-                "business_unit": source.get("business_unit"),
-                "summary": entry.get("summary"),
-                "source": entry.get("link"),
-                "effective_date": entry.get("published"),
-                "severity": source.get("default_severity", "medium"),
-                "owner": None,
-                "due_date": None,
-                "status": "new",
-                "impacted_areas": [],
-                "impact_assessment": None,
-                "related_requirement_ids": [],
-                "approvals": [],
-                "source_id": source["source_id"],
-                "source_entry_id": dedupe_key,
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "updated_at": None,
-                "risk_score": 0
-            }
-            change["risk_score"] = _compute_risk_score(change)
-            change_db[change_id] = change
-            created.append(change)
-    save_json_dict(CHANGE_DB_PATH, change_db)
-    _append_audit_log(
-        action="sources_scanned",
-        entity_type="source",
-        entity_id=source_id or "all",
-        details={"created_changes": len(created)}
-    )
-    for change in created:
-        _dispatch_webhooks("change.created", change)
-    return {"created": created, "total_created": len(created)}
-
-
 @app.post("/webhooks")
 async def add_webhook(request: WebhookCreateRequest):
     """Register an outbound webhook."""
@@ -1839,7 +1199,7 @@ async def add_webhook(request: WebhookCreateRequest):
     webhooks_db[webhook_id] = {
         "webhook_id": webhook_id,
         "url": request.url,
-        "events": request.events or ["change.created", "change.updated"],
+        "events": request.events or ["document.uploaded", "gap_analysis.completed"],
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     save_json_dict(WEBHOOKS_DB_PATH, webhooks_db)
@@ -1894,13 +1254,13 @@ async def delete_webhook(webhook_id: str):
 
 @app.post("/evidence/upload")
 async def upload_evidence(
-    entity_type: str = Query(..., description="requirement or change"),
+    entity_type: str = Query(..., description="requirement"),
     entity_id: str = Query(..., description="Target entity ID"),
     file: UploadFile = File(...)
 ):
-    """Upload evidence file and link it to a requirement or change."""
-    if entity_type not in {"requirement", "change"}:
-        raise HTTPException(status_code=400, detail="Invalid entity_type")
+    """Upload evidence file and link it to a requirement."""
+    if entity_type != "requirement":
+        raise HTTPException(status_code=400, detail="Only requirement entity_type is supported")
 
     evidence_id = str(uuid.uuid4())
     base_dir = settings.data_dir / "evidence" / entity_type / entity_id
@@ -2001,7 +1361,6 @@ async def delete_evidence(evidence_id: str):
 async def export_integrations():
     """Export core data for integration."""
     return {
-        "changes": list(change_db.values()),
         "requirements": _gather_requirements(),
         "documents": list(documents_db.values()),
         "generated_at": datetime.now(timezone.utc).isoformat()
@@ -2070,54 +1429,18 @@ async def export_audit_log(format: str = "csv"):
 async def get_stats():
     """Get system statistics."""
     requirements_count = sum(len(doc.get("requirements", [])) for doc in documents_db.values())
-    severity_counts = {"low": 0, "medium": 0, "high": 0}
-    status_counts: Dict[str, int] = {}
-    for change in change_db.values():
-        sev = (change.get("severity") or "medium").lower()
-        if sev in severity_counts:
-            severity_counts[sev] += 1
-        status = change.get("status") or "unknown"
-        status_counts[status] = status_counts.get(status, 0) + 1
-
     return {
         "total_chunks": vector_store.get_document_count(),
         "total_documents": len(documents_db),
         "jurisdictions": _all_jurisdictions(),
         "llm_available": req_extractor.client is not None,
         "total_requirements": requirements_count,
-        "total_changes": len(change_db),
         "total_audit_events": len(audit_log),
         "total_sources": len(sources_db),
         "total_evidence": len(evidence_db),
-        "overdue_changes": len(_get_overdue_changes()),
-        "change_severity_counts": severity_counts,
-        "change_status_counts": status_counts,
         "started_at": STARTED_AT.isoformat(),
         "uptime_seconds": int((datetime.now(timezone.utc) - STARTED_AT).total_seconds())
     }
-
-
-@app.get("/changes/stats")
-async def change_stats():
-    """Aggregate change counts."""
-    changes = list(change_db.values())
-    return {
-        "total": len(changes),
-        "by_jurisdiction": _count_by_field(changes, "jurisdiction"),
-        "by_status": _count_by_field(changes, "status"),
-        "by_severity": _count_by_field(changes, "severity"),
-        "by_owner": _count_by_field(changes, "owner"),
-        "overdue": len(_get_overdue_changes())
-    }
-
-
-@app.get("/changes/{change_id}")
-async def get_change(change_id: str):
-    """Get a single change item."""
-    change = change_db.get(change_id)
-    if not change:
-        raise HTTPException(status_code=404, detail="Change not found")
-    return change
 
 
 def _normalize_requirements(
@@ -2273,273 +1596,6 @@ def _extract_requirements_from_doc(doc: Dict[str, Any]) -> List[Dict[str, Any]]:
     return []
 
 
-def _change_exists_for_source(source_id: str, entry_id: str) -> bool:
-    for change in change_db.values():
-        if change.get("source_id") == source_id and change.get("source_entry_id") == entry_id:
-            return True
-    return False
-
-
-def _parse_feed_entries(url: str) -> List[Dict[str, Any]]:
-    try:
-        with urllib.request.urlopen(url, timeout=10) as response:
-            content = response.read()
-    except Exception as e:
-        logger.warning(f"Failed to fetch feed {url}: {e}")
-        return []
-
-    try:
-        root = ET.fromstring(content)
-    except ET.ParseError as e:
-        logger.warning(f"Failed to parse feed {url}: {e}")
-        return []
-
-    entries: List[Dict[str, Any]] = []
-
-    # RSS 2.0
-    for item in root.findall(".//item"):
-        title = (item.findtext("title") or "").strip()
-        link = (item.findtext("link") or "").strip()
-        guid = (item.findtext("guid") or "").strip()
-        pub_date = (item.findtext("pubDate") or "").strip()
-        description = (item.findtext("description") or "").strip()
-        entries.append(
-            {
-                "title": title,
-                "link": link,
-                "id": guid or link or title,
-                "published": pub_date,
-                "summary": description,
-            }
-        )
-
-    # Atom
-    for entry in root.findall(".//{http://www.w3.org/2005/Atom}entry"):
-        title = (entry.findtext("{http://www.w3.org/2005/Atom}title") or "").strip()
-        link_el = entry.find("{http://www.w3.org/2005/Atom}link")
-        link = link_el.attrib.get("href", "").strip() if link_el is not None else ""
-        entry_id = (entry.findtext("{http://www.w3.org/2005/Atom}id") or "").strip()
-        updated = (entry.findtext("{http://www.w3.org/2005/Atom}updated") or "").strip()
-        summary = (entry.findtext("{http://www.w3.org/2005/Atom}summary") or "").strip()
-        entries.append(
-            {
-                "title": title,
-                "link": link,
-                "id": entry_id or link or title,
-                "published": updated,
-                "summary": summary,
-            }
-        )
-
-    return entries
-
-
-def _basic_impact_summary(change: Dict[str, Any], matched: List[Dict[str, Any]]) -> str:
-    title = change.get("title") or "Regulatory update"
-    jurisdiction = change.get("jurisdiction") or "Unknown jurisdiction"
-    types = sorted({req.get("requirement_type") for req in matched if req.get("requirement_type")})[:3]
-    if types:
-        return f"{title} may impact {', '.join(types)} requirements in {jurisdiction}. Review affected controls and update policies as needed."
-    return f"{title} requires assessment in {jurisdiction}. Review impacted controls, policies, and reporting obligations."
-
-
-def _collect_matched_requirements(results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    matched: List[Dict[str, Any]] = []
-    seen = set()
-    for item in results:
-        metadata = item.get("metadata") or {}
-        doc_id = metadata.get("doc_id")
-        reqs = _extract_requirements_from_doc(documents_db.get(doc_id, {}))
-        for req in reqs:
-            req_id = req.get("requirement_id")
-            if not req_id or req_id in seen:
-                continue
-            seen.add(req_id)
-            matched.append(req)
-    return matched
-
-
-def _requirements_context(
-    requirements: List[Dict[str, Any]],
-    max_items: int
-) -> List[Dict[str, Any]]:
-    context = []
-    limit = max_items if max_items > 0 else len(requirements)
-    for req in requirements[:limit]:
-        evidence = req.get("evidence") or {}
-        metadata = evidence.get("metadata") or {}
-        evidence_text = (evidence.get("text") or req.get("source_snippet") or "").strip()
-        context.append(
-            {
-                "requirement_id": req.get("requirement_id"),
-                "requirement_type": req.get("requirement_type"),
-                "description": req.get("description"),
-                "doc_id": req.get("doc_id") or metadata.get("doc_id"),
-                "chunk_id": evidence.get("chunk_id"),
-                "evidence_text": evidence_text,
-            }
-        )
-    return context
-
-
-def _impact_brief_prompt(
-    change: Dict[str, Any],
-    requirements: List[Dict[str, Any]],
-    max_claims: int
-) -> str:
-    requirements_text = "\n".join(
-        f"- {req.get('requirement_id')}: {req.get('description')} | evidence: {req.get('evidence_text')}"
-        for req in requirements
-    )
-    return (
-        "Generate an audit-grade impact brief for a regulatory change. "
-        "Return JSON only in this exact shape:\n"
-        "{\n"
-        '  "summary": [\n'
-        "    {\n"
-        '      "claim": "string",\n'
-        '      "citations": [\n'
-        "        {\n"
-        '          "requirement_id": "string",\n'
-        '          "doc_id": "string",\n'
-        '          "chunk_id": "string",\n'
-        '          "evidence_text": "string"\n'
-        "        }\n"
-        "      ]\n"
-        "    }\n"
-        "  ]\n"
-        "}\n\n"
-        f"Change title: {change.get('title')}\n"
-        f"Summary: {change.get('summary')}\n"
-        f"Jurisdiction: {change.get('jurisdiction')}\n"
-        f"Max claims: {max_claims}\n\n"
-        "Requirements with evidence:\n"
-        f"{requirements_text}\n\n"
-        "Rules:\n"
-        "- Each claim must include at least one citation.\n"
-        "- Use only the provided requirements and evidence.\n"
-        "- Keep to the max claim count.\n"
-    )
-
-
-def _extract_json_payload(text: str) -> Dict[str, Any] | None:
-    try:
-        return json.loads(text)
-    except Exception:
-        pass
-    match = re.search(r"\{.*\}", text, re.DOTALL)
-    if not match:
-        return None
-    try:
-        return json.loads(match.group(0))
-    except Exception:
-        return None
-
-
-def _deterministic_claims(
-    change: Dict[str, Any],
-    requirements: List[Dict[str, Any]],
-    max_claims: int
-) -> List[Dict[str, Any]]:
-    claims = []
-    limit = max_claims if max_claims > 0 else len(requirements)
-    if not requirements:
-        return [
-            {
-                "claim": _basic_impact_summary(change, []),
-                "citations": [],
-                "evidence_gap": True,
-            }
-        ]
-    for req in requirements[:limit]:
-        evidence = req.get("evidence") or {}
-        evidence_text = (evidence.get("text") or req.get("source_snippet") or "").strip()
-        citation = {
-            "requirement_id": req.get("requirement_id"),
-            "doc_id": req.get("doc_id"),
-            "chunk_id": evidence.get("chunk_id"),
-            "evidence_text": evidence_text,
-        }
-        claims.append(
-            {
-                "claim": req.get("description") or _basic_impact_summary(change, [req]),
-                "citations": [citation] if evidence_text else [],
-            }
-        )
-    return claims
-
-
-def _validate_claims(claims: List[Dict[str, Any]], max_citations: int) -> List[Dict[str, Any]]:
-    validated = []
-    remaining = max_citations if max_citations > 0 else None
-    for claim in claims:
-        citations = claim.get("citations") or []
-        citations = [
-            citation
-            for citation in citations
-            if (citation.get("evidence_text") or "").strip()
-        ]
-        if remaining is not None:
-            if remaining <= 0:
-                citations = []
-            elif len(citations) > remaining:
-                citations = citations[:remaining]
-            remaining = max(remaining - len(citations), 0)
-        entry = {
-            "claim": claim.get("claim"),
-            "citations": citations,
-        }
-        if not citations:
-            base_claim = entry.get("claim") or "No evidence found"
-            if "no evidence found" not in base_claim.lower():
-                entry["claim"] = f"{base_claim} (no evidence found)"
-            entry["evidence_gap"] = True
-        validated.append(entry)
-    return validated
-
-
-def _claim_validation_summary(claims: List[Dict[str, Any]]) -> Dict[str, Any]:
-    total = len(claims)
-    with_citations = sum(1 for claim in claims if claim.get("citations"))
-    missing = [idx for idx, claim in enumerate(claims) if not claim.get("citations")]
-    ratio = (with_citations / total) if total else 0.0
-    return {
-        "total_claims": total,
-        "claims_with_citations": with_citations,
-        "claims_missing_citations": missing,
-        "evidence_coverage_ratio": ratio,
-    }
-
-
-def _get_overdue_changes() -> List[Dict[str, Any]]:
-    now = datetime.now(timezone.utc).date()
-    overdue = []
-    for change in change_db.values():
-        due_date = change.get("due_date")
-        status = change.get("status")
-        if not due_date or status == "implemented":
-            continue
-        try:
-            due = datetime.fromisoformat(due_date).date()
-        except ValueError:
-            continue
-        if due < now:
-            overdue.append({
-                "change_id": change.get("change_id"),
-                "title": change.get("title"),
-                "jurisdiction": change.get("jurisdiction"),
-                "owner": change.get("owner"),
-                "severity": change.get("severity"),
-                "entity": change.get("entity"),
-                "business_unit": change.get("business_unit"),
-                "due_date": due_date,
-                "days_overdue": (now - due).days,
-                "risk_score": change.get("risk_score"),
-                "escalation_required": _needs_escalation(change, due)
-            })
-    return overdue
-
-
 def _ensure_policy_seeded() -> None:
     if policies_db:
         return
@@ -2567,33 +1623,6 @@ def _ensure_policy_seeded() -> None:
 def _summarize_policy(content: str) -> str:
     lines = [line.strip() for line in content.splitlines() if line.strip()]
     return " ".join(lines[1:4])[:240] if len(lines) > 1 else ""
-
-
-def _compute_risk_score(change: Dict[str, Any]) -> int:
-    severity = (change.get("severity") or "medium").lower()
-    base = {"low": 1, "medium": 2, "high": 3}.get(severity, 2)
-    score = base
-    due_date = change.get("due_date")
-    if due_date:
-        try:
-            due = datetime.fromisoformat(due_date).date()
-            now = datetime.now(timezone.utc).date()
-            if due < now:
-                score += 2
-            else:
-                days_to_due = (due - now).days
-                if days_to_due <= 7:
-                    score += 1
-        except ValueError:
-            pass
-    return score
-
-
-def _needs_escalation(change: Dict[str, Any], due: datetime.date) -> bool:
-    if (change.get("severity") or "").lower() == "high":
-        return True
-    now = datetime.now(timezone.utc).date()
-    return due < now
 
 
 def _dispatch_webhooks(event: str, payload: Dict[str, Any]) -> None:
