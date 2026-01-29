@@ -1,0 +1,122 @@
+{
+  "1535a24b-9b8f-46d1-b638-7a57f6c61915": {
+    "source_id": "1535a24b-9b8f-46d1-b638-7a57f6c61915",
+    "name": "Local Feed",
+    "url": "file:///var/folders/rx/rsks00391t9cvlfddhnt8jlh0000gn/T/tmp0_fmwprw.xml",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "default_severity": "medium",
+    "created_at": "2026-01-23T14:40:57.041310+00:00"
+  },
+  "55ce289e-8e05-4faa-97c7-39af1e11266b": {
+    "source_id": "55ce289e-8e05-4faa-97c7-39af1e11266b",
+    "name": "Local Feed",
+    "url": "file:///var/folders/rx/rsks00391t9cvlfddhnt8jlh0000gn/T/tmpusx5ktmg.xml",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "default_severity": "medium",
+    "created_at": "2026-01-23T20:07:16.799808+00:00"
+  },
+  "420ebce8-2a95-481c-b6fc-b16505800930": {
+    "source_id": "420ebce8-2a95-481c-b6fc-b16505800930",
+    "name": "Local Feed",
+    "url": "file:///var/folders/rx/rsks00391t9cvlfddhnt8jlh0000gn/T/tmpjk9mu8un.xml",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "default_severity": "medium",
+    "created_at": "2026-01-23T20:09:17.260508+00:00"
+  },
+  "b4c721cd-1a2b-475c-a092-ca9c95f55919": {
+    "source_id": "b4c721cd-1a2b-475c-a092-ca9c95f55919",
+    "name": "Local Feed",
+    "url": "file:///var/folders/rx/rsks00391t9cvlfddhnt8jlh0000gn/T/tmpuz3snc4l.xml",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "default_severity": "medium",
+    "created_at": "2026-01-23T20:09:57.174831+00:00"
+  },
+  "9d0c3fd6-9625-4a74-ab01-53cd941c952e": {
+    "source_id": "9d0c3fd6-9625-4a74-ab01-53cd941c952e",
+    "name": "Local Feed",
+    "url": "file:///var/folders/rx/rsks00391t9cvlfddhnt8jlh0000gn/T/tmpsjcg5jjv.xml",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "default_severity": "medium",
+    "created_at": "2026-01-23T20:15:01.618095+00:00"
+  },
+  "94fe8649-593c-4ae2-afde-21f526cf37ab": {
+    "source_id": "94fe8649-593c-4ae2-afde-21f526cf37ab",
+    "name": "Local Feed",
+    "url": "file:///var/folders/rx/rsks00391t9cvlfddhnt8jlh0000gn/T/tmpa_3dqgwj.xml",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "default_severity": "medium",
+    "created_at": "2026-01-23T20:15:49.935309+00:00"
+  },
+  "f9282751-7d8d-48ab-99fd-5aa564d7cca6": {
+    "source_id": "f9282751-7d8d-48ab-99fd-5aa564d7cca6",
+    "name": "Local Feed",
+    "url": "file:///var/folders/rx/rsks00391t9cvlfddhnt8jlh0000gn/T/tmpmdnf15wz.xml",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "default_severity": "medium",
+    "created_at": "2026-01-23T20:28:01.117572+00:00"
+  },
+  "6c2d5bbf-19d8-4a03-9c5b-d893f61e3fb2": {
+    "source_id": "6c2d5bbf-19d8-4a03-9c5b-d893f61e3fb2",
+    "name": "Local Feed",
+    "url": "file:///var/folders/rx/rsks00391t9cvlfddhnt8jlh0000gn/T/tmpx_so7h0j.xml",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "default_severity": "medium",
+    "created_at": "2026-01-23T20:28:31.030582+00:00"
+  },
+  "788b83ce-a69b-4679-ac66-3af53acdded1": {
+    "source_id": "788b83ce-a69b-4679-ac66-3af53acdded1",
+    "name": "Local Feed",
+    "url": "file:///var/folders/rx/rsks00391t9cvlfddhnt8jlh0000gn/T/tmpfmphotl0.xml",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "default_severity": "medium",
+    "created_at": "2026-01-23T20:31:49.896843+00:00"
+  },
+  "ca808a88-1a2a-4b58-bf9c-100e51867b3c": {
+    "source_id": "ca808a88-1a2a-4b58-bf9c-100e51867b3c",
+    "name": "Local Feed",
+    "url": "file:///var/folders/rx/rsks00391t9cvlfddhnt8jlh0000gn/T/tmpap9rb6rj.xml",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "default_severity": "medium",
+    "created_at": "2026-01-23T21:04:50.311253+00:00"
+  },
+  "4f54e5ec-c70c-4fc1-a1af-e3b0e35e3e19": {
+    "source_id": "4f54e5ec-c70c-4fc1-a1af-e3b0e35e3e19",
+    "name": "Local Feed",
+    "url": "file:///var/folders/rx/rsks00391t9cvlfddhnt8jlh0000gn/T/tmpux0j9j1k.xml",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "default_severity": "medium",
+    "created_at": "2026-01-23T23:37:48.325223+00:00"
+  },
+  "aa26cb75-bac4-4907-99fb-a856eba29c71": {
+    "source_id": "aa26cb75-bac4-4907-99fb-a856eba29c71",
+    "name": "Local Feed",
+    "url": "file:///var/folders/rx/rsks00391t9cvlfddhnt8jlh0000gn/T/tmpxm9d2329.xml",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "default_severity": "medium",
+    "created_at": "2026-01-23T23:42:59.313109+00:00"
+  }
+}

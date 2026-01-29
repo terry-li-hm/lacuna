@@ -15,6 +15,7 @@ ENV/
 # Data
 data/db/
 data/documents/*.pdf
+data/documents_db.json
 *.sqlite
 
 # IDE

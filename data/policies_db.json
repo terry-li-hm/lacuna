@@ -1,0 +1,35 @@
+{
+  "risk-governance-standard": {
+    "policy_id": "risk-governance-standard",
+    "title": "Risk Governance Standard",
+    "path": "data/policies/risk-governance-standard.md",
+    "summary": "## Purpose Establish governance standards for model risk, policy approvals, and regulatory change oversight. ## Scope",
+    "status": "active",
+    "version": "1.1",
+    "owner": "Compliance",
+    "created_at": "2026-01-23T14:40:57.050375+00:00",
+    "updated_at": "2026-01-23T20:09:57.861386+00:00"
+  },
+  "aml-kyc-policy": {
+    "policy_id": "aml-kyc-policy",
+    "title": "AML/KYC Policy",
+    "path": "data/policies/aml-kyc-policy.md",
+    "summary": "## Purpose Define customer due diligence (CDD), enhanced due diligence (EDD), and ongoing monitoring requirements to prevent money laundering and terrorist financing risks. ## Scope",
+    "status": "active",
+    "version": "1.0",
+    "owner": "Compliance",
+    "created_at": "2026-01-23T14:40:57.050556+00:00",
+    "updated_at": null
+  },
+  "liquidity-reporting-procedure": {
+    "policy_id": "liquidity-reporting-procedure",
+    "title": "Liquidity Reporting Procedure",
+    "path": "data/policies/liquidity-reporting-procedure.md",
+    "summary": "## Purpose Provide procedures for Liquidity Coverage Ratio (LCR) reporting, disclosure, and regulatory submission. ## Scope",
+    "status": "active",
+    "version": "1.1",
+    "owner": "Compliance",
+    "created_at": "2026-01-23T14:40:57.051087+00:00",
+    "updated_at": "2026-01-23T23:43:01.657771+00:00"
+  }
+}

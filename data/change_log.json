@@ -1,0 +1,820 @@
+{
+  "74dfa563-7a91-4d23-b72f-b376c94e83d2": {
+    "change_id": "74dfa563-7a91-4d23-b72f-b376c94e83d2",
+    "title": "HKMA circular on LCR reporting",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "LCR disclosure updates",
+    "source": "https://example.com/hkma",
+    "effective_date": "2026-06-30",
+    "severity": "high",
+    "owner": "Risk",
+    "due_date": "2026-07-31",
+    "status": "assessing",
+    "impacted_areas": [
+      "Risk"
+    ],
+    "impact_assessment": "Impacts liquidity reporting controls",
+    "related_requirement_ids": [
+      "ba5f3b81-2e3f-49a0-a658-904ab389e1ab"
+    ],
+    "policy_refs": [
+      "aml-kyc-policy"
+    ],
+    "approvals": [
+      {
+        "approval_id": "20e79e3a-cc18-4aba-9a98-e83807e612b2",
+        "approver": "Head of Compliance",
+        "status": "pending",
+        "notes": "Queued",
+        "created_at": "2026-01-23T14:40:57.032339+00:00",
+        "updated_at": null
+      }
+    ],
+    "source_id": null,
+    "created_at": "2026-01-23T14:40:57.030926+00:00",
+    "updated_at": "2026-01-23T14:40:57.037226+00:00",
+    "risk_score": 3,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "2647b8a6-2622-4571-81ad-dff17da612b9": {
+    "change_id": "2647b8a6-2622-4571-81ad-dff17da612b9",
+    "title": "Sample Regulatory Update",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "Sample update description",
+    "source": "https://example.com/update",
+    "effective_date": "2026-01-23",
+    "severity": "medium",
+    "owner": null,
+    "due_date": null,
+    "status": "new",
+    "impacted_areas": [],
+    "impact_assessment": null,
+    "related_requirement_ids": [],
+    "approvals": [],
+    "source_id": "1535a24b-9b8f-46d1-b638-7a57f6c61915",
+    "source_entry_id": "sample-update-1",
+    "created_at": "2026-01-23T14:40:57.047053+00:00",
+    "updated_at": null,
+    "risk_score": 2,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "ccd1e3c8-82fa-4862-b41c-ac2f759857ca": {
+    "change_id": "ccd1e3c8-82fa-4862-b41c-ac2f759857ca",
+    "title": "HKMA circular on LCR reporting",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "LCR disclosure updates",
+    "source": "https://example.com/hkma",
+    "effective_date": "2026-06-30",
+    "severity": "high",
+    "owner": "Risk",
+    "due_date": "2026-07-31",
+    "status": "assessing",
+    "impacted_areas": [
+      "Risk"
+    ],
+    "impact_assessment": "Impacts liquidity reporting controls",
+    "related_requirement_ids": [
+      "14b7c584-b143-4e3e-89f0-383077c425bb"
+    ],
+    "policy_refs": [
+      "aml-kyc-policy"
+    ],
+    "approvals": [
+      {
+        "approval_id": "f809d25f-9127-4a74-8117-49e8c297c737",
+        "approver": "Head of Compliance",
+        "status": "pending",
+        "notes": "Queued",
+        "created_at": "2026-01-23T20:06:54.114147+00:00",
+        "updated_at": null
+      }
+    ],
+    "source_id": null,
+    "created_at": "2026-01-23T20:06:53.419155+00:00",
+    "updated_at": "2026-01-23T20:06:54.127619+00:00",
+    "risk_score": 3,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "29ac6879-c821-4c38-b2e5-62015b65d48c": {
+    "change_id": "29ac6879-c821-4c38-b2e5-62015b65d48c",
+    "title": "HKMA circular on LCR reporting",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "LCR disclosure updates",
+    "source": "https://example.com/hkma",
+    "effective_date": "2026-06-30",
+    "severity": "high",
+    "owner": "Risk",
+    "due_date": "2026-07-31",
+    "status": "assessing",
+    "impacted_areas": [
+      "Risk"
+    ],
+    "impact_assessment": "Impacts liquidity reporting controls",
+    "related_requirement_ids": [
+      "647bf963-d1d9-4a1a-b1bf-247ee90f6c93"
+    ],
+    "policy_refs": [
+      "aml-kyc-policy"
+    ],
+    "approvals": [
+      {
+        "approval_id": "714f8ba7-708a-41aa-980b-f7e4bc6b99e8",
+        "approver": "Head of Compliance",
+        "status": "pending",
+        "notes": "Queued",
+        "created_at": "2026-01-23T20:07:16.784121+00:00",
+        "updated_at": null
+      }
+    ],
+    "source_id": null,
+    "created_at": "2026-01-23T20:07:16.559264+00:00",
+    "updated_at": "2026-01-23T20:07:16.795244+00:00",
+    "risk_score": 3,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "e170c113-c94c-4e1f-b0d1-72f57bc3eac4": {
+    "change_id": "e170c113-c94c-4e1f-b0d1-72f57bc3eac4",
+    "title": "Sample Regulatory Update",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "Sample update description",
+    "source": "https://example.com/update",
+    "effective_date": "2026-01-23",
+    "severity": "medium",
+    "owner": null,
+    "due_date": null,
+    "status": "new",
+    "impacted_areas": [],
+    "impact_assessment": null,
+    "related_requirement_ids": [],
+    "approvals": [],
+    "source_id": "55ce289e-8e05-4faa-97c7-39af1e11266b",
+    "source_entry_id": "sample-update-1",
+    "created_at": "2026-01-23T20:07:16.803854+00:00",
+    "updated_at": null,
+    "risk_score": 2,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "9c645ab5-8669-4a1a-81d6-cd6130e9fe9a": {
+    "change_id": "9c645ab5-8669-4a1a-81d6-cd6130e9fe9a",
+    "title": "HKMA circular on LCR reporting",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "LCR disclosure updates",
+    "source": "https://example.com/hkma",
+    "effective_date": "2026-06-30",
+    "severity": "high",
+    "owner": "Risk",
+    "due_date": "2026-07-31",
+    "status": "assessing",
+    "impacted_areas": [
+      "Risk"
+    ],
+    "impact_assessment": "Impacts liquidity reporting controls",
+    "related_requirement_ids": [
+      "fb117bd4-ac25-42f0-818b-b0b8c668a02f"
+    ],
+    "policy_refs": [
+      "aml-kyc-policy"
+    ],
+    "approvals": [
+      {
+        "approval_id": "5671da22-f45d-4431-960a-02d74af761e9",
+        "approver": "Head of Compliance",
+        "status": "pending",
+        "notes": "Queued",
+        "created_at": "2026-01-23T20:09:17.242635+00:00",
+        "updated_at": null
+      }
+    ],
+    "source_id": null,
+    "created_at": "2026-01-23T20:09:16.645282+00:00",
+    "updated_at": "2026-01-23T20:09:17.256203+00:00",
+    "risk_score": 3,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "3406da8c-ef6a-49fb-aa25-9dd820924191": {
+    "change_id": "3406da8c-ef6a-49fb-aa25-9dd820924191",
+    "title": "Sample Regulatory Update",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "Sample update description",
+    "source": "https://example.com/update",
+    "effective_date": "2026-01-23",
+    "severity": "medium",
+    "owner": null,
+    "due_date": null,
+    "status": "new",
+    "impacted_areas": [],
+    "impact_assessment": null,
+    "related_requirement_ids": [],
+    "approvals": [],
+    "source_id": "420ebce8-2a95-481c-b6fc-b16505800930",
+    "source_entry_id": "sample-update-1",
+    "created_at": "2026-01-23T20:09:17.264177+00:00",
+    "updated_at": null,
+    "risk_score": 2,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "290e31b0-f097-4066-b98a-3abc60fdeeed": {
+    "change_id": "290e31b0-f097-4066-b98a-3abc60fdeeed",
+    "title": "HKMA circular on LCR reporting",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "LCR disclosure updates",
+    "source": "https://example.com/hkma",
+    "effective_date": "2026-06-30",
+    "severity": "high",
+    "owner": "Risk",
+    "due_date": "2026-07-31",
+    "status": "assessing",
+    "impacted_areas": [
+      "Risk"
+    ],
+    "impact_assessment": "Impacts liquidity reporting controls",
+    "related_requirement_ids": [
+      "af0237f4-5daa-437a-8a54-32431ec14fb6"
+    ],
+    "policy_refs": [
+      "aml-kyc-policy"
+    ],
+    "approvals": [
+      {
+        "approval_id": "ec993842-4ccd-41bf-bd3f-b90e4768ed88",
+        "approver": "Head of Compliance",
+        "status": "pending",
+        "notes": "Queued",
+        "created_at": "2026-01-23T20:09:57.143003+00:00",
+        "updated_at": null
+      }
+    ],
+    "source_id": null,
+    "created_at": "2026-01-23T20:09:56.471475+00:00",
+    "updated_at": "2026-01-23T20:09:57.164103+00:00",
+    "risk_score": 3,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "ebcbcd27-5a4d-453d-b67b-b4f6a3199b3b": {
+    "change_id": "ebcbcd27-5a4d-453d-b67b-b4f6a3199b3b",
+    "title": "Sample Regulatory Update",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "Sample update description",
+    "source": "https://example.com/update",
+    "effective_date": "2026-01-23",
+    "severity": "medium",
+    "owner": null,
+    "due_date": null,
+    "status": "new",
+    "impacted_areas": [],
+    "impact_assessment": null,
+    "related_requirement_ids": [],
+    "approvals": [],
+    "source_id": "b4c721cd-1a2b-475c-a092-ca9c95f55919",
+    "source_entry_id": "sample-update-1",
+    "created_at": "2026-01-23T20:09:57.182167+00:00",
+    "updated_at": null,
+    "risk_score": 2,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "84174e4e-15a0-47a5-867e-cb0765a80c92": {
+    "change_id": "84174e4e-15a0-47a5-867e-cb0765a80c92",
+    "title": "HKMA circular on LCR reporting",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "LCR disclosure updates",
+    "source": "https://example.com/hkma",
+    "effective_date": "2026-06-30",
+    "severity": "high",
+    "owner": "Risk",
+    "due_date": "2026-07-31",
+    "status": "assessing",
+    "impacted_areas": [
+      "Risk"
+    ],
+    "impact_assessment": "Impacts liquidity reporting controls",
+    "related_requirement_ids": [
+      "ef0b7022-9687-4a88-b366-e00540068381"
+    ],
+    "policy_refs": [
+      "aml-kyc-policy"
+    ],
+    "approvals": [
+      {
+        "approval_id": "70addcd0-4305-4bd1-9f0f-79bb27aa120d",
+        "approver": "Head of Compliance",
+        "status": "pending",
+        "notes": "Queued",
+        "created_at": "2026-01-23T20:15:01.577747+00:00",
+        "updated_at": null
+      }
+    ],
+    "source_id": null,
+    "created_at": "2026-01-23T20:15:00.303714+00:00",
+    "updated_at": "2026-01-23T20:15:01.600873+00:00",
+    "risk_score": 3,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "d3b575f4-d895-4b17-90ff-fe4d44123eda": {
+    "change_id": "d3b575f4-d895-4b17-90ff-fe4d44123eda",
+    "title": "Sample Regulatory Update",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "Sample update description",
+    "source": "https://example.com/update",
+    "effective_date": "2026-01-23",
+    "severity": "medium",
+    "owner": null,
+    "due_date": null,
+    "status": "new",
+    "impacted_areas": [],
+    "impact_assessment": null,
+    "related_requirement_ids": [],
+    "approvals": [],
+    "source_id": "9d0c3fd6-9625-4a74-ab01-53cd941c952e",
+    "source_entry_id": "sample-update-1",
+    "created_at": "2026-01-23T20:15:01.625231+00:00",
+    "updated_at": null,
+    "risk_score": 2,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "426c23dd-2ded-4d7d-9a18-4759b8a13fce": {
+    "change_id": "426c23dd-2ded-4d7d-9a18-4759b8a13fce",
+    "title": "HKMA circular on LCR reporting",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "LCR disclosure updates",
+    "source": "https://example.com/hkma",
+    "effective_date": "2026-06-30",
+    "severity": "high",
+    "owner": "Risk",
+    "due_date": "2026-07-31",
+    "status": "assessing",
+    "impacted_areas": [
+      "Risk"
+    ],
+    "impact_assessment": "Impacts liquidity reporting controls",
+    "related_requirement_ids": [
+      "1d7f5718-e906-44d3-bf79-91f9baec9360"
+    ],
+    "policy_refs": [
+      "aml-kyc-policy"
+    ],
+    "approvals": [
+      {
+        "approval_id": "97d83cb3-ec88-4051-9b54-f84b550d459a",
+        "approver": "Head of Compliance",
+        "status": "pending",
+        "notes": "Queued",
+        "created_at": "2026-01-23T20:15:49.915816+00:00",
+        "updated_at": null
+      }
+    ],
+    "source_id": null,
+    "created_at": "2026-01-23T20:15:48.433398+00:00",
+    "updated_at": "2026-01-23T20:15:49.926669+00:00",
+    "risk_score": 3,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "f9c6c7f9-d48d-4551-b265-949020c42749": {
+    "change_id": "f9c6c7f9-d48d-4551-b265-949020c42749",
+    "title": "Sample Regulatory Update",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "Sample update description",
+    "source": "https://example.com/update",
+    "effective_date": "2026-01-23",
+    "severity": "medium",
+    "owner": null,
+    "due_date": null,
+    "status": "new",
+    "impacted_areas": [],
+    "impact_assessment": null,
+    "related_requirement_ids": [],
+    "approvals": [],
+    "source_id": "94fe8649-593c-4ae2-afde-21f526cf37ab",
+    "source_entry_id": "sample-update-1",
+    "created_at": "2026-01-23T20:15:49.939705+00:00",
+    "updated_at": null,
+    "risk_score": 2,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "6c205f7f-3774-458c-a1fc-ed723e8711b6": {
+    "change_id": "6c205f7f-3774-458c-a1fc-ed723e8711b6",
+    "title": "HKMA circular on LCR reporting",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "LCR disclosure updates",
+    "source": "https://example.com/hkma",
+    "effective_date": "2026-06-30",
+    "severity": "high",
+    "owner": "Risk",
+    "due_date": "2026-07-31",
+    "status": "assessing",
+    "impacted_areas": [
+      "Risk"
+    ],
+    "impact_assessment": "Impacts liquidity reporting controls",
+    "related_requirement_ids": [
+      "1536f1a6-c525-4291-aa2d-f48e780be6e7"
+    ],
+    "policy_refs": [
+      "aml-kyc-policy"
+    ],
+    "approvals": [
+      {
+        "approval_id": "689114f5-3604-4de6-9a44-2a6f0cff6db8",
+        "approver": "Head of Compliance",
+        "status": "pending",
+        "notes": "Queued",
+        "created_at": "2026-01-23T20:28:01.093026+00:00",
+        "updated_at": null
+      }
+    ],
+    "source_id": null,
+    "created_at": "2026-01-23T20:27:59.628390+00:00",
+    "updated_at": "2026-01-23T20:28:01.109043+00:00",
+    "risk_score": 3,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "8b55b128-8d66-4a70-a282-6df4a665f41d": {
+    "change_id": "8b55b128-8d66-4a70-a282-6df4a665f41d",
+    "title": "Sample Regulatory Update",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "Sample update description",
+    "source": "https://example.com/update",
+    "effective_date": "2026-01-23",
+    "severity": "medium",
+    "owner": null,
+    "due_date": null,
+    "status": "new",
+    "impacted_areas": [],
+    "impact_assessment": null,
+    "related_requirement_ids": [],
+    "approvals": [],
+    "source_id": "f9282751-7d8d-48ab-99fd-5aa564d7cca6",
+    "source_entry_id": "sample-update-1",
+    "created_at": "2026-01-23T20:28:01.122298+00:00",
+    "updated_at": null,
+    "risk_score": 2,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "97918302-8841-4b3e-9ecc-1f52de6a7fc0": {
+    "change_id": "97918302-8841-4b3e-9ecc-1f52de6a7fc0",
+    "title": "HKMA circular on LCR reporting",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "LCR disclosure updates",
+    "source": "https://example.com/hkma",
+    "effective_date": "2026-06-30",
+    "severity": "high",
+    "owner": "Risk",
+    "due_date": "2026-07-31",
+    "status": "assessing",
+    "impacted_areas": [
+      "Risk"
+    ],
+    "impact_assessment": "Impacts liquidity reporting controls",
+    "related_requirement_ids": [
+      "381251ed-ec6c-48f3-ae9e-183082c416a4"
+    ],
+    "policy_refs": [
+      "aml-kyc-policy"
+    ],
+    "approvals": [
+      {
+        "approval_id": "9a452bd9-0076-46d2-9197-f428df5d9798",
+        "approver": "Head of Compliance",
+        "status": "pending",
+        "notes": "Queued",
+        "created_at": "2026-01-23T20:28:31.003630+00:00",
+        "updated_at": null
+      }
+    ],
+    "source_id": null,
+    "created_at": "2026-01-23T20:28:29.449896+00:00",
+    "updated_at": "2026-01-23T20:28:31.021035+00:00",
+    "risk_score": 3,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "d07f9d7a-9d0b-4acb-a8d0-a90eb35ec754": {
+    "change_id": "d07f9d7a-9d0b-4acb-a8d0-a90eb35ec754",
+    "title": "Sample Regulatory Update",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "Sample update description",
+    "source": "https://example.com/update",
+    "effective_date": "2026-01-23",
+    "severity": "medium",
+    "owner": null,
+    "due_date": null,
+    "status": "new",
+    "impacted_areas": [],
+    "impact_assessment": null,
+    "related_requirement_ids": [],
+    "approvals": [],
+    "source_id": "6c2d5bbf-19d8-4a03-9c5b-d893f61e3fb2",
+    "source_entry_id": "sample-update-1",
+    "created_at": "2026-01-23T20:28:31.034391+00:00",
+    "updated_at": null,
+    "risk_score": 2,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "b4406892-060e-40bd-a64a-3642ce4f20c2": {
+    "change_id": "b4406892-060e-40bd-a64a-3642ce4f20c2",
+    "title": "HKMA circular on LCR reporting",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "LCR disclosure updates",
+    "source": "https://example.com/hkma",
+    "effective_date": "2026-06-30",
+    "severity": "high",
+    "owner": "Risk",
+    "due_date": "2026-07-31",
+    "status": "assessing",
+    "impacted_areas": [
+      "Risk"
+    ],
+    "impact_assessment": "Impacts liquidity reporting controls",
+    "related_requirement_ids": [
+      "0051c999-303e-4fa4-a740-5292da50896c"
+    ],
+    "policy_refs": [
+      "aml-kyc-policy"
+    ],
+    "approvals": [
+      {
+        "approval_id": "0727550e-2b92-446a-b048-32043a42b3ce",
+        "approver": "Head of Compliance",
+        "status": "pending",
+        "notes": "Queued",
+        "created_at": "2026-01-23T20:31:49.873250+00:00",
+        "updated_at": null
+      }
+    ],
+    "source_id": null,
+    "created_at": "2026-01-23T20:31:47.955867+00:00",
+    "updated_at": "2026-01-23T20:31:49.887273+00:00",
+    "risk_score": 3,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "e8300550-1558-4ad7-a684-f3fcc7b51224": {
+    "change_id": "e8300550-1558-4ad7-a684-f3fcc7b51224",
+    "title": "Sample Regulatory Update",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "Sample update description",
+    "source": "https://example.com/update",
+    "effective_date": "2026-01-23",
+    "severity": "medium",
+    "owner": null,
+    "due_date": null,
+    "status": "new",
+    "impacted_areas": [],
+    "impact_assessment": null,
+    "related_requirement_ids": [],
+    "approvals": [],
+    "source_id": "788b83ce-a69b-4679-ac66-3af53acdded1",
+    "source_entry_id": "sample-update-1",
+    "created_at": "2026-01-23T20:31:49.900908+00:00",
+    "updated_at": null,
+    "risk_score": 2,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "7479a974-350e-4590-975e-9b8594eedac5": {
+    "change_id": "7479a974-350e-4590-975e-9b8594eedac5",
+    "title": "HKMA circular on LCR reporting",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "LCR disclosure updates",
+    "source": "https://example.com/hkma",
+    "effective_date": "2026-06-30",
+    "severity": "high",
+    "owner": "Risk",
+    "due_date": "2026-07-31",
+    "status": "assessing",
+    "impacted_areas": [
+      "Risk"
+    ],
+    "impact_assessment": "Impacts liquidity reporting controls",
+    "related_requirement_ids": [
+      "8a622027-b8d2-4792-90b2-e0ed4cd7340b"
+    ],
+    "policy_refs": [
+      "aml-kyc-policy"
+    ],
+    "approvals": [
+      {
+        "approval_id": "660cbf44-5ae0-4071-b5fc-a2cb61b455ad",
+        "approver": "Head of Compliance",
+        "status": "pending",
+        "notes": "Queued",
+        "created_at": "2026-01-23T21:04:50.284542+00:00",
+        "updated_at": null
+      }
+    ],
+    "source_id": null,
+    "created_at": "2026-01-23T21:04:48.184409+00:00",
+    "updated_at": "2026-01-23T21:04:50.301575+00:00",
+    "risk_score": 3,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "20b936bf-ad8a-47f1-a320-2d743453e9f8": {
+    "change_id": "20b936bf-ad8a-47f1-a320-2d743453e9f8",
+    "title": "Sample Regulatory Update",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "Sample update description",
+    "source": "https://example.com/update",
+    "effective_date": "2026-01-23",
+    "severity": "medium",
+    "owner": null,
+    "due_date": null,
+    "status": "new",
+    "impacted_areas": [],
+    "impact_assessment": null,
+    "related_requirement_ids": [],
+    "approvals": [],
+    "source_id": "ca808a88-1a2a-4b58-bf9c-100e51867b3c",
+    "source_entry_id": "sample-update-1",
+    "created_at": "2026-01-23T21:04:50.315768+00:00",
+    "updated_at": null,
+    "risk_score": 2,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "044a02c9-f8f4-4cf3-8167-a9dabc737c98": {
+    "change_id": "044a02c9-f8f4-4cf3-8167-a9dabc737c98",
+    "title": "HKMA circular on LCR reporting",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "LCR disclosure updates",
+    "source": "https://example.com/hkma",
+    "effective_date": "2026-06-30",
+    "severity": "high",
+    "owner": "Risk",
+    "due_date": "2026-07-31",
+    "status": "assessing",
+    "impacted_areas": [
+      "Risk"
+    ],
+    "impact_assessment": "Impacts liquidity reporting controls",
+    "related_requirement_ids": [
+      "e12b9d36-f93d-4f5a-9325-efcc24b6b2e5"
+    ],
+    "policy_refs": [
+      "aml-kyc-policy"
+    ],
+    "approvals": [
+      {
+        "approval_id": "1d46d900-bc40-475c-aab2-176f109854b1",
+        "approver": "Head of Compliance",
+        "status": "pending",
+        "notes": "Queued",
+        "created_at": "2026-01-23T23:37:48.294556+00:00",
+        "updated_at": null
+      }
+    ],
+    "source_id": null,
+    "created_at": "2026-01-23T23:37:45.705562+00:00",
+    "updated_at": "2026-01-23T23:37:48.314831+00:00",
+    "risk_score": 3,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "c39c031f-6800-45f7-bfdc-052654c29c47": {
+    "change_id": "c39c031f-6800-45f7-bfdc-052654c29c47",
+    "title": "Sample Regulatory Update",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "Sample update description",
+    "source": "https://example.com/update",
+    "effective_date": "2026-01-23",
+    "severity": "medium",
+    "owner": null,
+    "due_date": null,
+    "status": "new",
+    "impacted_areas": [],
+    "impact_assessment": null,
+    "related_requirement_ids": [],
+    "approvals": [],
+    "source_id": "4f54e5ec-c70c-4fc1-a1af-e3b0e35e3e19",
+    "source_entry_id": "sample-update-1",
+    "created_at": "2026-01-23T23:37:48.329852+00:00",
+    "updated_at": null,
+    "risk_score": 2,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "1bef192f-fffe-4444-ba65-93ceb954fecf": {
+    "change_id": "1bef192f-fffe-4444-ba65-93ceb954fecf",
+    "title": "HKMA circular on LCR reporting",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "LCR disclosure updates",
+    "source": "https://example.com/hkma",
+    "effective_date": "2026-06-30",
+    "severity": "high",
+    "owner": "Risk",
+    "due_date": "2026-07-31",
+    "status": "assessing",
+    "impacted_areas": [
+      "Risk"
+    ],
+    "impact_assessment": "Impacts liquidity reporting controls",
+    "related_requirement_ids": [
+      "3fd59c5c-b396-4ca5-990f-2f116fd2e860"
+    ],
+    "policy_refs": [
+      "aml-kyc-policy"
+    ],
+    "approvals": [
+      {
+        "approval_id": "7b8405f7-8a70-4897-9649-bfd8b85270c0",
+        "approver": "Head of Compliance",
+        "status": "pending",
+        "notes": "Queued",
+        "created_at": "2026-01-23T23:42:59.279166+00:00",
+        "updated_at": null
+      }
+    ],
+    "source_id": null,
+    "created_at": "2026-01-23T23:42:56.848953+00:00",
+    "updated_at": "2026-01-23T23:42:59.302098+00:00",
+    "risk_score": 3,
+    "overdue": false,
+    "days_overdue": null
+  },
+  "67daa0b8-ef8d-45a1-8f2a-f5ac156a40f7": {
+    "change_id": "67daa0b8-ef8d-45a1-8f2a-f5ac156a40f7",
+    "title": "Sample Regulatory Update",
+    "jurisdiction": "Hong Kong",
+    "entity": null,
+    "business_unit": null,
+    "summary": "Sample update description",
+    "source": "https://example.com/update",
+    "effective_date": "2026-01-23",
+    "severity": "medium",
+    "owner": null,
+    "due_date": null,
+    "status": "new",
+    "impacted_areas": [],
+    "impact_assessment": null,
+    "related_requirement_ids": [],
+    "approvals": [],
+    "source_id": "aa26cb75-bac4-4907-99fb-a856eba29c71",
+    "source_entry_id": "sample-update-1",
+    "created_at": "2026-01-23T23:42:59.317458+00:00",
+    "updated_at": null,
+    "risk_score": 2
+  }
+}

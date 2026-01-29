@@ -1,0 +1,21 @@
+{
+  "serviceName": "reg-atlas",
+  "cluster": "reg-atlas-cluster",
+  "taskDefinition": "reg-atlas",
+  "desiredCount": 1,
+  "launchType": "FARGATE",
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": ["subnet-xxxxxx"],
+      "securityGroups": ["sg-xxxxxx"],
+      "assignPublicIp": "ENABLED"
+    }
+  },
+  "loadBalancers": [
+    {
+      "targetGroupArn": "arn:aws:elasticloadbalancing:REGION:ACCOUNT:targetgroup/NAME",
+      "containerName": "reg-atlas",
+      "containerPort": 8000
+    }
+  ]
+}

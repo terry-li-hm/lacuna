@@ -20,7 +20,7 @@
 ## ✅ Deliverables
 
 ### 1. Full-Stack Application
-- ✅ FastAPI backend with 6 REST endpoints
+- ✅ FastAPI backend with 15+ REST endpoints (requirements registry + change log + audit trail)
 - ✅ ChromaDB vector database for semantic search
 - ✅ OpenRouter LLM integration (GPT-3.5-turbo for analysis)
 - ✅ OpenAI embeddings via OpenRouter
@@ -29,9 +29,17 @@
 
 ### 2. Features
 - ✅ Upload regulatory documents (PDF, text)
-- ✅ AI-powered requirement extraction
+- ✅ AI-powered requirement extraction with evidence snippets
+- ✅ Requirements registry with review status, tags, controls, policy refs
 - ✅ Natural language querying with RAG
 - ✅ Cross-jurisdiction comparison
+- ✅ Regulatory change register (triage, ownership, due dates, impact assessment)
+- ✅ Audit trail for review + change actions
+- ✅ CSV exports for requirements + change logs
+- ✅ GenAI suggestions for impact summaries and related requirements
+- ✅ Risk scoring + escalation flags for prioritization
+- ✅ Policy lifecycle updates (status/version/owner)
+- ✅ Webhook integrations for change events
 - ✅ Beautiful CLI for rapid testing
 
 ### 3. Documentation
@@ -66,6 +74,11 @@ python -m cli.main stats
 
 **All commands tested ✅ - Everything works!**
 
+**E2E API test (local, full workflow):**
+```bash
+REG_ATLAS_NO_LLM=1 DATA_DIR=/tmp/reg_atlas_data CHROMA_PERSIST_DIR=/tmp/reg_atlas_data/db/chroma PYTHONPATH=/Users/terry/reg-atlas python /tmp/reg_atlas_e2e.py
+```
+
 ---
 
 ## 📊 Technical Highlights
@@ -94,6 +107,7 @@ python -m cli.main stats
 3. **Demonstrates Technical Depth** - Not a Jupyter notebook, real architecture
 4. **Scalable Approach** - Works for 2 jurisdictions or 50
 5. **Cost-Effective** - Runs on free tier, <$30/month at scale
+6. **Audit-Ready** - Evidence links, change log, and exportable records
 
 **Demo Ready:** Can show end-to-end workflow in 5 minutes
 

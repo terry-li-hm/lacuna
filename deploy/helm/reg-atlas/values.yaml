@@ -1,0 +1,23 @@
+replicaCount: 1
+
+image:
+  repository: reg-atlas
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8000
+
+env:
+  REG_ATLAS_NO_LLM: "0"
+  DATA_DIR: /app/data
+  CHROMA_PERSIST_DIR: /app/data/db/chroma
+
+secrets:
+  OPENROUTER_API_KEY: ""
+
+persistence:
+  enabled: true
+  size: 5Gi
+  accessMode: ReadWriteOnce

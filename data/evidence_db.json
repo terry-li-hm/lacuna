@@ -1,0 +1,116 @@
+[
+  {
+    "evidence_id": "a1dd0c03-b284-46bf-83d7-df2df906642f",
+    "entity_type": "change",
+    "entity_id": "74dfa563-7a91-4d23-b72f-b376c94e83d2",
+    "filename": "sample_hkma_capital.txt",
+    "path": "data/evidence/change/74dfa563-7a91-4d23-b72f-b376c94e83d2/a1dd0c03-b284-46bf-83d7-df2df906642f_sample_hkma_capital.txt",
+    "uploaded_at": "2026-01-23T14:40:57.035312+00:00"
+  },
+  {
+    "evidence_id": "88a7eed3-2d8e-4081-8d59-cbda6ccd391f",
+    "entity_type": "change",
+    "entity_id": "ccd1e3c8-82fa-4862-b41c-ac2f759857ca",
+    "filename": "sample_hkma_capital.txt",
+    "path": "data/evidence/change/ccd1e3c8-82fa-4862-b41c-ac2f759857ca/88a7eed3-2d8e-4081-8d59-cbda6ccd391f_sample_hkma_capital.txt",
+    "uploaded_at": "2026-01-23T20:06:54.125161+00:00"
+  },
+  {
+    "evidence_id": "4269c5f3-50b2-4d6c-bc64-8bf2bdca8557",
+    "entity_type": "change",
+    "entity_id": "29ac6879-c821-4c38-b2e5-62015b65d48c",
+    "filename": "sample_hkma_capital.txt",
+    "path": "data/evidence/change/29ac6879-c821-4c38-b2e5-62015b65d48c/4269c5f3-50b2-4d6c-bc64-8bf2bdca8557_sample_hkma_capital.txt",
+    "uploaded_at": "2026-01-23T20:07:16.792791+00:00"
+  },
+  {
+    "evidence_id": "4ff62bf2-463b-40a1-98fa-838a62f90a4c",
+    "entity_type": "change",
+    "entity_id": "9c645ab5-8669-4a1a-81d6-cd6130e9fe9a",
+    "filename": "sample_hkma_capital.txt",
+    "path": "data/evidence/change/9c645ab5-8669-4a1a-81d6-cd6130e9fe9a/4ff62bf2-463b-40a1-98fa-838a62f90a4c_sample_hkma_capital.txt",
+    "uploaded_at": "2026-01-23T20:09:17.253664+00:00",
+    "size_bytes": 3553
+  },
+  {
+    "evidence_id": "509f9894-e241-409d-bcb4-a13a9efeaea4",
+    "entity_type": "change",
+    "entity_id": "290e31b0-f097-4066-b98a-3abc60fdeeed",
+    "filename": "sample_hkma_capital.txt",
+    "path": "data/evidence/change/290e31b0-f097-4066-b98a-3abc60fdeeed/509f9894-e241-409d-bcb4-a13a9efeaea4_sample_hkma_capital.txt",
+    "uploaded_at": "2026-01-23T20:09:57.157403+00:00",
+    "size_bytes": 3553
+  },
+  {
+    "evidence_id": "a971c4ed-675c-4463-8527-44b009dfce35",
+    "entity_type": "change",
+    "entity_id": "84174e4e-15a0-47a5-867e-cb0765a80c92",
+    "filename": "sample_hkma_capital.txt",
+    "path": "data/evidence/change/84174e4e-15a0-47a5-867e-cb0765a80c92/a971c4ed-675c-4463-8527-44b009dfce35_sample_hkma_capital.txt",
+    "uploaded_at": "2026-01-23T20:15:01.592801+00:00",
+    "size_bytes": 3553
+  },
+  {
+    "evidence_id": "0b8e59ab-455a-449c-8986-a520d190fa5c",
+    "entity_type": "change",
+    "entity_id": "426c23dd-2ded-4d7d-9a18-4759b8a13fce",
+    "filename": "sample_hkma_capital.txt",
+    "path": "data/evidence/change/426c23dd-2ded-4d7d-9a18-4759b8a13fce/0b8e59ab-455a-449c-8986-a520d190fa5c_sample_hkma_capital.txt",
+    "uploaded_at": "2026-01-23T20:15:49.923940+00:00",
+    "size_bytes": 3553
+  },
+  {
+    "evidence_id": "0f626533-131b-480d-838b-8c780d973e38",
+    "entity_type": "change",
+    "entity_id": "6c205f7f-3774-458c-a1fc-ed723e8711b6",
+    "filename": "sample_hkma_capital.txt",
+    "path": "data/evidence/change/6c205f7f-3774-458c-a1fc-ed723e8711b6/0f626533-131b-480d-838b-8c780d973e38_sample_hkma_capital.txt",
+    "uploaded_at": "2026-01-23T20:28:01.106213+00:00",
+    "size_bytes": 3553
+  },
+  {
+    "evidence_id": "cf37bb5e-c893-4769-9acb-45c6dc47243d",
+    "entity_type": "change",
+    "entity_id": "97918302-8841-4b3e-9ecc-1f52de6a7fc0",
+    "filename": "sample_hkma_capital.txt",
+    "path": "data/evidence/change/97918302-8841-4b3e-9ecc-1f52de6a7fc0/cf37bb5e-c893-4769-9acb-45c6dc47243d_sample_hkma_capital.txt",
+    "uploaded_at": "2026-01-23T20:28:31.018357+00:00",
+    "size_bytes": 3553
+  },
+  {
+    "evidence_id": "22cf2040-e6d5-434b-bc2b-294ef8571754",
+    "entity_type": "change",
+    "entity_id": "b4406892-060e-40bd-a64a-3642ce4f20c2",
+    "filename": "sample_hkma_capital.txt",
+    "path": "data/evidence/change/b4406892-060e-40bd-a64a-3642ce4f20c2/22cf2040-e6d5-434b-bc2b-294ef8571754_sample_hkma_capital.txt",
+    "uploaded_at": "2026-01-23T20:31:49.884571+00:00",
+    "size_bytes": 3553
+  },
+  {
+    "evidence_id": "0779e29c-2c03-44b9-a701-9a1923d15700",
+    "entity_type": "change",
+    "entity_id": "7479a974-350e-4590-975e-9b8594eedac5",
+    "filename": "sample_hkma_capital.txt",
+    "path": "data/evidence/change/7479a974-350e-4590-975e-9b8594eedac5/0779e29c-2c03-44b9-a701-9a1923d15700_sample_hkma_capital.txt",
+    "uploaded_at": "2026-01-23T21:04:50.299018+00:00",
+    "size_bytes": 3553
+  },
+  {
+    "evidence_id": "6e83df55-fa47-4ee9-80eb-a1e07906135f",
+    "entity_type": "change",
+    "entity_id": "044a02c9-f8f4-4cf3-8167-a9dabc737c98",
+    "filename": "sample_hkma_capital.txt",
+    "path": "data/evidence/change/044a02c9-f8f4-4cf3-8167-a9dabc737c98/6e83df55-fa47-4ee9-80eb-a1e07906135f_sample_hkma_capital.txt",
+    "uploaded_at": "2026-01-23T23:37:48.312155+00:00",
+    "size_bytes": 3553
+  },
+  {
+    "evidence_id": "41febe40-33ec-456a-b020-f0cc9ec366d3",
+    "entity_type": "change",
+    "entity_id": "1bef192f-fffe-4444-ba65-93ceb954fecf",
+    "filename": "sample_hkma_capital.txt",
+    "path": "data/evidence/change/1bef192f-fffe-4444-ba65-93ceb954fecf/41febe40-33ec-456a-b020-f0cc9ec366d3_sample_hkma_capital.txt",
+    "uploaded_at": "2026-01-23T23:42:59.297173+00:00",
+    "size_bytes": 3553
+  }
+]

@@ -1,6 +1,7 @@
 """Document processing pipeline for regulatory documents."""
 
 import logging
+import os
 from pathlib import Path
 from typing import List, Dict, Any
 from pypdf import PdfReader
@@ -84,8 +85,10 @@ class DocumentProcessor:
         logger.info(f"Processing text file: {file_path.name}")
         
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                text = f.read()
+            try:
+                text = file_path.read_text(encoding="utf-8")
+            except UnicodeDecodeError:
+                text = file_path.read_text(encoding="latin-1")
             
             # Split into chunks by paragraphs
             paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
@@ -122,8 +125,22 @@ class DocumentProcessor:
         Returns:
             List of text chunks
         """
+        if overlap >= chunk_size:
+            overlap = max(0, chunk_size // 5)
         if len(text) <= chunk_size:
             return [text]
+
+        use_llamaindex = os.getenv("REG_ATLAS_USE_LLAMAINDEX") == "1"
+        if use_llamaindex:
+            try:
+                from llama_index.core import Document
+                from llama_index.core.node_parser import SentenceSplitter
+
+                splitter = SentenceSplitter(chunk_size=chunk_size, chunk_overlap=overlap)
+                nodes = splitter.get_nodes_from_documents([Document(text=text)])
+                return [node.text for node in nodes if node.text]
+            except Exception as e:
+                logger.warning(f"LlamaIndex chunking unavailable, falling back: {e}")
         
         chunks = []
         start = 0
@@ -144,8 +161,13 @@ class DocumentProcessor:
                 
                 if sentence_end != -1:
                     end = end - 100 + sentence_end + 1
-            
-            chunks.append(text[start:end].strip())
-            start = end - overlap
+
+            chunk = text[start:end].strip()
+            if chunk:
+                chunks.append(chunk)
+            next_start = end - overlap
+            if next_start <= start:
+                next_start = end
+            start = next_start
         
         return chunks

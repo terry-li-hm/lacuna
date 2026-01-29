@@ -1,0 +1,83 @@
+Hong Kong Monetary Authority
+Supervisory Policy Manual - CA-G-5
+Capital Adequacy Ratio
+Issued: January 2024
+
+1. Introduction
+
+This module sets out the HKMA's approach to the calculation and maintenance of capital adequacy ratios for authorized institutions (AIs) in Hong Kong.
+
+2. Minimum Capital Requirements
+
+2.1 Common Equity Tier 1 (CET1) Capital Ratio
+All authorized institutions must maintain a minimum CET1 capital ratio of 4.5% of risk-weighted assets at all times.
+
+2.2 Tier 1 Capital Ratio
+The minimum Tier 1 capital ratio requirement is 6.0% of risk-weighted assets.
+
+2.3 Total Capital Ratio
+The minimum total capital ratio requirement is 8.0% of risk-weighted assets.
+
+3. Capital Conservation Buffer
+
+3.1 Buffer Requirement
+In addition to the minimum capital requirements, AIs are required to maintain a capital conservation buffer of 2.5% of risk-weighted assets, composed of CET1 capital.
+
+3.2 Consequences of Breaching Buffer
+AIs that do not maintain the capital conservation buffer will face constraints on distributions including dividend payments, share buybacks, and discretionary bonus payments to staff.
+
+4. Countercyclical Capital Buffer
+
+4.1 Buffer Range
+The countercyclical capital buffer requirement can range from 0% to 2.5% of risk-weighted assets, depending on prevailing macroeconomic conditions in Hong Kong.
+
+4.2 Current Requirement
+As of January 2024, the countercyclical capital buffer is set at 1.0% for exposures to Hong Kong.
+
+5. Systemic Risk Buffer
+
+5.1 Domestic Systemically Important Authorized Institutions (D-SIBs)
+D-SIBs are required to maintain an additional capital buffer ranging from 1.0% to 3.5% of risk-weighted assets, depending on their systemic importance.
+
+5.2 Designation Process
+The HKMA reviews and updates the list of D-SIBs annually based on quantitative indicators and supervisory judgment.
+
+6. Leverage Ratio
+
+6.1 Minimum Requirement
+All AIs must maintain a leverage ratio of at least 3.0%, calculated as Tier 1 capital divided by total exposures.
+
+6.2 Enhanced Requirement for D-SIBs
+D-SIBs are subject to an enhanced leverage ratio requirement of 3.75%.
+
+7. Reporting Requirements
+
+7.1 Quarterly Returns
+AIs must submit capital adequacy returns (Return MA(BS)1) to the HKMA on a quarterly basis, within 6 weeks after the end of each quarter.
+
+7.2 Annual Disclosures
+AIs must make public disclosures of their capital adequacy positions annually, in accordance with Pillar 3 disclosure requirements.
+
+8. Remedial Actions
+
+8.1 Early Warning Triggers
+The HKMA will take early supervisory action when an AI's capital ratios fall below the sum of minimum requirements plus buffers.
+
+8.2 Restoration Plans
+AIs approaching minimum capital requirements must submit detailed capital restoration plans to the HKMA for approval.
+
+9. Internal Capital Adequacy Assessment Process (ICAAP)
+
+9.1 Requirement
+All AIs must maintain a robust ICAAP that identifies, measures, and aggregates all material risks and determines adequate internal capital to support those risks.
+
+9.2 Supervisory Review
+The HKMA conducts regular reviews of AIs' ICAAPs and may impose higher capital requirements based on identified deficiencies.
+
+10. Transitional Arrangements
+
+10.1 Implementation Timeline
+The full requirements under Basel III came into effect in Hong Kong on January 1, 2019, with certain transitional arrangements for capital instruments.
+
+10.2 Grandfathering Provisions
+Non-compliant capital instruments issued before 2013 are subject to phase-out arrangements, with full phase-out completed by January 1, 2022.

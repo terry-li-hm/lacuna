@@ -1,0 +1,34 @@
+{
+  "family": "reg-atlas",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "containerDefinitions": [
+    {
+      "name": "reg-atlas",
+      "image": "REGISTRY/REPO:TAG",
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "DATA_DIR", "value": "/app/data" },
+        { "name": "CHROMA_PERSIST_DIR", "value": "/app/data/db/chroma" },
+        { "name": "REG_ATLAS_NO_LLM", "value": "0" }
+      ],
+      "secrets": [
+        { "name": "OPENROUTER_API_KEY", "valueFrom": "arn:aws:secretsmanager:REGION:ACCOUNT:secret:NAME" }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -fsS http://localhost:8000/ || exit 1"],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 20
+      }
+    }
+  ]
+}

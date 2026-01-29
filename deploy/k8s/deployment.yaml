@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reg-atlas
+  namespace: reg-atlas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reg-atlas
+  template:
+    metadata:
+      labels:
+        app: reg-atlas
+    spec:
+      containers:
+        - name: reg-atlas
+          image: reg-atlas:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: reg-atlas-config
+            - secretRef:
+                name: reg-atlas-secrets
+          volumeMounts:
+            - name: reg-atlas-data
+              mountPath: /app/data
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 20
+      volumes:
+        - name: reg-atlas-data
+          persistentVolumeClaim:
+            claimName: reg-atlas-data
