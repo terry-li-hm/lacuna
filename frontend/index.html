@@ -418,6 +418,33 @@
             </div>
         </header>
 
+        <div class="card" style="margin-bottom: 30px; border-left: 5px solid var(--accent-2); background: linear-gradient(to right, #fffaf0, #fff);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin-bottom: 0; border: none; font-family: 'Fraunces', serif; color: var(--ink-1);">
+                    <span style="color: var(--accent-2);">●</span> Regulatory Radar <span style="font-size: 12px; font-family: 'Space Grotesk', sans-serif; font-weight: normal; color: var(--ink-2);">(Agentic Associate)</span>
+                </h2>
+                <span class="badge" style="background: var(--accent-2); color: white; padding: 4px 12px;">Active Monitoring</span>
+            </div>
+            <div id="radar-signals">
+                <div class="result-item" style="background: #fff; border: 1px solid var(--border); border-left: 4px solid var(--accent-2); padding: 15px; border-radius: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div class="result-meta" style="margin-bottom: 5px;">Detected: Jan 27, 2026 · Source: <strong>HKMA/PCPD</strong></div>
+                            <div class="result-text" style="font-weight: 600; font-size: 16px; margin-bottom: 8px;">Joint Announcement: Combatting Fraud and Safeguarding Personal Data</div>
+                        </div>
+                        <span class="badge warn" style="padding: 4px 10px;">High Impact</span>
+                    </div>
+                    <div style="font-size: 13px; color: var(--ink-2); margin-bottom: 15px; line-height: 1.5;">
+                        <strong>Associate Action:</strong> I've auto-drafted a gap analysis mapping this announcement against your <em>'Risk Governance Standard (v1.1)'</em>. 3 new mandates identified requiring attention.
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-secondary" style="font-size: 12px; padding: 8px 16px;" onclick="demoJan2026Gap()">Review Draft Analysis</button>
+                        <button class="btn-secondary" style="font-size: 12px; padding: 8px 16px; opacity: 0.7;">Dismiss</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="main-grid">
             <div class="card">
                 <h2>Upload Document</h2>
@@ -1205,6 +1232,84 @@
             const contentEl = document.getElementById('resultsContent');
             contentEl.innerHTML = content;
             resultsEl.classList.remove('hidden');
+            // Scroll to results
+            resultsEl.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function demoJan2026Gap() {
+            const circular_id = "e57ea7d0-011c-4fa8-960f-81737670be5f"; // Jan 2026 Circular
+            const baseline_id = "fcd1d92c-afd4-465a-be20-c3e70d54bc41"; // Aug 2024 Baseline
+            const is_policy_baseline = false;
+            
+            showStatus('Orchestrating agentic gap analysis...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/gap-analysis`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        circular_doc_id: circular_id,
+                        baseline_id: baseline_id,
+                        is_policy_baseline: is_policy_baseline,
+                        no_llm: isNoLlmMode()
+                    })
+                });
+                
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.detail || 'Gap analysis failed');
+                
+                let html = `
+                    <h3>Agentic Gap Analysis: Jan 2026 Announcement vs Aug 2024 Baseline</h3>
+                    <p class="muted" style="margin-bottom: 15px;">Note: This analysis was automatically drafted by the associate upon detection of the regulatory signal.</p>
+                    <div class="stats" style="margin-bottom: 20px;">
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: var(--accent);">${data.summary.Full}</div>
+                            <div class="stat-label">Aligned</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: var(--accent-2);">${data.summary.Partial}</div>
+                            <div class="stat-label">Partial</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: #7c2d1a;">${data.summary.Gap}</div>
+                            <div class="stat-label">New Mandates</div>
+                        </div>
+                    </div>
+                `;
+                
+                html += `<table class="table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Requirement (Jan 2026)</th>
+                            <th>Reasoning & Audit Evidence</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                
+                data.findings.forEach(f => {
+                    const color = f.status === 'Full' ? 'var(--accent)' : (f.status === 'Partial' ? 'var(--accent-2)' : '#7c2d1a');
+                    const statusText = f.status === 'Gap' ? 'NEW MANDATE' : f.status;
+                    
+                    html += `<tr>
+                        <td><span class="badge" style="background-color: ${color}22; color: ${color}; font-weight: bold;">${statusText}</span></td>
+                        <td><strong>${f.description}</strong></td>
+                        <td>
+                            <div style="margin-bottom: 8px;">${f.reasoning}</div>
+                            ${f.provenance.map(p => `
+                                <div class="evidence" style="background: #fdfaf4; padding: 10px; border-radius: 8px; font-size: 12px; border: 1px solid #efeae0; margin-top: 5px;">
+                                    <strong style="color: var(--ink-2);">Verified Source [${p.chunk_id.split('_').pop()}]:</strong> <em>"${p.text_segment}..."</em>
+                                </div>`).join('')}
+                        </td>
+                    </tr>`;
+                });
+                
+                html += `</tbody></table>`;
+                showResults(html);
+                showStatus('Agentic report loaded successfully', 'success');
+            } catch (error) {
+                showStatus('Demo IDs not found. Please upload circulars first.', 'error');
+            }
         }
 
         function isNoLlmMode() {
