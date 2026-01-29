@@ -284,6 +284,8 @@ def gap(
     baseline_id: str = typer.Argument(..., help="ID of the baseline document or policy"),
     is_policy: bool = typer.Option(False, "--policy", help="Treat baseline as a policy ID"),
     no_llm: bool = typer.Option(False, "--no-llm", help="Disable LLM analysis"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Show full provenance details"),
+    json_output: bool = typer.Option(False, "--json", help="Output full report as JSON"),
     api_url: Optional[str] = typer.Option(None, "--api-url", help="Override API URL")
 ):
     """Perform a gap analysis between a circular and a baseline."""
@@ -294,6 +296,11 @@ def gap(
         with console.status(f"[bold green]Performing Gap Analysis..."):
             result = client.gap_analysis(circular_id, baseline_id, is_policy_baseline=is_policy, no_llm=no_llm)
         
+        if json_output:
+            import json
+            console.print_json(json.dumps(result))
+            return
+
         console.print(f"[green]✓[/green] Gap Analysis Complete\n")
         console.print(f"[bold cyan]Report ID:[/bold cyan] {result['report_id']}")
         
@@ -315,8 +322,57 @@ def gap(
                     f['description'][:50] + "...",
                     f['reasoning'][:100] + "..."
                 )
+                
+                if verbose and f.get('provenance'):
+                    for p in f['provenance']:
+                        table.add_row(
+                            "", 
+                            f"[dim]Source: {p['chunk_id']}[/dim]", 
+                            f"[italic cyan]\"{p['text_segment'][:150]}...\"[/italic cyan]"
+                        )
             console.print(table)
             
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise typer.Exit(1)
+    finally:
+        client.close()
+
+
+@app.command()
+def list_policies(
+    api_url: Optional[str] = typer.Option(None, "--api-url", help="Override API URL")
+):
+    """List all internal policies."""
+    url = api_url or get_api_url()
+    client = RegAtlasClient(base_url=url)
+    
+    try:
+        result = client.list_policies()
+        policies = result.get('policies', [])
+        
+        if not policies:
+            console.print("[yellow]No policies found.[/yellow]")
+            return
+        
+        table = Table(show_header=True, header_style="bold magenta")
+        table.add_column("Policy ID", style="cyan", no_wrap=True)
+        table.add_column("Title", style="white")
+        table.add_column("Status", style="green")
+        table.add_column("Version", style="yellow")
+        table.add_column("Owner", style="white")
+        
+        for p in policies:
+            table.add_row(
+                p.get('policy_id') or p.get('id', '—'),
+                p.get('name') or p.get('title', '—'),
+                p.get('status', '—'),
+                p.get('version', '—'),
+                p.get('owner', '—')
+            )
+        
+        console.print(table)
+        console.print(f"\n[dim]Total: {len(policies)} policies[/dim]")
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
         raise typer.Exit(1)

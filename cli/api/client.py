@@ -127,6 +127,12 @@ class RegAtlasClient:
         response.raise_for_status()
         return response.json()
 
+    def list_policies(self) -> Dict[str, Any]:
+        """List all internal policies."""
+        response = self.client.get(f"{self.base_url}/policies")
+        response.raise_for_status()
+        return response.json()
+
     def close(self):
         """Close the HTTP client."""
         self.client.close()
