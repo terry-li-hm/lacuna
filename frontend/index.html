@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RegAtlas</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Space+Grotesk:wght@400;500;600&display=swap">
     <style>
         * {
             margin: 0;
@@ -11,9 +12,24 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg-1: #f5f1e8;
+            --bg-2: #f0f7f5;
+            --ink-1: #1d2a2f;
+            --ink-2: #4a5b62;
+            --accent: #177a6b;
+            --accent-2: #d87a2a;
+            --card: #ffffff;
+            --border: rgba(29, 42, 47, 0.12);
+            --shadow: 0 18px 40px rgba(23, 29, 33, 0.12);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--ink-1);
+            background: radial-gradient(circle at top left, #fef3d6, transparent 45%),
+                        radial-gradient(circle at top right, #dff0ec, transparent 40%),
+                        linear-gradient(140deg, var(--bg-1), var(--bg-2));
             min-height: 100vh;
             padding: 20px;
         }
@@ -24,20 +40,23 @@
         }
 
         header {
-            background: white;
+            background: var(--card);
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
             margin-bottom: 30px;
+            border: 1px solid var(--border);
         }
 
         h1 {
-            color: #333;
+            font-family: 'Fraunces', serif;
+            font-size: 32px;
+            color: var(--ink-1);
             margin-bottom: 10px;
         }
 
         .subtitle {
-            color: #666;
+            color: var(--ink-2);
             font-size: 14px;
         }
 
@@ -49,17 +68,18 @@
         }
 
         .card {
-            background: white;
+            background: var(--card);
             padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(23, 29, 33, 0.08);
         }
 
         .card h2 {
-            color: #333;
+            color: var(--ink-1);
             margin-bottom: 20px;
             font-size: 20px;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 2px solid rgba(23, 122, 107, 0.3);
             padding-bottom: 10px;
         }
 
@@ -70,7 +90,7 @@
         label {
             display: block;
             margin-bottom: 8px;
-            color: #555;
+            color: var(--ink-2);
             font-weight: 500;
         }
 
@@ -79,24 +99,25 @@
         select {
             width: 100%;
             padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
             font-size: 14px;
             transition: border-color 0.3s;
+            background: #fbfbfa;
         }
 
         input[type="text"]:focus,
         select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--accent);
         }
 
         button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, #0f5b53 100%);
             color: white;
             border: none;
             padding: 12px 24px;
-            border-radius: 5px;
+            border-radius: 10px;
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
@@ -105,7 +126,7 @@
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 18px rgba(23, 122, 107, 0.3);
         }
 
         button:disabled {
@@ -114,48 +135,61 @@
             transform: none;
         }
 
+        .btn-secondary {
+            background: #f1f5f2;
+            color: var(--accent);
+            border: 1px solid rgba(23, 122, 107, 0.25);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(102, 126, 234, 0.2);
+        }
+
         .results {
-            background: white;
+            background: var(--card);
             padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
             margin-top: 20px;
         }
 
         .results h2 {
-            color: #333;
+            color: var(--ink-1);
             margin-bottom: 20px;
         }
 
         .result-item {
-            background: #f8f9fa;
+            background: #f7f4ee;
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 15px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid var(--accent);
         }
 
         .result-meta {
-            color: #666;
+            color: var(--ink-2);
             font-size: 12px;
             margin-bottom: 10px;
         }
 
         .result-text {
-            color: #333;
+            color: var(--ink-1);
             line-height: 1.6;
         }
 
         .summary {
-            background: #e7f3ff;
+            background: #f3efe2;
             padding: 20px;
             border-radius: 5px;
             margin-bottom: 20px;
-            border-left: 4px solid #2196F3;
+            border-left: 4px solid var(--accent-2);
         }
 
         .summary h3 {
-            color: #1976D2;
+            color: var(--accent-2);
             margin-bottom: 10px;
         }
 
@@ -167,21 +201,21 @@
         }
 
         .status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background: #e0f1ea;
+            color: #0f5b53;
+            border: 1px solid rgba(23, 122, 107, 0.3);
         }
 
         .status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: #f6e3d9;
+            color: #7c2d1a;
+            border: 1px solid rgba(216, 122, 42, 0.4);
         }
 
         .status.info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
+            background: #e4f0f3;
+            color: #2a5b64;
+            border: 1px solid rgba(42, 91, 100, 0.25);
         }
 
         .hidden {
@@ -190,11 +224,14 @@
 
         .stats {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-around;
+            gap: 12px;
             padding: 20px;
-            background: #f8f9fa;
-            border-radius: 5px;
+            background: #f8f5ef;
+            border-radius: 12px;
             margin-bottom: 20px;
+            border: 1px solid var(--border);
         }
 
         .stat-item {
@@ -204,13 +241,125 @@
         .stat-value {
             font-size: 32px;
             font-weight: bold;
-            color: #667eea;
+            color: var(--accent);
         }
 
         .stat-label {
             color: #666;
             font-size: 14px;
             margin-top: 5px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .table th,
+        .table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .table th {
+            background: #f6f2ea;
+            color: var(--ink-2);
+            font-weight: 600;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            background: #e0f1ea;
+            color: var(--accent);
+        }
+
+        .badge.warn {
+            background: #f6e3d9;
+            color: #7c2d1a;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .muted {
+            color: var(--ink-2);
+            font-size: 12px;
+        }
+
+        .evidence {
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--ink-2);
+            background: #f4f0e6;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        .top-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .api-config {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .api-config input {
+            width: 260px;
+        }
+
+        .pill {
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: #f1f5f2;
+            border: 1px solid var(--border);
+            font-size: 11px;
+        }
+
+        .table td button.copy-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--ink-2);
+            padding: 2px 6px;
+            font-size: 11px;
+            border-radius: 6px;
+            box-shadow: none;
+        }
+
+        .table td button.copy-btn:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: var(--accent);
+            color: var(--accent);
         }
 
         @media (max-width: 768px) {
@@ -225,6 +374,18 @@
         <header>
             <h1>RegAtlas</h1>
             <p class="subtitle">Cross-jurisdiction regulatory analytics for financial institutions</p>
+            <div class="top-bar">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-2);">
+                    <input type="checkbox" id="noLlmToggle">
+                    Demo mode (no LLM calls)
+                </label>
+                <div class="api-config">
+                    <span class="pill">API Base</span>
+                    <input type="text" id="apiBaseInput" placeholder="http://localhost:8000">
+                    <button type="button" id="saveApiBaseBtn" class="btn-secondary">Save</button>
+                    <span class="pill" id="apiStatus">Not checked</span>
+                </div>
+            </div>
             <div class="stats" id="stats">
                 <div class="stat-item">
                     <div class="stat-value" id="docCount">0</div>
@@ -238,8 +399,51 @@
                     <div class="stat-value" id="jurisdictionCount">0</div>
                     <div class="stat-label">Jurisdictions</div>
                 </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="requirementCount">0</div>
+                    <div class="stat-label">Requirements</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="changeCount">0</div>
+                    <div class="stat-label">Changes</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="uptimeValue">0s</div>
+                    <div class="stat-label">Uptime</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="llmValue">No</div>
+                    <div class="stat-label">LLM</div>
+                </div>
             </div>
         </header>
+
+        <div class="card" style="margin-bottom: 30px; border-left: 5px solid var(--accent-2); background: linear-gradient(to right, #fffaf0, #fff);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin-bottom: 0; border: none; font-family: 'Fraunces', serif; color: var(--ink-1);">
+                    <span style="color: var(--accent-2);">●</span> Regulatory Radar <span style="font-size: 12px; font-family: 'Space Grotesk', sans-serif; font-weight: normal; color: var(--ink-2);">(Agentic Associate)</span>
+                </h2>
+                <span class="badge" style="background: var(--accent-2); color: white; padding: 4px 12px;">Active Monitoring</span>
+            </div>
+            <div id="radar-signals">
+                <div class="result-item" style="background: #fff; border: 1px solid var(--border); border-left: 4px solid var(--accent-2); padding: 15px; border-radius: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div class="result-meta" style="margin-bottom: 5px;">Detected: Jan 27, 2026 · Source: <strong>HKMA/PCPD</strong></div>
+                            <div class="result-text" style="font-weight: 600; font-size: 16px; margin-bottom: 8px;">Joint Announcement: Combatting Fraud and Safeguarding Personal Data</div>
+                        </div>
+                        <span class="badge warn" style="padding: 4px 10px;">High Impact</span>
+                    </div>
+                    <div style="font-size: 13px; color: var(--ink-2); margin-bottom: 15px; line-height: 1.5;">
+                        <strong>Associate Action:</strong> I've auto-drafted a gap analysis mapping this announcement against your <em>'Risk Governance Standard (v1.1)'</em>. 3 new mandates identified requiring attention.
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-secondary" style="font-size: 12px; padding: 8px 16px;" onclick="demoJan2026Gap()">Review Draft Analysis</button>
+                        <button class="btn-secondary" style="font-size: 12px; padding: 8px 16px; opacity: 0.7;">Dismiss</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="main-grid">
             <div class="card">
@@ -259,6 +463,14 @@
                             <option value="United States">United States (Fed/OCC)</option>
                             <option value="European Union">European Union (EBA)</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="uploadEntity">Entity (Optional)</label>
+                        <input type="text" id="uploadEntity" placeholder="e.g., Group / Subsidiary">
+                    </div>
+                    <div class="form-group">
+                        <label for="uploadBusinessUnit">Business Unit (Optional)</label>
+                        <input type="text" id="uploadBusinessUnit" placeholder="e.g., Retail Banking">
                     </div>
                     <button type="submit" id="uploadBtn">Upload & Analyze</button>
                 </form>
@@ -314,7 +526,586 @@
             </form>
         </div>
 
-        <div id="statusMessage" class="hidden"></div>
+        <div class="card">
+            <h2>Gap Analysis</h2>
+            <p class="muted" style="margin-bottom: 15px;">Map a new circular against a baseline document or policy to identify compliance gaps.</p>
+            <form id="gapForm">
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="gapCircular">Circular (Target)</label>
+                        <select id="gapCircular" required>
+                            <option value="">Select Circular...</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="gapBaseline">Baseline (Policy/Source)</label>
+                        <select id="gapBaseline" required>
+                            <option value="">Select Baseline...</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="width: 120px;">
+                        <label for="gapIsPolicy">Type</label>
+                        <select id="gapIsPolicy">
+                            <option value="false">Document</option>
+                            <option value="true">Policy</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" id="gapBtn">Run Audit-Grade Gap Analysis</button>
+            </form>
+        </div>
+
+        <div class="main-grid">
+            <div class="card">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    <h2 style="margin-bottom: 0;">Document Library</h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" id="exportDocsBtn" class="btn-secondary">Export CSV</button>
+                        <button type="button" id="refreshDocsBtn" class="btn-secondary">Refresh</button>
+                    </div>
+                </div>
+                <div class="filters" style="margin-top: 15px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="docJurisdiction">Jurisdiction</label>
+                        <select id="docJurisdiction">
+                            <option value="">All</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="docSearch">Search</label>
+                        <input type="text" id="docSearch" placeholder="filename, entity, BU">
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button type="button" id="applyDocFiltersBtn">Apply Filters</button>
+                    <button type="button" id="clearDocFiltersBtn" class="btn-secondary">Clear</button>
+                </div>
+                <div id="documentsTableWrap" style="margin-top: 15px;">
+                    <table class="table" id="documentsTable">
+                        <thead>
+                            <tr>
+                                <th>Document</th>
+                                <th>Jurisdiction</th>
+                                <th>Entity</th>
+                                <th>Business Unit</th>
+                                <th>Requirements</th>
+                                <th>Chunks</th>
+                                <th>Uploaded</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    <h2 style="margin-bottom: 0;">Requirements Registry</h2>
+                    <button type="button" id="exportRequirementsBtn" class="btn-secondary">Export CSV</button>
+                </div>
+                <div class="filters" style="margin-top: 15px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="reqJurisdiction">Jurisdiction</label>
+                        <select id="reqJurisdiction">
+                            <option value="">All</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="reqEntity">Entity</label>
+                        <select id="reqEntity">
+                            <option value="">All</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="reqBusinessUnit">Business Unit</label>
+                        <select id="reqBusinessUnit">
+                            <option value="">All</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="reqType">Requirement Type</label>
+                        <select id="reqType">
+                            <option value="">All</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="reqStatus">Status</label>
+                        <select id="reqStatus">
+                            <option value="">All</option>
+                            <option value="new">New</option>
+                            <option value="reviewed">Reviewed</option>
+                            <option value="action_required">Action Required</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="reqMandatory">Mandatory</label>
+                        <select id="reqMandatory">
+                            <option value="">All</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                            <option value="Unknown">Unknown</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="reqSearch">Search</label>
+                        <input type="text" id="reqSearch" placeholder="e.g., capital ratio">
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button type="button" id="applyReqFiltersBtn">Apply Filters</button>
+                    <button type="button" id="clearReqFiltersBtn" class="btn-secondary">Clear</button>
+                </div>
+                <div class="filter-actions">
+                    <button type="button" id="exportRequirementsJsonBtn" class="btn-secondary">Export JSON</button>
+                </div>
+                <div id="requirementsTableWrap" style="margin-top: 15px;">
+                    <table class="table" id="requirementsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Jurisdiction</th>
+                                <th>Mandatory</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+            <div class="card">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    <h2 style="margin-bottom: 0;">Regulatory Change Register</h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" id="exportChangesJsonBtn" class="btn-secondary">Export JSON</button>
+                        <button type="button" id="exportChangesBtn" class="btn-secondary">Export CSV</button>
+                    </div>
+                </div>
+            <form id="changeForm" style="margin-top: 15px;">
+                <div class="form-row">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeTitle">Title</label>
+                        <input type="text" id="changeTitle" placeholder="e.g., HKMA circular on LCR" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeJurisdiction">Jurisdiction</label>
+                        <select id="changeJurisdiction" required>
+                            <option value="">Select...</option>
+                            <option value="Hong Kong">Hong Kong</option>
+                            <option value="Singapore">Singapore</option>
+                            <option value="United Kingdom">United Kingdom</option>
+                            <option value="United States">United States</option>
+                            <option value="European Union">European Union</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeEntity">Entity</label>
+                        <input type="text" id="changeEntity" placeholder="e.g., Group / Subsidiary">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeBusinessUnit">Business Unit</label>
+                        <input type="text" id="changeBusinessUnit" placeholder="e.g., Retail Banking">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeSeverity">Severity</label>
+                        <select id="changeSeverity">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeStatus">Status</label>
+                        <select id="changeStatus">
+                            <option value="new">New</option>
+                            <option value="triaged">Triaged</option>
+                            <option value="assessing">Assessing</option>
+                            <option value="implemented">Implemented</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeOwner">Owner</label>
+                        <input type="text" id="changeOwner" placeholder="Compliance lead">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeDueDate">Due Date</label>
+                        <input type="text" id="changeDueDate" placeholder="YYYY-MM-DD">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 12px;">
+                    <label for="changeSummary">Summary</label>
+                    <input type="text" id="changeSummary" placeholder="Short description of the regulatory change">
+                </div>
+                <div class="form-row" style="margin-top: 12px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeSource">Source</label>
+                        <input type="text" id="changeSource" placeholder="URL or regulator publication">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeEffectiveDate">Effective Date</label>
+                        <input type="text" id="changeEffectiveDate" placeholder="YYYY-MM-DD">
+                    </div>
+                </div>
+                <div class="form-row" style="margin-top: 12px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeImpactedAreas">Impacted Areas</label>
+                        <input type="text" id="changeImpactedAreas" placeholder="Risk, Treasury, Ops">
+                        <div class="muted">Comma-separated</div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeRelatedReqs">Related Requirement IDs</label>
+                        <input type="text" id="changeRelatedReqs" placeholder="req-1, req-2">
+                        <div class="muted">Comma-separated</div>
+                    </div>
+                </div>
+                <button type="submit" id="changeSubmitBtn">Add Change</button>
+            </form>
+
+            <form id="changeUpdateForm" style="margin-top: 18px;">
+                <div class="form-row">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeUpdateId">Change ID</label>
+                        <input type="text" id="changeUpdateId" placeholder="Paste change_id from table" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeUpdateStatus">Status</label>
+                        <select id="changeUpdateStatus">
+                            <option value="">No change</option>
+                            <option value="triaged">Triaged</option>
+                            <option value="assessing">Assessing</option>
+                            <option value="implemented">Implemented</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeUpdateSeverity">Severity</label>
+                        <select id="changeUpdateSeverity">
+                            <option value="">No change</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeUpdateOwner">Owner</label>
+                        <input type="text" id="changeUpdateOwner" placeholder="Assignee">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeUpdateDueDate">Due Date</label>
+                        <input type="text" id="changeUpdateDueDate" placeholder="YYYY-MM-DD">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 12px;">
+                    <label for="changeImpactAssessment">Impact Assessment</label>
+                    <input type="text" id="changeImpactAssessment" placeholder="Impact on controls, processes, reporting">
+                </div>
+                <div class="form-group" style="margin-top: 12px;">
+                    <label for="changeImpactTemplate">Impact Template</label>
+                    <select id="changeImpactTemplate">
+                        <option value="">Select a template...</option>
+                        <option value="Reporting impact: update LCR reporting thresholds; adjust reporting cadence; validate disclosures. Controls affected: liquidity reporting controls. Evidence required: updated reports + approval logs.">Reporting change</option>
+                        <option value="Policy impact: update AML/KYC policy section; retrain staff; update control testing plan. Controls affected: onboarding controls. Evidence required: policy version + training records.">Policy update</option>
+                        <option value="Operational impact: update monitoring rules; adjust thresholds; run backtest. Controls affected: transaction monitoring controls. Evidence required: change ticket + testing results.">Operational monitoring</option>
+                    </select>
+                </div>
+                <div class="form-row" style="margin-top: 12px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeUpdateAreas">Impacted Areas</label>
+                        <input type="text" id="changeUpdateAreas" placeholder="Risk, Treasury, Ops">
+                        <div class="muted">Comma-separated</div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeUpdateReqs">Related Requirement IDs</label>
+                        <input type="text" id="changeUpdateReqs" placeholder="req-1, req-2">
+                        <div class="muted">Comma-separated</div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changePolicyRefs">Policy Refs</label>
+                        <input type="text" id="changePolicyRefs" placeholder="aml-kyc-policy, liquidity-reporting-procedure">
+                        <div class="muted">Comma-separated policy IDs</div>
+                    </div>
+                </div>
+                <div class="filter-actions" style="margin-top: 12px;">
+                    <button type="button" id="aiSuggestBtn" class="btn-secondary">AI Suggest</button>
+                    <button type="submit" id="changeUpdateBtn" class="btn-secondary">Update Change</button>
+                </div>
+            </form>
+
+                <div class="filters" style="margin-top: 18px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeFilterJurisdiction">Filter Jurisdiction</label>
+                        <select id="changeFilterJurisdiction">
+                            <option value="">All</option>
+                        </select>
+                    </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="changeFilterEntity">Filter Entity</label>
+                    <select id="changeFilterEntity">
+                        <option value="">All</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="changeFilterBusinessUnit">Filter Business Unit</label>
+                    <select id="changeFilterBusinessUnit">
+                        <option value="">All</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="changeFilterStatus">Filter Status</label>
+                    <select id="changeFilterStatus">
+                        <option value="">All</option>
+                        <option value="new">New</option>
+                        <option value="triaged">Triaged</option>
+                        <option value="assessing">Assessing</option>
+                        <option value="implemented">Implemented</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="changeFilterSeverity">Filter Severity</label>
+                    <select id="changeFilterSeverity">
+                        <option value="">All</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeFilterSearch">Search</label>
+                        <input type="text" id="changeFilterSearch" placeholder="keyword">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="changeFilterOverdue">Overdue Only</label>
+                        <select id="changeFilterOverdue">
+                            <option value="">All</option>
+                            <option value="true">Yes</option>
+                        </select>
+                    </div>
+                </div>
+            <div class="filter-actions">
+                <button type="button" id="applyChangeFiltersBtn">Apply Filters</button>
+                <button type="button" id="clearChangeFiltersBtn" class="btn-secondary">Clear</button>
+            </div>
+
+            <div id="changesTableWrap" style="margin-top: 15px;">
+                <table class="table" id="changesTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Jurisdiction</th>
+                            <th>Severity</th>
+                            <th>Risk</th>
+                            <th>Status</th>
+                            <th>Owner</th>
+                            <th>Due</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="card">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    <h2 style="margin-bottom: 0;">Regulatory Sources</h2>
+                    <button type="button" id="scanSourcesBtn" class="btn-secondary">Scan All</button>
+                </div>
+                <form id="sourceForm" style="margin-top: 15px;">
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="sourceName">Name</label>
+                            <input type="text" id="sourceName" placeholder="HKMA RSS" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="sourceUrl">URL</label>
+                            <input type="text" id="sourceUrl" placeholder="https://example.com/rss.xml" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="sourceJurisdiction">Jurisdiction</label>
+                            <input type="text" id="sourceJurisdiction" placeholder="Hong Kong">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="sourceSeverity">Default Severity</label>
+                            <select id="sourceSeverity">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="sourceEntity">Entity</label>
+                            <input type="text" id="sourceEntity" placeholder="Group / Subsidiary">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="sourceBusinessUnit">Business Unit</label>
+                            <input type="text" id="sourceBusinessUnit" placeholder="Retail Banking">
+                        </div>
+                    </div>
+                    <button type="submit" id="sourceSubmitBtn">Add Source</button>
+                </form>
+                <div id="sourcesTableWrap" style="margin-top: 15px;">
+                    <table class="table" id="sourcesTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Jurisdiction</th>
+                                <th>URL</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <form id="webhookForm" style="margin-top: 15px;">
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="webhookUrl">Webhook URL</label>
+                            <input type="text" id="webhookUrl" placeholder="https://example.com/webhook" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="webhookEvents">Events</label>
+                            <input type="text" id="webhookEvents" placeholder="change.created, change.updated">
+                            <div class="muted">Comma-separated</div>
+                        </div>
+                    </div>
+                    <button type="submit" id="webhookSubmitBtn" class="btn-secondary">Add Webhook</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    <h2 style="margin-bottom: 0;">Policy Library</h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" id="exportPoliciesBtn" class="btn-secondary">Export CSV</button>
+                        <button type="button" id="refreshPoliciesBtn" class="btn-secondary">Refresh</button>
+                    </div>
+                </div>
+                <div id="policiesTableWrap" style="margin-top: 15px;">
+                    <table class="table" id="policiesTable">
+                        <thead>
+                            <tr>
+                                <th>Policy</th>
+                                <th>Policy ID</th>
+                                <th>Summary</th>
+                                <th>Status</th>
+                                <th>Version</th>
+                                <th>Owner</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <form id="policyUpdateForm" style="margin-top: 15px;">
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="policyUpdateId">Policy ID</label>
+                            <input type="text" id="policyUpdateId" placeholder="aml-kyc-policy" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="policyUpdateStatus">Status</label>
+                            <select id="policyUpdateStatus">
+                                <option value="">No change</option>
+                                <option value="active">Active</option>
+                                <option value="draft">Draft</option>
+                                <option value="retired">Retired</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="policyUpdateVersion">Version</label>
+                            <input type="text" id="policyUpdateVersion" placeholder="1.1">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="policyUpdateOwner">Owner</label>
+                            <input type="text" id="policyUpdateOwner" placeholder="Compliance">
+                        </div>
+                    </div>
+                    <button type="submit" id="policyUpdateBtn" class="btn-secondary">Update Policy</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="card">
+                <h2>Change Approvals</h2>
+                <form id="approvalForm">
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="approvalChangeId">Change ID</label>
+                            <input type="text" id="approvalChangeId" placeholder="Paste change_id" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="approvalApprover">Approver</label>
+                            <input type="text" id="approvalApprover" placeholder="Head of Compliance" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="approvalStatus">Status</label>
+                            <select id="approvalStatus">
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 12px;">
+                        <label for="approvalNotes">Notes</label>
+                        <input type="text" id="approvalNotes" placeholder="Approval notes">
+                    </div>
+                    <button type="submit" id="approvalSubmitBtn">Add Approval</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Evidence Upload</h2>
+                <form id="evidenceForm">
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="evidenceEntityType">Entity Type</label>
+                            <select id="evidenceEntityType">
+                                <option value="change">Change</option>
+                                <option value="requirement">Requirement</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="evidenceEntityId">Entity ID</label>
+                            <input type="text" id="evidenceEntityId" placeholder="Paste change/requirement ID" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="evidenceFile">Evidence File</label>
+                            <input type="file" id="evidenceFile" required>
+                        </div>
+                    </div>
+                    <button type="submit" id="evidenceSubmitBtn">Upload Evidence</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    <h2 style="margin-bottom: 0;">Overdue Alerts</h2>
+                    <button type="button" id="refreshAlertsBtn" class="btn-secondary">Refresh</button>
+                </div>
+                <div id="alertsTableWrap" style="margin-top: 15px;">
+                    <table class="table" id="alertsTable">
+                        <thead>
+                            <tr>
+                                <th>Change</th>
+                                <th>Jurisdiction</th>
+                                <th>Owner</th>
+                                <th>Due</th>
+                                <th>Days</th>
+                                <th>Escalate</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="statusMessage" class="hidden" role="status" aria-live="polite"></div>
         
         <div id="results" class="results hidden">
             <h2>Results</h2>
@@ -323,7 +1114,88 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8000';
+        const API_BASE_STORAGE_KEY = 'regatlas_api_base';
+
+        function defaultApiBase() {
+            if (window.location.protocol.startsWith('http')) {
+                return window.location.origin;
+            }
+            return 'http://localhost:8000';
+        }
+
+        let API_BASE = localStorage.getItem(API_BASE_STORAGE_KEY) || defaultApiBase();
+
+        function setApiStatus(text, state = 'info') {
+            const statusEl = document.getElementById('apiStatus');
+            statusEl.textContent = text;
+            statusEl.style.borderColor = state === 'error' ? 'rgba(216, 122, 42, 0.4)' : 'var(--border)';
+            statusEl.style.color = state === 'error' ? '#7c2d1a' : 'var(--ink-2)';
+        }
+
+        async function checkApiStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/`);
+                if (!response.ok) throw new Error('API unreachable');
+                setApiStatus('Connected', 'success');
+            } catch (error) {
+                setApiStatus('Disconnected', 'error');
+            }
+        }
+
+        function setApiBase(value) {
+            if (!value) return;
+            API_BASE = value.replace(/\/$/, '');
+            localStorage.setItem(API_BASE_STORAGE_KEY, API_BASE);
+            checkApiStatus();
+        }
+
+        async function updateGapSelectors() {
+            try {
+                const docRes = await fetch(`${API_BASE}/documents`);
+                const docData = await docRes.json();
+                const circularSel = document.getElementById('gapCircular');
+                const baselineSel = document.getElementById('gapBaseline');
+                
+                const docs = docData.documents || [];
+                
+                const currentCircular = circularSel.value;
+                const currentBaseline = baselineSel.value;
+
+                circularSel.innerHTML = '<option value="">Select Circular...</option>';
+                docs.forEach(doc => {
+                    const opt = document.createElement('option');
+                    opt.value = doc.doc_id;
+                    opt.textContent = `${doc.filename || doc.doc_id} (${doc.jurisdiction})`;
+                    circularSel.appendChild(opt);
+                });
+                circularSel.value = currentCircular;
+
+                const isPolicy = document.getElementById('gapIsPolicy').value === 'true';
+                if (isPolicy) {
+                    const polRes = await fetch(`${API_BASE}/policies`);
+                    const polData = await polRes.json();
+                    baselineSel.innerHTML = '<option value="">Select Policy...</option>';
+                    const policies = Array.isArray(polData) ? polData : (polData.policies || []);
+                    policies.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p.policy_id || p.id;
+                        opt.textContent = p.name || p.title;
+                        baselineSel.appendChild(opt);
+                    });
+                } else {
+                    baselineSel.innerHTML = '<option value="">Select Baseline Document...</option>';
+                    docs.forEach(doc => {
+                        const opt = document.createElement('option');
+                        opt.value = doc.doc_id;
+                        opt.textContent = `${doc.filename || doc.doc_id} (${doc.jurisdiction})`;
+                        baselineSel.appendChild(opt);
+                    });
+                }
+                baselineSel.value = currentBaseline;
+            } catch (err) {
+                console.error('Error updating gap selectors:', err);
+            }
+        }
 
         // Load stats on page load
         async function loadStats() {
@@ -334,8 +1206,13 @@
                 document.getElementById('docCount').textContent = data.total_documents || 0;
                 document.getElementById('chunkCount').textContent = data.total_chunks || 0;
                 document.getElementById('jurisdictionCount').textContent = data.jurisdictions.length || 0;
+                document.getElementById('requirementCount').textContent = data.total_requirements || 0;
+                document.getElementById('changeCount').textContent = data.total_changes || 0;
+                document.getElementById('uptimeValue').textContent = `${data.uptime_seconds || 0}s`;
+                document.getElementById('llmValue').textContent = data.llm_available ? 'Yes' : 'No';
             } catch (error) {
                 console.error('Error loading stats:', error);
+                showStatus('Failed to load stats. Check API base.', 'error');
             }
         }
 
@@ -355,6 +1232,313 @@
             const contentEl = document.getElementById('resultsContent');
             contentEl.innerHTML = content;
             resultsEl.classList.remove('hidden');
+            // Scroll to results
+            resultsEl.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function demoJan2026Gap() {
+            const circular_id = "e57ea7d0-011c-4fa8-960f-81737670be5f"; // Jan 2026 Circular
+            const baseline_id = "fcd1d92c-afd4-465a-be20-c3e70d54bc41"; // Aug 2024 Baseline
+            const is_policy_baseline = false;
+            
+            showStatus('Orchestrating agentic gap analysis...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/gap-analysis`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        circular_doc_id: circular_id,
+                        baseline_id: baseline_id,
+                        is_policy_baseline: is_policy_baseline,
+                        no_llm: isNoLlmMode()
+                    })
+                });
+                
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.detail || 'Gap analysis failed');
+                
+                let html = `
+                    <h3>Agentic Gap Analysis: Jan 2026 Announcement vs Aug 2024 Baseline</h3>
+                    <p class="muted" style="margin-bottom: 15px;">Note: This analysis was automatically drafted by the associate upon detection of the regulatory signal.</p>
+                    <div class="stats" style="margin-bottom: 20px;">
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: var(--accent);">${data.summary.Full}</div>
+                            <div class="stat-label">Aligned</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: var(--accent-2);">${data.summary.Partial}</div>
+                            <div class="stat-label">Partial</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: #7c2d1a;">${data.summary.Gap}</div>
+                            <div class="stat-label">New Mandates</div>
+                        </div>
+                    </div>
+                `;
+                
+                html += `<table class="table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Requirement (Jan 2026)</th>
+                            <th>Reasoning & Audit Evidence</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                
+                data.findings.forEach(f => {
+                    const color = f.status === 'Full' ? 'var(--accent)' : (f.status === 'Partial' ? 'var(--accent-2)' : '#7c2d1a');
+                    const statusText = f.status === 'Gap' ? 'NEW MANDATE' : f.status;
+                    
+                    html += `<tr>
+                        <td><span class="badge" style="background-color: ${color}22; color: ${color}; font-weight: bold;">${statusText}</span></td>
+                        <td><strong>${f.description}</strong></td>
+                        <td>
+                            <div style="margin-bottom: 8px;">${f.reasoning}</div>
+                            ${f.provenance.map(p => `
+                                <div class="evidence" style="background: #fdfaf4; padding: 10px; border-radius: 8px; font-size: 12px; border: 1px solid #efeae0; margin-top: 5px;">
+                                    <strong style="color: var(--ink-2);">Verified Source [${p.chunk_id.split('_').pop()}]:</strong> <em>"${p.text_segment}..."</em>
+                                </div>`).join('')}
+                        </td>
+                    </tr>`;
+                });
+                
+                html += `</tbody></table>`;
+                showResults(html);
+                showStatus('Agentic report loaded successfully', 'success');
+            } catch (error) {
+                showStatus('Demo IDs not found. Please upload circulars first.', 'error');
+            }
+        }
+
+        function isNoLlmMode() {
+            return document.getElementById('noLlmToggle').checked;
+        }
+
+        function setTableLoading(tableId, message = 'Loading...', colspan = 8) {
+            const body = document.querySelector(`${tableId} tbody`);
+            if (!body) return;
+            body.innerHTML = `<tr><td colspan="${colspan}">${message}</td></tr>`;
+        }
+
+        function formatDate(value) {
+            if (!value) return '—';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return value;
+            return date.toLocaleString();
+        }
+
+        function truncate(text, limit = 240) {
+            if (!text) return '';
+            if (text.length <= limit) return text;
+            return `${text.slice(0, limit)}…`;
+        }
+
+        function splitCsv(value) {
+            if (!value) return [];
+            return value
+                .split(',')
+                .map(item => item.trim())
+                .filter(Boolean);
+        }
+
+        async function loadEntities() {
+            try {
+                const response = await fetch(`${API_BASE}/entities`);
+                const data = await response.json();
+                const entities = data.entities || [];
+                const businessUnits = data.business_units || [];
+
+                const reqEntity = document.getElementById('reqEntity');
+                reqEntity.innerHTML = '<option value="">All</option>';
+                entities.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item;
+                    option.textContent = item;
+                    reqEntity.appendChild(option);
+                });
+
+                const reqBusinessUnit = document.getElementById('reqBusinessUnit');
+                reqBusinessUnit.innerHTML = '<option value="">All</option>';
+                businessUnits.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item;
+                    option.textContent = item;
+                    reqBusinessUnit.appendChild(option);
+                });
+
+                const changeEntity = document.getElementById('changeFilterEntity');
+                changeEntity.innerHTML = '<option value="">All</option>';
+                entities.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item;
+                    option.textContent = item;
+                    changeEntity.appendChild(option);
+                });
+
+                const changeBusinessUnit = document.getElementById('changeFilterBusinessUnit');
+                changeBusinessUnit.innerHTML = '<option value="">All</option>';
+                businessUnits.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item;
+                    option.textContent = item;
+                    changeBusinessUnit.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading entities:', error);
+            }
+        }
+
+        async function loadDocuments(filters = {}) {
+            try {
+                setTableLoading('#documentsTable', 'Loading documents...', 8);
+                const params = new URLSearchParams();
+                Object.entries(filters).forEach(([key, value]) => {
+                    if (value) params.append(key, value);
+                });
+                const response = await fetch(`${API_BASE}/documents?${params.toString()}`);
+                const data = await response.json();
+                const tableBody = document.querySelector('#documentsTable tbody');
+                tableBody.innerHTML = '';
+
+                (data.documents || []).forEach(doc => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${doc.filename || doc.doc_id}</td>
+                        <td>${doc.jurisdiction || '—'}</td>
+                        <td>${doc.entity || '—'}</td>
+                        <td>${doc.business_unit || '—'}</td>
+                        <td>${(doc.requirements || []).length}</td>
+                        <td>${doc.chunks_count || 0}</td>
+                        <td>${formatDate(doc.uploaded_at)}</td>
+                        <td>
+                            <button class="copy-btn" data-doc="${doc.doc_id}">Delete</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+
+                const jurisdictionOptions = data.jurisdictions || [];
+                const reqJurisdiction = document.getElementById('reqJurisdiction');
+                reqJurisdiction.innerHTML = '<option value="">All</option>';
+                jurisdictionOptions.forEach(j => {
+                    const option = document.createElement('option');
+                    option.value = j;
+                    option.textContent = j;
+                    reqJurisdiction.appendChild(option);
+                });
+
+                const docJurisdiction = document.getElementById('docJurisdiction');
+                docJurisdiction.innerHTML = '<option value="">All</option>';
+                jurisdictionOptions.forEach(j => {
+                    const option = document.createElement('option');
+                    option.value = j;
+                    option.textContent = j;
+                    docJurisdiction.appendChild(option);
+                });
+
+                const changeJurisdiction = document.getElementById('changeFilterJurisdiction');
+                changeJurisdiction.innerHTML = '<option value="">All</option>';
+                jurisdictionOptions.forEach(j => {
+                    const option = document.createElement('option');
+                    option.value = j;
+                    option.textContent = j;
+                    changeJurisdiction.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading documents:', error);
+                showStatus('Error loading documents', 'error');
+            }
+        }
+
+        async function loadRequirements(filters = {}) {
+            const params = new URLSearchParams();
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value) params.append(key, value);
+            });
+
+            try {
+                setTableLoading('#requirementsTable', 'Loading requirements...', 6);
+                const response = await fetch(`${API_BASE}/requirements?${params.toString()}`);
+                const data = await response.json();
+                const tableBody = document.querySelector('#requirementsTable tbody');
+                tableBody.innerHTML = '';
+
+                (data.requirements || []).forEach(req => {
+                    const row = document.createElement('tr');
+                    const shortId = req.requirement_id ? req.requirement_id.slice(0, 8) : '—';
+                    row.innerHTML = `
+                        <td title="${req.requirement_id || ''}">
+                            ${shortId}
+                            ${req.requirement_id ? `<button class="copy-btn" data-copy="${req.requirement_id}">Copy</button>` : ''}
+                        </td>
+                        <td>${req.requirement_type || 'Unknown'}</td>
+                        <td>
+                            ${req.description || '—'}
+                            ${req.evidence && req.evidence.text ? `<div class="evidence">${truncate(req.evidence.text)}</div>` : ''}
+                        </td>
+                        <td>${req.jurisdiction || '—'}</td>
+                        <td><span class="badge">${req.mandatory || 'Unknown'}</span></td>
+                        <td>${req.status || 'new'}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+
+                const reqType = document.getElementById('reqType');
+                reqType.innerHTML = '<option value="">All</option>';
+                (data.types || []).forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type;
+                    option.textContent = type;
+                    reqType.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading requirements:', error);
+                showStatus('Error loading requirements', 'error');
+            }
+        }
+
+        async function loadChanges(filters = {}) {
+            const params = new URLSearchParams();
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value) params.append(key, value);
+            });
+
+            try {
+                setTableLoading('#changesTable', 'Loading changes...', 9);
+                const response = await fetch(`${API_BASE}/changes?${params.toString()}`);
+                const data = await response.json();
+                const tableBody = document.querySelector('#changesTable tbody');
+                tableBody.innerHTML = '';
+
+                (data.changes || []).forEach(change => {
+                    const row = document.createElement('tr');
+                    const shortId = change.change_id ? change.change_id.slice(0, 8) : '—';
+                    const statusLabel = change.status || 'new';
+                    const overdueTag = change.overdue ? '<span class="badge warn">Overdue</span>' : '';
+                    row.innerHTML = `
+                        <td title="${change.change_id || ''}">
+                            ${shortId}
+                            ${change.change_id ? `<button class="copy-btn" data-copy="${change.change_id}">Copy</button>` : ''}
+                        </td>
+                        <td>${change.title || '—'}</td>
+                        <td>${change.jurisdiction || '—'}</td>
+                        <td><span class="badge">${change.severity || 'medium'}</span></td>
+                        <td>${change.risk_score ?? '—'}</td>
+                        <td>${statusLabel} ${overdueTag}</td>
+                        <td>${change.owner || '—'}</td>
+                        <td>${change.due_date || '—'}</td>
+                        <td>
+                            ${change.change_id ? `<button class="copy-btn" data-delete="${change.change_id}">Delete</button>` : '—'}
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading changes:', error);
+                showStatus('Error loading changes', 'error');
+            }
         }
 
         // Upload form handler
@@ -363,6 +1547,8 @@
             
             const fileInput = document.getElementById('document');
             const jurisdiction = document.getElementById('jurisdiction').value;
+            const entity = document.getElementById('uploadEntity').value;
+            const businessUnit = document.getElementById('uploadBusinessUnit').value;
             const btn = document.getElementById('uploadBtn');
             
             if (!fileInput.files[0]) {
@@ -377,7 +1563,15 @@
                 const formData = new FormData();
                 formData.append('file', fileInput.files[0]);
                 
-                const response = await fetch(`${API_BASE}/upload?jurisdiction=${encodeURIComponent(jurisdiction)}`, {
+                const url = new URL(`${API_BASE}/upload`);
+                url.searchParams.set('jurisdiction', jurisdiction);
+                if (entity) url.searchParams.set('entity', entity);
+                if (businessUnit) url.searchParams.set('business_unit', businessUnit);
+                if (isNoLlmMode()) {
+                    url.searchParams.set('no_llm', 'true');
+                }
+
+                const response = await fetch(url.toString(), {
                     method: 'POST',
                     body: formData
                 });
@@ -390,12 +1584,15 @@
                 
                 // Display requirements
                 let html = `<h3>Extracted Requirements (${data.jurisdiction})</h3>`;
-                if (data.requirements && data.requirements.requirements) {
-                    data.requirements.requirements.forEach(req => {
+                if (data.requirements && data.requirements.length) {
+                    data.requirements.forEach(req => {
                         html += `
                             <div class="result-item">
-                                <div class="result-meta"><strong>${req.requirement_type || 'Unknown'}</strong></div>
+                                <div class="result-meta">
+                                    <strong>${req.requirement_type || 'Unknown'}</strong> · ${req.mandatory || 'Unknown'}
+                                </div>
                                 <div class="result-text">${req.description || 'No description'}</div>
+                                ${req.evidence && req.evidence.text ? `<div class="evidence">${truncate(req.evidence.text)}</div>` : ''}
                             </div>
                         `;
                     });
@@ -405,6 +1602,8 @@
                 
                 showResults(html);
                 loadStats();
+                loadDocuments();
+                loadRequirements();
                 
                 // Reset form
                 fileInput.value = '';
@@ -433,6 +1632,7 @@
                 const payload = {
                     query: query,
                     jurisdiction: jurisdiction || null,
+                    no_llm: isNoLlmMode(),
                     n_results: 5
                 };
                 
@@ -507,7 +1707,8 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         jurisdiction1: j1,
-                        jurisdiction2: j2
+                        jurisdiction2: j2,
+                        no_llm: isNoLlmMode()
                     })
                 });
                 
@@ -539,8 +1740,718 @@
             }
         });
 
+        // Gap form handler
+        document.getElementById('gapForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const circular_doc_id = document.getElementById('gapCircular').value;
+            const baseline_id = document.getElementById('gapBaseline').value;
+            const is_policy_baseline = document.getElementById('gapIsPolicy').value === 'true';
+            const gapBtn = document.getElementById('gapBtn');
+            
+            gapBtn.disabled = true;
+            gapBtn.textContent = 'Analyzing...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/gap-analysis`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        circular_doc_id,
+                        baseline_id,
+                        is_policy_baseline,
+                        no_llm: isNoLlmMode()
+                    })
+                });
+                
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.detail || 'Gap analysis failed');
+                
+                let html = `
+                    <h3>Gap Analysis Report</h3>
+                    <div class="stats" style="margin-bottom: 20px;">
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: var(--accent);">${data.summary.Full}</div>
+                            <div class="stat-label">Full Coverage</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: var(--accent-2);">${data.summary.Partial}</div>
+                            <div class="stat-label">Partial</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" style="color: #7c2d1a;">${data.summary.Gap}</div>
+                            <div class="stat-label">Gaps</div>
+                        </div>
+                    </div>
+                `;
+                
+                html += `<table class="table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Requirement</th>
+                            <th>Reasoning & Evidence</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                
+                data.findings.forEach(f => {
+                    const statusClass = f.status === 'Full' ? 'badge' : (f.status === 'Partial' ? 'badge warn' : 'badge warn');
+                    const color = f.status === 'Full' ? 'var(--accent)' : (f.status === 'Partial' ? 'var(--accent-2)' : '#7c2d1a');
+                    
+                    html += `<tr>
+                        <td><span class="${statusClass}" style="background-color: ${color}22; color: ${color};">${f.status}</span></td>
+                        <td><strong>${f.description}</strong></td>
+                        <td>
+                            <div style="margin-bottom: 8px;">${f.reasoning}</div>
+                            ${f.provenance.map(p => `
+                                <div class="evidence">
+                                    <strong>Source [${p.chunk_id.split('_').pop()}]:</strong> ${p.text_segment}
+                                    <div class="muted" style="margin-top: 4px;">Doc ID: ${p.doc_id}</div>
+                                </div>`).join('')}
+                        </td>
+                    </tr>`;
+                });
+                
+                html += `</tbody></table>`;
+                showResults(html);
+                showStatus('Gap analysis complete', 'success');
+            } catch (error) {
+                showStatus(error.message, 'error');
+            } finally {
+                gapBtn.disabled = false;
+                gapBtn.textContent = 'Run Audit-Grade Gap Analysis';
+            }
+        });
+
+        document.getElementById('gapIsPolicy').addEventListener('change', updateGapSelectors);
+
         // Load stats on page load
         loadStats();
+        loadDocuments();
+        loadRequirements();
+        loadChanges();
+        loadEntities();
+        loadSources();
+        loadAlerts();
+        loadPolicies();
+        updateGapSelectors();
+        checkApiStatus();
+
+        const apiBaseInput = document.getElementById('apiBaseInput');
+        apiBaseInput.value = API_BASE;
+        document.getElementById('saveApiBaseBtn').addEventListener('click', () => {
+            setApiBase(apiBaseInput.value.trim());
+            showStatus('API base saved', 'success');
+            loadStats();
+            loadDocuments();
+            loadRequirements();
+            loadChanges();
+            loadEntities();
+            loadSources();
+            loadAlerts();
+            loadPolicies();
+        });
+        apiBaseInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                document.getElementById('saveApiBaseBtn').click();
+            }
+        });
+
+        document.querySelector('#changesTable tbody').addEventListener('click', async (event) => {
+            const target = event.target;
+            if (target && target.dataset && target.dataset.copy) {
+                try {
+                    await navigator.clipboard.writeText(target.dataset.copy);
+                    showStatus('Change ID copied', 'success');
+                } catch (error) {
+                    showStatus('Copy failed', 'error');
+                }
+            }
+            if (target && target.dataset && target.dataset.delete) {
+                const changeId = target.dataset.delete;
+                const confirmed = window.confirm('Delete this change item?');
+                if (!confirmed) return;
+                try {
+                    const response = await fetch(`${API_BASE}/changes/${changeId}`, { method: 'DELETE' });
+                    if (!response.ok) throw new Error('Delete failed');
+                    showStatus('Change deleted', 'success');
+                    loadChanges();
+                    loadStats();
+                } catch (error) {
+                    showStatus('Delete failed', 'error');
+                }
+            }
+        });
+
+        document.querySelector('#documentsTable tbody').addEventListener('click', async (event) => {
+            const target = event.target;
+            if (target && target.dataset && target.dataset.doc) {
+                const docId = target.dataset.doc;
+                const confirmed = window.confirm('Delete this document and its requirements?');
+                if (!confirmed) return;
+                try {
+                    const response = await fetch(`${API_BASE}/documents/${docId}`, { method: 'DELETE' });
+                    if (!response.ok) throw new Error('Delete failed');
+                    showStatus('Document deleted', 'success');
+                    loadDocuments();
+                    loadRequirements();
+                    loadStats();
+                } catch (error) {
+                    showStatus('Delete failed', 'error');
+                }
+            }
+        });
+
+        document.querySelector('#requirementsTable tbody').addEventListener('click', async (event) => {
+            const target = event.target;
+            if (target && target.dataset && target.dataset.copy) {
+                try {
+                    await navigator.clipboard.writeText(target.dataset.copy);
+                    showStatus('Requirement ID copied', 'success');
+                } catch (error) {
+                    showStatus('Copy failed', 'error');
+                }
+            }
+        });
+
+        document.getElementById('refreshDocsBtn').addEventListener('click', () => {
+            loadDocuments();
+            loadStats();
+        });
+
+        document.getElementById('exportDocsBtn').addEventListener('click', () => {
+            window.open(`${API_BASE}/documents/export?format=csv`, '_blank');
+        });
+
+        document.getElementById('applyDocFiltersBtn').addEventListener('click', () => {
+            loadDocuments({
+                jurisdiction: document.getElementById('docJurisdiction').value,
+                q: document.getElementById('docSearch').value
+            });
+        });
+
+        document.getElementById('clearDocFiltersBtn').addEventListener('click', () => {
+            document.getElementById('docJurisdiction').value = '';
+            document.getElementById('docSearch').value = '';
+            loadDocuments();
+        });
+
+        document.getElementById('applyReqFiltersBtn').addEventListener('click', () => {
+            loadRequirements({
+                jurisdiction: document.getElementById('reqJurisdiction').value,
+                entity: document.getElementById('reqEntity').value,
+                business_unit: document.getElementById('reqBusinessUnit').value,
+                requirement_type: document.getElementById('reqType').value,
+                status: document.getElementById('reqStatus').value,
+                mandatory: document.getElementById('reqMandatory').value,
+                q: document.getElementById('reqSearch').value
+            });
+        });
+
+        document.getElementById('clearReqFiltersBtn').addEventListener('click', () => {
+            document.getElementById('reqJurisdiction').value = '';
+            document.getElementById('reqEntity').value = '';
+            document.getElementById('reqBusinessUnit').value = '';
+            document.getElementById('reqType').value = '';
+            document.getElementById('reqStatus').value = '';
+            document.getElementById('reqMandatory').value = '';
+            document.getElementById('reqSearch').value = '';
+            loadRequirements();
+        });
+
+        document.getElementById('exportRequirementsBtn').addEventListener('click', () => {
+            const params = new URLSearchParams({
+                jurisdiction: document.getElementById('reqJurisdiction').value,
+                entity: document.getElementById('reqEntity').value,
+                business_unit: document.getElementById('reqBusinessUnit').value,
+                requirement_type: document.getElementById('reqType').value,
+                status: document.getElementById('reqStatus').value,
+                mandatory: document.getElementById('reqMandatory').value,
+                q: document.getElementById('reqSearch').value
+            });
+            const url = `${API_BASE}/requirements/export?${params.toString()}`;
+            window.open(url, '_blank');
+        });
+
+        document.getElementById('exportRequirementsJsonBtn').addEventListener('click', () => {
+            const params = new URLSearchParams({
+                jurisdiction: document.getElementById('reqJurisdiction').value,
+                entity: document.getElementById('reqEntity').value,
+                business_unit: document.getElementById('reqBusinessUnit').value,
+                requirement_type: document.getElementById('reqType').value,
+                status: document.getElementById('reqStatus').value,
+                mandatory: document.getElementById('reqMandatory').value,
+                q: document.getElementById('reqSearch').value,
+                format: 'json'
+            });
+            const url = `${API_BASE}/requirements/export?${params.toString()}`;
+            window.open(url, '_blank');
+        });
+
+        document.getElementById('changeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const payload = {
+                title: document.getElementById('changeTitle').value,
+                jurisdiction: document.getElementById('changeJurisdiction').value,
+                entity: document.getElementById('changeEntity').value || null,
+                business_unit: document.getElementById('changeBusinessUnit').value || null,
+                severity: document.getElementById('changeSeverity').value,
+                status: document.getElementById('changeStatus').value,
+                owner: document.getElementById('changeOwner').value,
+                due_date: document.getElementById('changeDueDate').value,
+                summary: document.getElementById('changeSummary').value,
+                source: document.getElementById('changeSource').value,
+                effective_date: document.getElementById('changeEffectiveDate').value,
+                impacted_areas: splitCsv(document.getElementById('changeImpactedAreas').value),
+                related_requirement_ids: splitCsv(document.getElementById('changeRelatedReqs').value)
+            };
+
+            const submitBtn = document.getElementById('changeSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+
+            try {
+                const response = await fetch(`${API_BASE}/changes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('Change creation failed');
+                await response.json();
+                showStatus('Change logged successfully', 'success');
+                loadChanges();
+                loadEntities();
+                document.getElementById('changeForm').reset();
+                document.getElementById('changeSeverity').value = 'medium';
+                document.getElementById('changeStatus').value = 'new';
+                document.getElementById('changeJurisdiction').value = '';
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Add Change';
+            }
+        });
+
+        document.getElementById('changeUpdateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const changeId = document.getElementById('changeUpdateId').value;
+            if (!changeId) {
+                showStatus('Change ID is required', 'error');
+                return;
+            }
+
+            const payload = {
+                status: document.getElementById('changeUpdateStatus').value || null,
+                severity: document.getElementById('changeUpdateSeverity').value || null,
+                owner: document.getElementById('changeUpdateOwner').value || null,
+                due_date: document.getElementById('changeUpdateDueDate').value || null,
+                impact_assessment: document.getElementById('changeImpactAssessment').value || null,
+                impacted_areas: splitCsv(document.getElementById('changeUpdateAreas').value),
+                related_requirement_ids: splitCsv(document.getElementById('changeUpdateReqs').value),
+                policy_refs: splitCsv(document.getElementById('changePolicyRefs').value)
+            };
+
+            const submitBtn = document.getElementById('changeUpdateBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Updating...';
+
+            try {
+                const response = await fetch(`${API_BASE}/changes/${changeId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('Change update failed');
+                await response.json();
+                showStatus('Change updated successfully', 'success');
+                loadChanges();
+                document.getElementById('changeUpdateForm').reset();
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Update Change';
+            }
+        });
+
+        document.getElementById('aiSuggestBtn').addEventListener('click', async () => {
+            const changeId = document.getElementById('changeUpdateId').value;
+            if (!changeId) {
+                showStatus('Change ID is required', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('aiSuggestBtn');
+            btn.disabled = true;
+            btn.textContent = 'Suggesting...';
+
+            try {
+                const response = await fetch(`${API_BASE}/changes/${changeId}/ai-suggest`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        no_llm: isNoLlmMode(),
+                        n_results: 5
+                    })
+                });
+                if (!response.ok) throw new Error('Suggestion failed');
+                const data = await response.json();
+
+                if (data.impact_summary) {
+                    document.getElementById('changeImpactAssessment').value = data.impact_summary;
+                }
+                if (data.matched_requirements && data.matched_requirements.length) {
+                    const ids = data.matched_requirements
+                        .map(req => req.requirement_id)
+                        .filter(Boolean);
+                    if (ids.length) {
+                        document.getElementById('changeUpdateReqs').value = ids.join(', ');
+                    }
+                }
+                showStatus('AI suggestions applied', 'success');
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'AI Suggest';
+            }
+        });
+
+        document.getElementById('applyChangeFiltersBtn').addEventListener('click', () => {
+            loadChanges({
+                jurisdiction: document.getElementById('changeFilterJurisdiction').value,
+                entity: document.getElementById('changeFilterEntity').value,
+                business_unit: document.getElementById('changeFilterBusinessUnit').value,
+                status: document.getElementById('changeFilterStatus').value,
+                severity: document.getElementById('changeFilterSeverity').value,
+                q: document.getElementById('changeFilterSearch').value,
+                include_overdue: document.getElementById('changeFilterOverdue').value
+            });
+        });
+
+        document.getElementById('clearChangeFiltersBtn').addEventListener('click', () => {
+            document.getElementById('changeFilterJurisdiction').value = '';
+            document.getElementById('changeFilterEntity').value = '';
+            document.getElementById('changeFilterBusinessUnit').value = '';
+            document.getElementById('changeFilterStatus').value = '';
+            document.getElementById('changeFilterSeverity').value = '';
+            document.getElementById('changeFilterSearch').value = '';
+            document.getElementById('changeFilterOverdue').value = '';
+            loadChanges();
+        });
+
+        document.getElementById('exportChangesBtn').addEventListener('click', () => {
+            const params = new URLSearchParams({
+                jurisdiction: document.getElementById('changeFilterJurisdiction').value,
+                entity: document.getElementById('changeFilterEntity').value,
+                business_unit: document.getElementById('changeFilterBusinessUnit').value,
+                status: document.getElementById('changeFilterStatus').value,
+                severity: document.getElementById('changeFilterSeverity').value,
+                q: document.getElementById('changeFilterSearch').value
+            });
+            const url = `${API_BASE}/changes/export?${params.toString()}`;
+            window.open(url, '_blank');
+        });
+
+        document.getElementById('exportChangesJsonBtn').addEventListener('click', () => {
+            const params = new URLSearchParams({
+                jurisdiction: document.getElementById('changeFilterJurisdiction').value,
+                entity: document.getElementById('changeFilterEntity').value,
+                business_unit: document.getElementById('changeFilterBusinessUnit').value,
+                status: document.getElementById('changeFilterStatus').value,
+                severity: document.getElementById('changeFilterSeverity').value,
+                q: document.getElementById('changeFilterSearch').value,
+                format: 'json'
+            });
+            const url = `${API_BASE}/changes/export?${params.toString()}`;
+            window.open(url, '_blank');
+        });
+
+        document.getElementById('changeImpactTemplate').addEventListener('change', (e) => {
+            if (!e.target.value) return;
+            document.getElementById('changeImpactAssessment').value = e.target.value;
+        });
+
+        document.getElementById('approvalForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const changeId = document.getElementById('approvalChangeId').value;
+            const payload = {
+                approver: document.getElementById('approvalApprover').value,
+                status: document.getElementById('approvalStatus').value,
+                notes: document.getElementById('approvalNotes').value
+            };
+
+            const submitBtn = document.getElementById('approvalSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+
+            try {
+                const response = await fetch(`${API_BASE}/changes/${changeId}/approvals`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('Approval creation failed');
+                showStatus('Approval added', 'success');
+                document.getElementById('approvalForm').reset();
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Add Approval';
+            }
+        });
+
+        document.getElementById('evidenceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const entityType = document.getElementById('evidenceEntityType').value;
+            const entityId = document.getElementById('evidenceEntityId').value;
+            const fileInput = document.getElementById('evidenceFile');
+            if (!fileInput.files[0]) {
+                showStatus('Select an evidence file', 'error');
+                return;
+            }
+
+            const submitBtn = document.getElementById('evidenceSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Uploading...';
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const url = new URL(`${API_BASE}/evidence/upload`);
+                url.searchParams.set('entity_type', entityType);
+                url.searchParams.set('entity_id', entityId);
+
+                const response = await fetch(url.toString(), {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Evidence upload failed');
+                showStatus('Evidence uploaded', 'success');
+                document.getElementById('evidenceForm').reset();
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Upload Evidence';
+            }
+        });
+
+        async function loadSources() {
+            try {
+                setTableLoading('#sourcesTable', 'Loading sources...', 3);
+                const response = await fetch(`${API_BASE}/sources`);
+                const data = await response.json();
+                const tableBody = document.querySelector('#sourcesTable tbody');
+                tableBody.innerHTML = '';
+                (data.sources || []).forEach(source => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${source.name || '—'}</td>
+                        <td>${source.jurisdiction || '—'}</td>
+                        <td>${source.url || '—'}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading sources:', error);
+                showStatus('Error loading sources', 'error');
+            }
+        }
+
+        async function loadAlerts() {
+            try {
+                setTableLoading('#alertsTable', 'Loading alerts...', 6);
+                const response = await fetch(`${API_BASE}/alerts`);
+                const data = await response.json();
+                const tableBody = document.querySelector('#alertsTable tbody');
+                tableBody.innerHTML = '';
+                (data.overdue || []).forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.title || '—'}</td>
+                        <td>${item.jurisdiction || '—'}</td>
+                        <td>${item.owner || '—'}</td>
+                        <td>${item.due_date || '—'}</td>
+                        <td>${item.days_overdue || 0}</td>
+                        <td>${item.escalation_required ? 'Yes' : 'No'}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading alerts:', error);
+                showStatus('Error loading alerts', 'error');
+            }
+        }
+
+        async function loadPolicies() {
+            try {
+                setTableLoading('#policiesTable', 'Loading policies...', 6);
+                const response = await fetch(`${API_BASE}/policies`);
+                const data = await response.json();
+                const tableBody = document.querySelector('#policiesTable tbody');
+                tableBody.innerHTML = '';
+                (data.policies || []).forEach(policy => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${policy.title || '—'}</td>
+                        <td>${policy.policy_id || '—'}</td>
+                        <td>${policy.summary || '—'}</td>
+                        <td>${policy.status || '—'}</td>
+                        <td>${policy.version || '—'}</td>
+                        <td>${policy.owner || '—'}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading policies:', error);
+                showStatus('Error loading policies', 'error');
+            }
+        }
+
+        document.getElementById('sourceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const payload = {
+                name: document.getElementById('sourceName').value,
+                url: document.getElementById('sourceUrl').value,
+                jurisdiction: document.getElementById('sourceJurisdiction').value || null,
+                entity: document.getElementById('sourceEntity').value || null,
+                business_unit: document.getElementById('sourceBusinessUnit').value || null,
+                default_severity: document.getElementById('sourceSeverity').value
+            };
+
+            const submitBtn = document.getElementById('sourceSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+
+            try {
+                const response = await fetch(`${API_BASE}/sources`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('Source creation failed');
+                showStatus('Source added', 'success');
+                document.getElementById('sourceForm').reset();
+                document.getElementById('sourceSeverity').value = 'medium';
+                loadSources();
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Add Source';
+            }
+        });
+
+        document.getElementById('scanSourcesBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('scanSourcesBtn');
+            btn.disabled = true;
+            btn.textContent = 'Scanning...';
+            try {
+                const response = await fetch(`${API_BASE}/scan`, { method: 'POST' });
+                if (!response.ok) throw new Error('Scan failed');
+                const data = await response.json();
+                showStatus(`Scan complete: ${data.total_created || 0} changes`, 'success');
+                loadChanges();
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Scan All';
+            }
+        });
+
+        document.getElementById('refreshAlertsBtn').addEventListener('click', () => {
+            loadAlerts();
+        });
+
+        document.getElementById('refreshPoliciesBtn').addEventListener('click', () => {
+            loadPolicies();
+        });
+
+        document.getElementById('exportPoliciesBtn').addEventListener('click', () => {
+            window.open(`${API_BASE}/policies/export?format=csv`, '_blank');
+        });
+
+        document.getElementById('webhookForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const payload = {
+                url: document.getElementById('webhookUrl').value,
+                events: splitCsv(document.getElementById('webhookEvents').value)
+            };
+
+            const btn = document.getElementById('webhookSubmitBtn');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            try {
+                const response = await fetch(`${API_BASE}/webhooks`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error('Webhook creation failed');
+                showStatus('Webhook added', 'success');
+                document.getElementById('webhookForm').reset();
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Add Webhook';
+            }
+        });
+
+        document.getElementById('policyUpdateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const policyId = document.getElementById('policyUpdateId').value;
+            if (!policyId) {
+                showStatus('Policy ID is required', 'error');
+                return;
+            }
+
+            const payload = {
+                status: document.getElementById('policyUpdateStatus').value || null,
+                version: document.getElementById('policyUpdateVersion').value || null,
+                owner: document.getElementById('policyUpdateOwner').value || null
+            };
+
+            const btn = document.getElementById('policyUpdateBtn');
+            btn.disabled = true;
+            btn.textContent = 'Updating...';
+
+            try {
+                const response = await fetch(`${API_BASE}/policies/${policyId}/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error('Policy update failed');
+                showStatus('Policy updated', 'success');
+                document.getElementById('policyUpdateForm').reset();
+                loadPolicies();
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Update Policy';
+            }
+        });
     </script>
 </body>
 </html>

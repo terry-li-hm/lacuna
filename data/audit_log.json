@@ -1,0 +1,988 @@
+[
+  {
+    "timestamp": "2026-01-23T14:40:57.027411+00:00",
+    "action": "requirement_reviewed",
+    "entity_type": "requirement",
+    "entity_id": "ba5f3b81-2e3f-49a0-a658-904ab389e1ab",
+    "details": {
+      "status": "reviewed",
+      "reviewer": "Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T14:40:57.031115+00:00",
+    "action": "change_created",
+    "entity_type": "change",
+    "entity_id": "74dfa563-7a91-4d23-b72f-b376c94e83d2",
+    "details": {
+      "title": "HKMA circular on LCR reporting",
+      "jurisdiction": "Hong Kong"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T14:40:57.032578+00:00",
+    "action": "change_approval_added",
+    "entity_type": "change",
+    "entity_id": "74dfa563-7a91-4d23-b72f-b376c94e83d2",
+    "details": {
+      "approval_id": "20e79e3a-cc18-4aba-9a98-e83807e612b2",
+      "approver": "Head of Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T14:40:57.035470+00:00",
+    "action": "evidence_uploaded",
+    "entity_type": "change",
+    "entity_id": "74dfa563-7a91-4d23-b72f-b376c94e83d2",
+    "details": {
+      "evidence_id": "a1dd0c03-b284-46bf-83d7-df2df906642f",
+      "filename": "sample_hkma_capital.txt"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T14:40:57.037446+00:00",
+    "action": "change_updated",
+    "entity_type": "change",
+    "entity_id": "74dfa563-7a91-4d23-b72f-b376c94e83d2",
+    "details": {
+      "status": "assessing",
+      "owner": "Risk"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T14:40:57.041474+00:00",
+    "action": "source_added",
+    "entity_type": "source",
+    "entity_id": "1535a24b-9b8f-46d1-b638-7a57f6c61915",
+    "details": {
+      "name": "Local Feed"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T14:40:57.047312+00:00",
+    "action": "sources_scanned",
+    "entity_type": "source",
+    "entity_id": "1535a24b-9b8f-46d1-b638-7a57f6c61915",
+    "details": {
+      "created_changes": 1
+    }
+  },
+  {
+    "timestamp": "2026-01-23T14:40:57.052542+00:00",
+    "action": "policy_updated",
+    "entity_type": "policy",
+    "entity_id": "risk-governance-standard",
+    "details": {
+      "status": "active",
+      "version": "1.1"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:06:53.415014+00:00",
+    "action": "requirement_reviewed",
+    "entity_type": "requirement",
+    "entity_id": "14b7c584-b143-4e3e-89f0-383077c425bb",
+    "details": {
+      "status": "reviewed",
+      "reviewer": "Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:06:53.419572+00:00",
+    "action": "change_created",
+    "entity_type": "change",
+    "entity_id": "ccd1e3c8-82fa-4862-b41c-ac2f759857ca",
+    "details": {
+      "title": "HKMA circular on LCR reporting",
+      "jurisdiction": "Hong Kong"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:06:54.115855+00:00",
+    "action": "change_approval_added",
+    "entity_type": "change",
+    "entity_id": "ccd1e3c8-82fa-4862-b41c-ac2f759857ca",
+    "details": {
+      "approval_id": "f809d25f-9127-4a74-8117-49e8c297c737",
+      "approver": "Head of Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:06:54.125421+00:00",
+    "action": "evidence_uploaded",
+    "entity_type": "change",
+    "entity_id": "ccd1e3c8-82fa-4862-b41c-ac2f759857ca",
+    "details": {
+      "evidence_id": "88a7eed3-2d8e-4081-8d59-cbda6ccd391f",
+      "filename": "sample_hkma_capital.txt"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:06:54.128029+00:00",
+    "action": "change_updated",
+    "entity_type": "change",
+    "entity_id": "ccd1e3c8-82fa-4862-b41c-ac2f759857ca",
+    "details": {
+      "status": "assessing",
+      "owner": "Risk"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:07:16.555615+00:00",
+    "action": "requirement_reviewed",
+    "entity_type": "requirement",
+    "entity_id": "647bf963-d1d9-4a1a-b1bf-247ee90f6c93",
+    "details": {
+      "status": "reviewed",
+      "reviewer": "Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:07:16.559566+00:00",
+    "action": "change_created",
+    "entity_type": "change",
+    "entity_id": "29ac6879-c821-4c38-b2e5-62015b65d48c",
+    "details": {
+      "title": "HKMA circular on LCR reporting",
+      "jurisdiction": "Hong Kong"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:07:16.785891+00:00",
+    "action": "change_approval_added",
+    "entity_type": "change",
+    "entity_id": "29ac6879-c821-4c38-b2e5-62015b65d48c",
+    "details": {
+      "approval_id": "714f8ba7-708a-41aa-980b-f7e4bc6b99e8",
+      "approver": "Head of Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:07:16.793045+00:00",
+    "action": "evidence_uploaded",
+    "entity_type": "change",
+    "entity_id": "29ac6879-c821-4c38-b2e5-62015b65d48c",
+    "details": {
+      "evidence_id": "4269c5f3-50b2-4d6c-bc64-8bf2bdca8557",
+      "filename": "sample_hkma_capital.txt"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:07:16.795612+00:00",
+    "action": "change_updated",
+    "entity_type": "change",
+    "entity_id": "29ac6879-c821-4c38-b2e5-62015b65d48c",
+    "details": {
+      "status": "assessing",
+      "owner": "Risk"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:07:16.800059+00:00",
+    "action": "source_added",
+    "entity_type": "source",
+    "entity_id": "55ce289e-8e05-4faa-97c7-39af1e11266b",
+    "details": {
+      "name": "Local Feed"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:07:16.804146+00:00",
+    "action": "sources_scanned",
+    "entity_type": "source",
+    "entity_id": "55ce289e-8e05-4faa-97c7-39af1e11266b",
+    "details": {
+      "created_changes": 1
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:07:17.036844+00:00",
+    "action": "policy_updated",
+    "entity_type": "policy",
+    "entity_id": "risk-governance-standard",
+    "details": {
+      "status": "active",
+      "version": "1.1"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:09:16.641434+00:00",
+    "action": "requirement_reviewed",
+    "entity_type": "requirement",
+    "entity_id": "fb117bd4-ac25-42f0-818b-b0b8c668a02f",
+    "details": {
+      "status": "reviewed",
+      "reviewer": "Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:09:16.645604+00:00",
+    "action": "change_created",
+    "entity_type": "change",
+    "entity_id": "9c645ab5-8669-4a1a-81d6-cd6130e9fe9a",
+    "details": {
+      "title": "HKMA circular on LCR reporting",
+      "jurisdiction": "Hong Kong"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:09:17.244496+00:00",
+    "action": "change_approval_added",
+    "entity_type": "change",
+    "entity_id": "9c645ab5-8669-4a1a-81d6-cd6130e9fe9a",
+    "details": {
+      "approval_id": "5671da22-f45d-4431-960a-02d74af761e9",
+      "approver": "Head of Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:09:17.253943+00:00",
+    "action": "evidence_uploaded",
+    "entity_type": "change",
+    "entity_id": "9c645ab5-8669-4a1a-81d6-cd6130e9fe9a",
+    "details": {
+      "evidence_id": "4ff62bf2-463b-40a1-98fa-838a62f90a4c",
+      "filename": "sample_hkma_capital.txt"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:09:17.256508+00:00",
+    "action": "change_updated",
+    "entity_type": "change",
+    "entity_id": "9c645ab5-8669-4a1a-81d6-cd6130e9fe9a",
+    "details": {
+      "status": "assessing",
+      "owner": "Risk"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:09:17.260777+00:00",
+    "action": "source_added",
+    "entity_type": "source",
+    "entity_id": "420ebce8-2a95-481c-b6fc-b16505800930",
+    "details": {
+      "name": "Local Feed"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:09:17.264471+00:00",
+    "action": "sources_scanned",
+    "entity_type": "source",
+    "entity_id": "420ebce8-2a95-481c-b6fc-b16505800930",
+    "details": {
+      "created_changes": 1
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:09:17.728000+00:00",
+    "action": "policy_updated",
+    "entity_type": "policy",
+    "entity_id": "risk-governance-standard",
+    "details": {
+      "status": "active",
+      "version": "1.1"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:09:56.467104+00:00",
+    "action": "requirement_reviewed",
+    "entity_type": "requirement",
+    "entity_id": "af0237f4-5daa-437a-8a54-32431ec14fb6",
+    "details": {
+      "status": "reviewed",
+      "reviewer": "Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:09:56.471818+00:00",
+    "action": "change_created",
+    "entity_type": "change",
+    "entity_id": "290e31b0-f097-4066-b98a-3abc60fdeeed",
+    "details": {
+      "title": "HKMA circular on LCR reporting",
+      "jurisdiction": "Hong Kong"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:09:57.145228+00:00",
+    "action": "change_approval_added",
+    "entity_type": "change",
+    "entity_id": "290e31b0-f097-4066-b98a-3abc60fdeeed",
+    "details": {
+      "approval_id": "ec993842-4ccd-41bf-bd3f-b90e4768ed88",
+      "approver": "Head of Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:09:57.158092+00:00",
+    "action": "evidence_uploaded",
+    "entity_type": "change",
+    "entity_id": "290e31b0-f097-4066-b98a-3abc60fdeeed",
+    "details": {
+      "evidence_id": "509f9894-e241-409d-bcb4-a13a9efeaea4",
+      "filename": "sample_hkma_capital.txt"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:09:57.165139+00:00",
+    "action": "change_updated",
+    "entity_type": "change",
+    "entity_id": "290e31b0-f097-4066-b98a-3abc60fdeeed",
+    "details": {
+      "status": "assessing",
+      "owner": "Risk"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:09:57.175363+00:00",
+    "action": "source_added",
+    "entity_type": "source",
+    "entity_id": "b4c721cd-1a2b-475c-a092-ca9c95f55919",
+    "details": {
+      "name": "Local Feed"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:09:57.182972+00:00",
+    "action": "sources_scanned",
+    "entity_type": "source",
+    "entity_id": "b4c721cd-1a2b-475c-a092-ca9c95f55919",
+    "details": {
+      "created_changes": 1
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:09:57.862853+00:00",
+    "action": "policy_updated",
+    "entity_type": "policy",
+    "entity_id": "risk-governance-standard",
+    "details": {
+      "status": "active",
+      "version": "1.1"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:15:00.299294+00:00",
+    "action": "requirement_reviewed",
+    "entity_type": "requirement",
+    "entity_id": "ef0b7022-9687-4a88-b366-e00540068381",
+    "details": {
+      "status": "reviewed",
+      "reviewer": "Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:15:00.304205+00:00",
+    "action": "change_created",
+    "entity_type": "change",
+    "entity_id": "84174e4e-15a0-47a5-867e-cb0765a80c92",
+    "details": {
+      "title": "HKMA circular on LCR reporting",
+      "jurisdiction": "Hong Kong"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:15:01.580264+00:00",
+    "action": "change_approval_added",
+    "entity_type": "change",
+    "entity_id": "84174e4e-15a0-47a5-867e-cb0765a80c92",
+    "details": {
+      "approval_id": "70addcd0-4305-4bd1-9f0f-79bb27aa120d",
+      "approver": "Head of Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:15:01.594017+00:00",
+    "action": "evidence_uploaded",
+    "entity_type": "change",
+    "entity_id": "84174e4e-15a0-47a5-867e-cb0765a80c92",
+    "details": {
+      "evidence_id": "a971c4ed-675c-4463-8527-44b009dfce35",
+      "filename": "sample_hkma_capital.txt"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:15:01.602109+00:00",
+    "action": "change_updated",
+    "entity_type": "change",
+    "entity_id": "84174e4e-15a0-47a5-867e-cb0765a80c92",
+    "details": {
+      "status": "assessing",
+      "owner": "Risk"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:15:01.618648+00:00",
+    "action": "source_added",
+    "entity_type": "source",
+    "entity_id": "9d0c3fd6-9625-4a74-ab01-53cd941c952e",
+    "details": {
+      "name": "Local Feed"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:15:01.626098+00:00",
+    "action": "sources_scanned",
+    "entity_type": "source",
+    "entity_id": "9d0c3fd6-9625-4a74-ab01-53cd941c952e",
+    "details": {
+      "created_changes": 1
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:15:02.518118+00:00",
+    "action": "policy_updated",
+    "entity_type": "policy",
+    "entity_id": "liquidity-reporting-procedure",
+    "details": {
+      "status": "active",
+      "version": "1.1"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:15:48.428980+00:00",
+    "action": "requirement_reviewed",
+    "entity_type": "requirement",
+    "entity_id": "1d7f5718-e906-44d3-bf79-91f9baec9360",
+    "details": {
+      "status": "reviewed",
+      "reviewer": "Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:15:48.433968+00:00",
+    "action": "change_created",
+    "entity_type": "change",
+    "entity_id": "426c23dd-2ded-4d7d-9a18-4759b8a13fce",
+    "details": {
+      "title": "HKMA circular on LCR reporting",
+      "jurisdiction": "Hong Kong"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:15:49.918156+00:00",
+    "action": "change_approval_added",
+    "entity_type": "change",
+    "entity_id": "426c23dd-2ded-4d7d-9a18-4759b8a13fce",
+    "details": {
+      "approval_id": "97d83cb3-ec88-4051-9b54-f84b550d459a",
+      "approver": "Head of Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:15:49.924240+00:00",
+    "action": "evidence_uploaded",
+    "entity_type": "change",
+    "entity_id": "426c23dd-2ded-4d7d-9a18-4759b8a13fce",
+    "details": {
+      "evidence_id": "0b8e59ab-455a-449c-8986-a520d190fa5c",
+      "filename": "sample_hkma_capital.txt"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:15:49.927169+00:00",
+    "action": "change_updated",
+    "entity_type": "change",
+    "entity_id": "426c23dd-2ded-4d7d-9a18-4759b8a13fce",
+    "details": {
+      "status": "assessing",
+      "owner": "Risk"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:15:49.935593+00:00",
+    "action": "source_added",
+    "entity_type": "source",
+    "entity_id": "94fe8649-593c-4ae2-afde-21f526cf37ab",
+    "details": {
+      "name": "Local Feed"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:15:49.940302+00:00",
+    "action": "sources_scanned",
+    "entity_type": "source",
+    "entity_id": "94fe8649-593c-4ae2-afde-21f526cf37ab",
+    "details": {
+      "created_changes": 1
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:15:51.030296+00:00",
+    "action": "policy_updated",
+    "entity_type": "policy",
+    "entity_id": "liquidity-reporting-procedure",
+    "details": {
+      "status": "active",
+      "version": "1.1"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:27:59.623359+00:00",
+    "action": "requirement_reviewed",
+    "entity_type": "requirement",
+    "entity_id": "1536f1a6-c525-4291-aa2d-f48e780be6e7",
+    "details": {
+      "status": "reviewed",
+      "reviewer": "Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:27:59.629060+00:00",
+    "action": "change_created",
+    "entity_type": "change",
+    "entity_id": "6c205f7f-3774-458c-a1fc-ed723e8711b6",
+    "details": {
+      "title": "HKMA circular on LCR reporting",
+      "jurisdiction": "Hong Kong"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:28:01.095853+00:00",
+    "action": "change_approval_added",
+    "entity_type": "change",
+    "entity_id": "6c205f7f-3774-458c-a1fc-ed723e8711b6",
+    "details": {
+      "approval_id": "689114f5-3604-4de6-9a44-2a6f0cff6db8",
+      "approver": "Head of Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:28:01.106510+00:00",
+    "action": "evidence_uploaded",
+    "entity_type": "change",
+    "entity_id": "6c205f7f-3774-458c-a1fc-ed723e8711b6",
+    "details": {
+      "evidence_id": "0f626533-131b-480d-838b-8c780d973e38",
+      "filename": "sample_hkma_capital.txt"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:28:01.109639+00:00",
+    "action": "change_updated",
+    "entity_type": "change",
+    "entity_id": "6c205f7f-3774-458c-a1fc-ed723e8711b6",
+    "details": {
+      "status": "assessing",
+      "owner": "Risk"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:28:01.117820+00:00",
+    "action": "source_added",
+    "entity_type": "source",
+    "entity_id": "f9282751-7d8d-48ab-99fd-5aa564d7cca6",
+    "details": {
+      "name": "Local Feed"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:28:01.122879+00:00",
+    "action": "sources_scanned",
+    "entity_type": "source",
+    "entity_id": "f9282751-7d8d-48ab-99fd-5aa564d7cca6",
+    "details": {
+      "created_changes": 1
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:28:02.466761+00:00",
+    "action": "policy_updated",
+    "entity_type": "policy",
+    "entity_id": "liquidity-reporting-procedure",
+    "details": {
+      "status": "active",
+      "version": "1.1"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:28:29.444448+00:00",
+    "action": "requirement_reviewed",
+    "entity_type": "requirement",
+    "entity_id": "381251ed-ec6c-48f3-ae9e-183082c416a4",
+    "details": {
+      "status": "reviewed",
+      "reviewer": "Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:28:29.450422+00:00",
+    "action": "change_created",
+    "entity_type": "change",
+    "entity_id": "97918302-8841-4b3e-9ecc-1f52de6a7fc0",
+    "details": {
+      "title": "HKMA circular on LCR reporting",
+      "jurisdiction": "Hong Kong"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:28:31.007220+00:00",
+    "action": "change_approval_added",
+    "entity_type": "change",
+    "entity_id": "97918302-8841-4b3e-9ecc-1f52de6a7fc0",
+    "details": {
+      "approval_id": "9a452bd9-0076-46d2-9197-f428df5d9798",
+      "approver": "Head of Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:28:31.018649+00:00",
+    "action": "evidence_uploaded",
+    "entity_type": "change",
+    "entity_id": "97918302-8841-4b3e-9ecc-1f52de6a7fc0",
+    "details": {
+      "evidence_id": "cf37bb5e-c893-4769-9acb-45c6dc47243d",
+      "filename": "sample_hkma_capital.txt"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:28:31.021568+00:00",
+    "action": "change_updated",
+    "entity_type": "change",
+    "entity_id": "97918302-8841-4b3e-9ecc-1f52de6a7fc0",
+    "details": {
+      "status": "assessing",
+      "owner": "Risk"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:28:31.030846+00:00",
+    "action": "source_added",
+    "entity_type": "source",
+    "entity_id": "6c2d5bbf-19d8-4a03-9c5b-d893f61e3fb2",
+    "details": {
+      "name": "Local Feed"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:28:31.034876+00:00",
+    "action": "sources_scanned",
+    "entity_type": "source",
+    "entity_id": "6c2d5bbf-19d8-4a03-9c5b-d893f61e3fb2",
+    "details": {
+      "created_changes": 1
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:28:32.592690+00:00",
+    "action": "policy_updated",
+    "entity_type": "policy",
+    "entity_id": "liquidity-reporting-procedure",
+    "details": {
+      "status": "active",
+      "version": "1.1"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:31:47.950367+00:00",
+    "action": "requirement_reviewed",
+    "entity_type": "requirement",
+    "entity_id": "0051c999-303e-4fa4-a740-5292da50896c",
+    "details": {
+      "status": "reviewed",
+      "reviewer": "Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:31:47.956449+00:00",
+    "action": "change_created",
+    "entity_type": "change",
+    "entity_id": "b4406892-060e-40bd-a64a-3642ce4f20c2",
+    "details": {
+      "title": "HKMA circular on LCR reporting",
+      "jurisdiction": "Hong Kong"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:31:49.876721+00:00",
+    "action": "change_approval_added",
+    "entity_type": "change",
+    "entity_id": "b4406892-060e-40bd-a64a-3642ce4f20c2",
+    "details": {
+      "approval_id": "0727550e-2b92-446a-b048-32043a42b3ce",
+      "approver": "Head of Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:31:49.884868+00:00",
+    "action": "evidence_uploaded",
+    "entity_type": "change",
+    "entity_id": "b4406892-060e-40bd-a64a-3642ce4f20c2",
+    "details": {
+      "evidence_id": "22cf2040-e6d5-434b-bc2b-294ef8571754",
+      "filename": "sample_hkma_capital.txt"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:31:49.887878+00:00",
+    "action": "change_updated",
+    "entity_type": "change",
+    "entity_id": "b4406892-060e-40bd-a64a-3642ce4f20c2",
+    "details": {
+      "status": "assessing",
+      "owner": "Risk"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:31:49.897130+00:00",
+    "action": "source_added",
+    "entity_type": "source",
+    "entity_id": "788b83ce-a69b-4679-ac66-3af53acdded1",
+    "details": {
+      "name": "Local Feed"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:31:49.901377+00:00",
+    "action": "sources_scanned",
+    "entity_type": "source",
+    "entity_id": "788b83ce-a69b-4679-ac66-3af53acdded1",
+    "details": {
+      "created_changes": 1
+    }
+  },
+  {
+    "timestamp": "2026-01-23T20:31:51.627133+00:00",
+    "action": "policy_updated",
+    "entity_type": "policy",
+    "entity_id": "liquidity-reporting-procedure",
+    "details": {
+      "status": "active",
+      "version": "1.1"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T21:04:48.178972+00:00",
+    "action": "requirement_reviewed",
+    "entity_type": "requirement",
+    "entity_id": "8a622027-b8d2-4792-90b2-e0ed4cd7340b",
+    "details": {
+      "status": "reviewed",
+      "reviewer": "Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T21:04:48.185072+00:00",
+    "action": "change_created",
+    "entity_type": "change",
+    "entity_id": "7479a974-350e-4590-975e-9b8594eedac5",
+    "details": {
+      "title": "HKMA circular on LCR reporting",
+      "jurisdiction": "Hong Kong"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T21:04:50.287149+00:00",
+    "action": "change_approval_added",
+    "entity_type": "change",
+    "entity_id": "7479a974-350e-4590-975e-9b8594eedac5",
+    "details": {
+      "approval_id": "660cbf44-5ae0-4071-b5fc-a2cb61b455ad",
+      "approver": "Head of Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T21:04:50.299423+00:00",
+    "action": "evidence_uploaded",
+    "entity_type": "change",
+    "entity_id": "7479a974-350e-4590-975e-9b8594eedac5",
+    "details": {
+      "evidence_id": "0779e29c-2c03-44b9-a701-9a1923d15700",
+      "filename": "sample_hkma_capital.txt"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T21:04:50.302061+00:00",
+    "action": "change_updated",
+    "entity_type": "change",
+    "entity_id": "7479a974-350e-4590-975e-9b8594eedac5",
+    "details": {
+      "status": "assessing",
+      "owner": "Risk"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T21:04:50.311521+00:00",
+    "action": "source_added",
+    "entity_type": "source",
+    "entity_id": "ca808a88-1a2a-4b58-bf9c-100e51867b3c",
+    "details": {
+      "name": "Local Feed"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T21:04:50.316294+00:00",
+    "action": "sources_scanned",
+    "entity_type": "source",
+    "entity_id": "ca808a88-1a2a-4b58-bf9c-100e51867b3c",
+    "details": {
+      "created_changes": 1
+    }
+  },
+  {
+    "timestamp": "2026-01-23T21:04:52.309609+00:00",
+    "action": "policy_updated",
+    "entity_type": "policy",
+    "entity_id": "liquidity-reporting-procedure",
+    "details": {
+      "status": "active",
+      "version": "1.1"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T23:37:45.700043+00:00",
+    "action": "requirement_reviewed",
+    "entity_type": "requirement",
+    "entity_id": "e12b9d36-f93d-4f5a-9325-efcc24b6b2e5",
+    "details": {
+      "status": "reviewed",
+      "reviewer": "Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T23:37:45.706288+00:00",
+    "action": "change_created",
+    "entity_type": "change",
+    "entity_id": "044a02c9-f8f4-4cf3-8167-a9dabc737c98",
+    "details": {
+      "title": "HKMA circular on LCR reporting",
+      "jurisdiction": "Hong Kong"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T23:37:48.296293+00:00",
+    "action": "change_approval_added",
+    "entity_type": "change",
+    "entity_id": "044a02c9-f8f4-4cf3-8167-a9dabc737c98",
+    "details": {
+      "approval_id": "1d46d900-bc40-475c-aab2-176f109854b1",
+      "approver": "Head of Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T23:37:48.312430+00:00",
+    "action": "evidence_uploaded",
+    "entity_type": "change",
+    "entity_id": "044a02c9-f8f4-4cf3-8167-a9dabc737c98",
+    "details": {
+      "evidence_id": "6e83df55-fa47-4ee9-80eb-a1e07906135f",
+      "filename": "sample_hkma_capital.txt"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T23:37:48.315586+00:00",
+    "action": "change_updated",
+    "entity_type": "change",
+    "entity_id": "044a02c9-f8f4-4cf3-8167-a9dabc737c98",
+    "details": {
+      "status": "assessing",
+      "owner": "Risk"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T23:37:48.325615+00:00",
+    "action": "source_added",
+    "entity_type": "source",
+    "entity_id": "4f54e5ec-c70c-4fc1-a1af-e3b0e35e3e19",
+    "details": {
+      "name": "Local Feed"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T23:37:48.330570+00:00",
+    "action": "sources_scanned",
+    "entity_type": "source",
+    "entity_id": "4f54e5ec-c70c-4fc1-a1af-e3b0e35e3e19",
+    "details": {
+      "created_changes": 1
+    }
+  },
+  {
+    "timestamp": "2026-01-23T23:37:50.534000+00:00",
+    "action": "policy_updated",
+    "entity_type": "policy",
+    "entity_id": "liquidity-reporting-procedure",
+    "details": {
+      "status": "active",
+      "version": "1.1"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T23:42:56.843347+00:00",
+    "action": "requirement_reviewed",
+    "entity_type": "requirement",
+    "entity_id": "3fd59c5c-b396-4ca5-990f-2f116fd2e860",
+    "details": {
+      "status": "reviewed",
+      "reviewer": "Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T23:42:56.849643+00:00",
+    "action": "change_created",
+    "entity_type": "change",
+    "entity_id": "1bef192f-fffe-4444-ba65-93ceb954fecf",
+    "details": {
+      "title": "HKMA circular on LCR reporting",
+      "jurisdiction": "Hong Kong"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T23:42:59.280911+00:00",
+    "action": "change_approval_added",
+    "entity_type": "change",
+    "entity_id": "1bef192f-fffe-4444-ba65-93ceb954fecf",
+    "details": {
+      "approval_id": "7b8405f7-8a70-4897-9649-bfd8b85270c0",
+      "approver": "Head of Compliance"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T23:42:59.297979+00:00",
+    "action": "evidence_uploaded",
+    "entity_type": "change",
+    "entity_id": "1bef192f-fffe-4444-ba65-93ceb954fecf",
+    "details": {
+      "evidence_id": "41febe40-33ec-456a-b020-f0cc9ec366d3",
+      "filename": "sample_hkma_capital.txt"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T23:42:59.302730+00:00",
+    "action": "change_updated",
+    "entity_type": "change",
+    "entity_id": "1bef192f-fffe-4444-ba65-93ceb954fecf",
+    "details": {
+      "status": "assessing",
+      "owner": "Risk"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T23:42:59.313436+00:00",
+    "action": "source_added",
+    "entity_type": "source",
+    "entity_id": "aa26cb75-bac4-4907-99fb-a856eba29c71",
+    "details": {
+      "name": "Local Feed"
+    }
+  },
+  {
+    "timestamp": "2026-01-23T23:42:59.318246+00:00",
+    "action": "sources_scanned",
+    "entity_type": "source",
+    "entity_id": "aa26cb75-bac4-4907-99fb-a856eba29c71",
+    "details": {
+      "created_changes": 1
+    }
+  },
+  {
+    "timestamp": "2026-01-23T23:43:01.658988+00:00",
+    "action": "policy_updated",
+    "entity_type": "policy",
+    "entity_id": "liquidity-reporting-procedure",
+    "details": {
+      "status": "active",
+      "version": "1.1"
+    }
+  }
+]

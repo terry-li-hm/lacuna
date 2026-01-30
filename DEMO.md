@@ -113,7 +113,7 @@ python -m cli.main list-docs
 ```
 
 **Say:**
-> "The system scales - currently 2 documents, but works with 10, 50, 100+ documents across any number of jurisdictions."
+> "The system scales - currently 2 documents, but works with 10, 50, 100+ documents across any number of jurisdictions. We also have a central requirements registry with evidence links and CSV export for downstream compliance workflows."
 
 **Point out:**
 - 13 chunks indexed
@@ -122,7 +122,30 @@ python -m cli.main list-docs
 
 ---
 
-### 6. Architecture & Value (30 seconds)
+### 6. Regulatory Change Register (45 seconds)
+
+**Show in UI:**
+- Add a change item (HKMA circular, MAS notice)
+- Assign owner and due date
+- Export change log to CSV
+
+**Say:**
+> "This mirrors how compliance teams actually work: log regulatory updates, triage by severity, assign owners, track deadlines, and export audit-ready records."
+
+---
+
+### 7. GenAI Assist (30 seconds)
+
+**Show in UI:**
+- Use "AI Suggest" to draft impact assessment
+- Auto-link related requirements
+
+**Say:**
+> "GenAI accelerates the analysis step—drafting impact summaries and mapping relevant obligations, while keeping humans in control."
+
+---
+
+### 8. Architecture & Value (30 seconds)
 
 **Show:** Quick code walkthrough or architecture diagram
 
@@ -141,6 +164,8 @@ python -m cli.main list-docs
 - 📈 **Scalability:** Handles multiple jurisdictions easily
 - 🔌 **Integration:** API-first, can integrate with existing systems
 - 💰 **Cost-effective:** Runs on free tier for demos, affordable for production
+- ✅ **Audit-ready:** Evidence links + audit trail support
+- 🧭 **Governance:** Risk scoring, escalation flags, approvals workflow
 
 ---
 

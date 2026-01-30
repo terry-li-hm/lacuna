@@ -25,11 +25,18 @@ class RegAtlasClient:
         response.raise_for_status()
         return response.json()
     
-    def upload_document(self, file_path: Path, jurisdiction: str) -> Dict[str, Any]:
+    def upload_document(
+        self,
+        file_path: Path,
+        jurisdiction: str,
+        no_llm: bool = False
+    ) -> Dict[str, Any]:
         """Upload a document for processing."""
         with open(file_path, "rb") as f:
             files = {"file": (file_path.name, f, "application/octet-stream")}
             params = {"jurisdiction": jurisdiction}
+            if no_llm:
+                params["no_llm"] = "true"
             response = self.client.post(
                 f"{self.base_url}/upload",
                 files=files,
@@ -42,23 +49,31 @@ class RegAtlasClient:
         self,
         query: str,
         jurisdiction: Optional[str] = None,
-        n_results: int = 5
+        n_results: int = 5,
+        no_llm: bool = False
     ) -> Dict[str, Any]:
         """Query documents with semantic search."""
         payload = {
             "query": query,
             "jurisdiction": jurisdiction,
-            "n_results": n_results
+            "n_results": n_results,
+            "no_llm": no_llm
         }
         response = self.client.post(f"{self.base_url}/query", json=payload)
         response.raise_for_status()
         return response.json()
     
-    def compare_jurisdictions(self, jurisdiction1: str, jurisdiction2: str) -> Dict[str, Any]:
+    def compare_jurisdictions(
+        self,
+        jurisdiction1: str,
+        jurisdiction2: str,
+        no_llm: bool = False
+    ) -> Dict[str, Any]:
         """Compare requirements between two jurisdictions."""
         payload = {
             "jurisdiction1": jurisdiction1,
-            "jurisdiction2": jurisdiction2
+            "jurisdiction2": jurisdiction2,
+            "no_llm": no_llm
         }
         response = self.client.post(f"{self.base_url}/compare", json=payload)
         response.raise_for_status()
@@ -69,7 +84,43 @@ class RegAtlasClient:
         response = self.client.get(f"{self.base_url}/documents")
         response.raise_for_status()
         return response.json()
-    
+
+    def list_requirements(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """List requirements with optional filters."""
+        response = self.client.get(f"{self.base_url}/requirements", params=params or {})
+        response.raise_for_status()
+        return response.json()
+
+    def requirements_stats(self) -> Dict[str, Any]:
+        """Get requirement stats."""
+        response = self.client.get(f"{self.base_url}/requirements/stats")
+        response.raise_for_status()
+        return response.json()
+
+    def gap_analysis(
+        self,
+        circular_doc_id: str,
+        baseline_id: str,
+        is_policy_baseline: bool = False,
+        no_llm: bool = False
+    ) -> Dict[str, Any]:
+        """Perform gap analysis between circular and baseline."""
+        payload = {
+            "circular_doc_id": circular_doc_id,
+            "baseline_id": baseline_id,
+            "is_policy_baseline": is_policy_baseline,
+            "no_llm": no_llm
+        }
+        response = self.client.post(f"{self.base_url}/gap-analysis", json=payload)
+        response.raise_for_status()
+        return response.json()
+
+    def list_policies(self) -> Dict[str, Any]:
+        """List all internal policies."""
+        response = self.client.get(f"{self.base_url}/policies")
+        response.raise_for_status()
+        return response.json()
+
     def close(self):
         """Close the HTTP client."""
         self.client.close()

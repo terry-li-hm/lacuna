@@ -1,0 +1,16 @@
+# HKMA Circular: Consumer Protection in respect of Use of Generative Artificial Intelligence
+Date: 19 August 2024
+Source: Hong Kong Monetary Authority (HKMA)
+
+## Key Requirements
+
+1. GOVERNANCE: The Board and senior management of the authorized institution (AI) are ultimately accountable for the GenAI solutions deployed.
+2. ACCOUNTABILITY: AIs must ensure that there are clear lines of responsibility and accountability for GenAI outcomes.
+3. HUMAN-IN-THE-LOOP: There must be meaningful human involvement in the GenAI-driven decision-making process, especially for high-impact decisions.
+4. FAIRNESS: AIs must ensure that GenAI models do not result in unfair bias or discrimination against specific consumer groups.
+5. TRANSPARENCY: AIs must provide clear and timely disclosure to customers when they are interacting with GenAI.
+6. EXPLAINABILITY: AIs should be able to explain how GenAI outputs are generated and the logic behind them to a reasonable extent.
+7. OPT-OUT RIGHT: Customers must be provided with an option to opt-out of GenAI-based interactions and request human intervention or assistance.
+8. DATA PRIVACY: AIs must comply with the Personal Data (Privacy) Ordinance (PDPO) and ensure data minimization when using GenAI.
+9. MONITORING: AIs must implement continuous monitoring and regular testing of GenAI models to ensure performance and safety.
+10. EXTERNAL PARTIES: AIs remain responsible for compliance when using GenAI solutions provided by third-party vendors.

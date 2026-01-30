@@ -1,0 +1,12 @@
+services:
+  reg-atlas:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      REG_ATLAS_NO_LLM: ${REG_ATLAS_NO_LLM:-0}
+      DATA_DIR: /app/data
+      CHROMA_PERSIST_DIR: /app/data/db/chroma
+    volumes:
+      - ./data:/app/data

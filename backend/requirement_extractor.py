@@ -3,6 +3,7 @@
 import logging
 from typing import List, Dict, Any
 import os
+import uuid
 from openai import OpenAI
 
 logger = logging.getLogger(__name__)
@@ -11,7 +12,14 @@ logger = logging.getLogger(__name__)
 class RequirementExtractor:
     """Extract and categorize regulatory requirements using LLM."""
     
-    def __init__(self, api_key: str | None = None, model: str = "openai/gpt-3.5-turbo"):
+    def __init__(
+        self,
+        api_key: str | None = None,
+        model: str = "openai/gpt-3.5-turbo",
+        base_url: str = "https://openrouter.ai/api/v1"
+    ):
+        if os.getenv("REG_ATLAS_NO_LLM") == "1":
+            api_key = None
         self.api_key = api_key
         self.model = model
         self.client = None
@@ -19,13 +27,18 @@ class RequirementExtractor:
         if api_key:
             self.client = OpenAI(
                 api_key=api_key,
-                base_url="https://openrouter.ai/api/v1"
+                base_url=base_url
             )
             logger.info(f"Initialized OpenRouter client with model: {model}")
         else:
             logger.warning("No OpenRouter API key provided - extraction features limited")
     
-    def extract_requirements(self, text: str, jurisdiction: str = "Unknown") -> Dict[str, Any]:
+    def extract_requirements(
+        self,
+        text: str,
+        jurisdiction: str = "Unknown",
+        force_basic: bool = False
+    ) -> Dict[str, Any]:
         """
         Extract regulatory requirements from text.
         
@@ -36,7 +49,7 @@ class RequirementExtractor:
         Returns:
             Dictionary containing extracted requirements and categories
         """
-        if not self.client:
+        if force_basic or not self.client:
             logger.warning("No LLM client available - returning basic extraction")
             return self._basic_extraction(text, jurisdiction)
         
@@ -48,6 +61,8 @@ For each requirement, identify:
 2. Brief description of the requirement
 3. Any specific thresholds, ratios, or deadlines mentioned
 4. Whether it's mandatory or recommended
+5. Confidence level (High/Medium/Low)
+6. A short source snippet (<= 200 chars) quoted from the text
 
 Text:
 {text[:4000]}  # Limit context length
@@ -57,6 +72,8 @@ REQUIREMENT_TYPE: [type]
 DESCRIPTION: [brief description]
 DETAILS: [specific numbers, dates, thresholds]
 MANDATORY: [Yes/No]
+CONFIDENCE: [High/Medium/Low]
+SOURCE_SNIPPET: [quoted excerpt]
 ---
 """
 
@@ -103,7 +120,7 @@ MANDATORY: [Yes/No]
                     key, value = line.split(':', 1)
                     key = key.strip().lower().replace(' ', '_')
                     req[key] = value.strip()
-            
+
             if 'requirement_type' in req:
                 requirements.append(req)
         
@@ -137,6 +154,13 @@ MANDATORY: [Yes/No]
                     "mandatory": "Unknown"
                 }
                 for cat in found_categories
+            ] or [
+                {
+                    "requirement_type": "General Compliance",
+                    "description": "Regulatory requirements detected (LLM disabled)",
+                    "details": "No keyword match found in basic extraction",
+                    "mandatory": "Unknown"
+                }
             ],
             "raw_extraction": "Basic extraction performed (no LLM available)"
         }
@@ -144,7 +168,8 @@ MANDATORY: [Yes/No]
     def compare_requirements(
         self,
         req1: Dict[str, Any],
-        req2: Dict[str, Any]
+        req2: Dict[str, Any],
+        force_basic: bool = False
     ) -> str:
         """
         Compare requirements from two jurisdictions.
@@ -156,7 +181,7 @@ MANDATORY: [Yes/No]
         Returns:
             Comparison summary
         """
-        if not self.client:
+        if force_basic or not self.client:
             return self._basic_comparison(req1, req2)
         
         try:
@@ -206,6 +231,112 @@ Provide a concise comparison highlighting:
         
         return "\n".join(formatted)
     
+    def perform_gap_analysis(
+        self,
+        circular_req: Dict[str, Any],
+        baseline_chunks: List[Dict[str, Any]],
+        force_basic: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Perform a gap analysis for a single requirement against baseline context.
+        
+        Args:
+            circular_req: The requirement from the new circular
+            baseline_chunks: Relevant chunks from the baseline document/policy
+            force_basic: Whether to skip LLM
+            
+        Returns:
+            Dictionary with status, reasoning, and verified citations
+        """
+        if force_basic or not self.client:
+            return {
+                "status": "Partial",
+                "reasoning": "Gap analysis performed without LLM. Manual review required.",
+                "citations": []
+            }
+
+        try:
+            # Format baseline chunks with indices for "Inject-and-Verify"
+            context_text = ""
+            for i, chunk in enumerate(baseline_chunks):
+                text = chunk.get('document', '')
+                context_text += f"<chunk index=\"{i}\">\n{text}\n</chunk>\n"
+
+            prompt = f"""You are a Senior Regulatory Auditor. Perform a gap analysis.
+
+Circular Requirement: {circular_req.get('description', 'No description')}
+Details: {circular_req.get('details', 'No specific details')}
+
+Baseline Context:
+{context_text}
+
+Evaluation Criteria:
+- Full Coverage: Baseline explicitly meets all conditions, thresholds, and deadlines.
+- Partial Coverage: Baseline addresses intent but lacks granular details or specific thresholds.
+- Gap: Baseline is silent or contradicts the requirement.
+
+Rules:
+1. Cite index in square brackets, e.g., [0], [1].
+2. If no coverage exists, status is 'Gap'.
+3. Output valid JSON only.
+
+Response Format:
+{{
+  "status": "Full" | "Partial" | "Gap",
+  "reasoning": "Provide exact delta or alignment details",
+  "citations": [list of index integers]
+}}
+"""
+
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": "You are a regulatory compliance auditor. Always output valid JSON."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.1
+            )
+
+            result_text = response.choices[0].message.content or "{}"
+            
+            # Simple JSON extraction in case of markdown wrapping
+            if "```json" in result_text:
+                result_text = result_text.split("```json")[1].split("```")[0].strip()
+            elif "```" in result_text:
+                result_text = result_text.split("```")[1].split("```")[0].strip()
+            
+            import json
+            result = json.loads(result_text)
+            
+            # Map indices back to chunk IDs and enrich citations
+            verified_provenance = []
+            for idx in result.get("citations", []):
+                try:
+                    idx_int = int(idx)
+                    if 0 <= idx_int < len(baseline_chunks):
+                        chunk = baseline_chunks[idx_int]
+                        verified_provenance.append({
+                            "id": f"cit_{uuid.uuid4().hex[:8]}",
+                            "source_type": "baseline",
+                            "doc_id": chunk.get("metadata", {}).get("doc_id", "unknown"),
+                            "chunk_id": chunk.get("id", "unknown"),
+                            "text_segment": chunk.get("document", "")[:500],
+                            "verification_status": "verified"
+                        })
+                except (ValueError, TypeError):
+                    continue
+            
+            result["provenance"] = verified_provenance
+            return result
+
+        except Exception as e:
+            logger.error(f"Error in gap analysis: {e}")
+            return {
+                "status": "Gap",
+                "reasoning": f"Error during analysis: {str(e)}",
+                "provenance": []
+            }
+
     def _basic_comparison(self, req1: Dict[str, Any], req2: Dict[str, Any]) -> str:
         """Basic comparison without LLM."""
         j1 = req1.get("jurisdiction", "Jurisdiction 1")
