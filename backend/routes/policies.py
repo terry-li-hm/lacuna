@@ -15,6 +15,7 @@ from backend.state import (
     _sort_by_iso,
     policies_db,
     save_json_dict,
+    get_policy_repo,
 )
 from backend.models.schemas import PolicyUpdateRequest
 
@@ -103,6 +104,14 @@ async def update_policy(policy_id: str, request: PolicyUpdateRequest):
         policy["owner"] = request.owner
     policy["updated_at"] = datetime.now(timezone.utc).isoformat()
     save_json_dict(POLICIES_DB_PATH, policies_db)
+
+    # Also save to DuckDB
+    try:
+        repo = get_policy_repo()
+        repo.save(policy)
+    except Exception as e:
+        logger.warning(f"Failed to save policy to DuckDB: {e}")
+
     _append_audit_log(
         action="policy_updated",
         entity_type="policy",

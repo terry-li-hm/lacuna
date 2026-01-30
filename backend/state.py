@@ -5,11 +5,17 @@ import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, Iterable, List, Optional
 
 from fastapi import HTTPException
 
 from backend.config import settings
+from backend.storage import (
+    init_db,
+    DocumentRepository,
+    PolicyRepository,
+    AuditLogRepository,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -194,6 +200,11 @@ evidence_db: List[Dict[str, Any]] = []
 policies_db: Dict[str, Dict[str, Any]] = {}
 webhooks_db: Dict[str, Dict[str, Any]] = {}
 
+# Repository instances
+_document_repo: Optional[DocumentRepository] = None
+_policy_repo: Optional[PolicyRepository] = None
+_audit_log_repo: Optional[AuditLogRepository] = None
+
 # Components - will be initialized in main.py
 doc_processor = None
 req_extractor = None
@@ -201,9 +212,36 @@ vector_store = None
 llm_api_key = None
 
 
+def get_document_repo() -> DocumentRepository:
+    """Get or create the document repository singleton."""
+    global _document_repo
+    if _document_repo is None:
+        _document_repo = DocumentRepository()
+    return _document_repo
+
+
+def get_policy_repo() -> PolicyRepository:
+    """Get or create the policy repository singleton."""
+    global _policy_repo
+    if _policy_repo is None:
+        _policy_repo = PolicyRepository()
+    return _policy_repo
+
+
+def get_audit_log_repo() -> AuditLogRepository:
+    """Get or create the audit log repository singleton."""
+    global _audit_log_repo
+    if _audit_log_repo is None:
+        _audit_log_repo = AuditLogRepository()
+    return _audit_log_repo
+
+
 def init_state():
     """Initialize global state from disk."""
     global documents_db, audit_log, sources_db, evidence_db, policies_db, webhooks_db
+    # Initialize DuckDB first
+    init_db()
+    # Load JSON as fallback / legacy support
     documents_db = load_documents_db(DOCUMENTS_DB_PATH)
     audit_log = load_json_list(AUDIT_LOG_PATH)
     sources_db = load_json_dict(SOURCES_DB_PATH)
@@ -408,7 +446,7 @@ def _ensure_policy_seeded() -> None:
         title = (
             content.splitlines()[0].replace("#", "").strip() if content else policy_id
         )
-        policies_db[policy_id] = {
+        policy = {
             "policy_id": policy_id,
             "title": title,
             "path": str(path),
@@ -419,6 +457,13 @@ def _ensure_policy_seeded() -> None:
             "created_at": datetime.now(timezone.utc).isoformat(),
             "updated_at": None,
         }
+        policies_db[policy_id] = policy
+        # Also save to DuckDB
+        try:
+            repo = get_policy_repo()
+            repo.save(policy)
+        except Exception as e:
+            logger.warning(f"Failed to save policy to DuckDB: {e}")
     save_json_dict(POLICIES_DB_PATH, policies_db)
 
 
@@ -452,5 +497,12 @@ def _append_audit_log(
         "entity_id": entity_id,
         "details": details or {},
     }
+    # Save to JSON for fallback
     audit_log.append(entry)
     save_json_list(AUDIT_LOG_PATH, audit_log)
+    # Also save to DuckDB
+    try:
+        repo = get_audit_log_repo()
+        repo.append(action, entity_type, entity_id, details)
+    except Exception as e:
+        logger.warning(f"Failed to append to DuckDB audit log: {e}")

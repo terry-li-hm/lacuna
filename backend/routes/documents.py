@@ -24,6 +24,7 @@ from backend.state import (
     req_extractor,
     save_documents_db,
     vector_store,
+    get_document_repo,
 )
 
 logger = logging.getLogger(__name__)
@@ -142,7 +143,7 @@ async def upload_document(
         _attach_evidence(requirements, doc_id)
 
         # Store document info
-        documents_db[doc_id] = {
+        doc_data = {
             "doc_id": doc_id,
             "filename": safe_name,
             "jurisdiction": jurisdiction,
@@ -156,7 +157,15 @@ async def upload_document(
             "size_bytes": len(content),
             "uploaded_at": datetime.now(timezone.utc).isoformat(),
         }
+        documents_db[doc_id] = doc_data
         save_documents_db(DOCUMENTS_DB_PATH, documents_db)
+
+        # Also save to DuckDB
+        try:
+            repo = get_document_repo()
+            repo.save(doc_data)
+        except Exception as e:
+            logger.warning(f"Failed to save document to DuckDB: {e}")
 
         logger.info(f"Successfully processed document {doc_id}")
 
@@ -294,5 +303,12 @@ async def delete_document(doc_id: str):
     vector_store.delete_document(doc_id)
     documents_db.pop(doc_id, None)
     save_documents_db(DOCUMENTS_DB_PATH, documents_db)
+
+    # Also delete from DuckDB
+    try:
+        repo = get_document_repo()
+        repo.delete(doc_id)
+    except Exception as e:
+        logger.warning(f"Failed to delete document from DuckDB: {e}")
 
     return {"deleted": True, "doc_id": doc_id}
