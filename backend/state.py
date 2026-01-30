@@ -212,6 +212,9 @@ _requirement_service: Optional[Any] = None
 _gap_analysis_service: Optional[Any] = None
 _policy_service: Optional[Any] = None
 _system_service: Optional[Any] = None
+_query_service: Optional[Any] = None
+_integration_service: Optional[Any] = None
+_evidence_service: Optional[Any] = None
 
 # Components - will be initialized in main.py
 doc_processor = None
@@ -319,6 +322,44 @@ def get_system_service():
             req_extractor=req_extractor,
         )
     return _system_service
+
+
+def get_query_service():
+    """Get or create the query service singleton."""
+    global _query_service
+    if _query_service is None:
+        from backend.services.query_service import QueryService
+
+        _query_service = QueryService(
+            vector_store=vector_store, req_extractor=req_extractor
+        )
+    return _query_service
+
+
+def get_integration_service():
+    """Get or create the integration service singleton."""
+    global _integration_service
+    if _integration_service is None:
+        from backend.services.integration_service import IntegrationService
+
+        _integration_service = IntegrationService(
+            sources_db=sources_db,
+            webhooks_db=webhooks_db,
+            audit_repo=get_audit_log_repo(),
+        )
+    return _integration_service
+
+
+def get_evidence_service():
+    """Get or create the evidence service singleton."""
+    global _evidence_service
+    if _evidence_service is None:
+        from backend.services.evidence_service import EvidenceService
+
+        _evidence_service = EvidenceService(
+            evidence_db=evidence_db, audit_repo=get_audit_log_repo()
+        )
+    return _evidence_service
 
 
 def init_state():
