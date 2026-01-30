@@ -205,6 +205,14 @@ _document_repo: Optional[DocumentRepository] = None
 _policy_repo: Optional[PolicyRepository] = None
 _audit_log_repo: Optional[AuditLogRepository] = None
 
+# Service instances
+_llm_service: Optional[Any] = None
+_document_service: Optional[Any] = None
+_requirement_service: Optional[Any] = None
+_gap_analysis_service: Optional[Any] = None
+_policy_service: Optional[Any] = None
+_system_service: Optional[Any] = None
+
 # Components - will be initialized in main.py
 doc_processor = None
 req_extractor = None
@@ -234,6 +242,83 @@ def get_audit_log_repo() -> AuditLogRepository:
     if _audit_log_repo is None:
         _audit_log_repo = AuditLogRepository()
     return _audit_log_repo
+
+
+def get_llm_service():
+    """Get or create the LLM service singleton."""
+    global _llm_service
+    if _llm_service is None:
+        from backend.services.llm_service import LLMService
+
+        _llm_service = LLMService(extractor=req_extractor)
+    return _llm_service
+
+
+def get_document_service():
+    """Get or create the document service singleton."""
+    global _document_service
+    if _document_service is None:
+        from backend.services.document_service import DocumentService
+
+        _document_service = DocumentService(
+            doc_repo=get_document_repo(),
+            vector_store=vector_store,
+            processor=doc_processor,
+            llm_service=get_llm_service(),
+        )
+    return _document_service
+
+
+def get_requirement_service():
+    """Get or create the requirement service singleton."""
+    global _requirement_service
+    if _requirement_service is None:
+        from backend.services.requirement_service import RequirementService
+
+        _requirement_service = RequirementService(
+            doc_repo=get_document_repo(), audit_repo=get_audit_log_repo()
+        )
+    return _requirement_service
+
+
+def get_gap_analysis_service():
+    """Get or create the gap analysis service singleton."""
+    global _gap_analysis_service
+    if _gap_analysis_service is None:
+        from backend.services.gap_analysis_service import GapAnalysisService
+
+        _gap_analysis_service = GapAnalysisService(
+            doc_repo=get_document_repo(),
+            policy_repo=get_policy_repo(),
+            vector_store=vector_store,
+            llm_service=get_llm_service(),
+        )
+    return _gap_analysis_service
+
+
+def get_policy_service():
+    """Get or create the policy service singleton."""
+    global _policy_service
+    if _policy_service is None:
+        from backend.services.policy_service import PolicyService
+
+        _policy_service = PolicyService(policy_repo=get_policy_repo())
+    return _policy_service
+
+
+def get_system_service():
+    """Get or create the system service singleton."""
+    global _system_service
+    if _system_service is None:
+        from backend.services.system_service import SystemService
+
+        _system_service = SystemService(
+            doc_repo=get_document_repo(),
+            audit_repo=get_audit_log_repo(),
+            vector_store=vector_store,
+            req_extractor=req_extractor,
+        )
+    return _system_service
 
 
 def init_state():

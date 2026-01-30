@@ -3,19 +3,13 @@
 import csv
 import io
 import logging
-from datetime import datetime, timezone
+from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 
 from backend.state import (
-    POLICIES_DB_PATH,
-    _append_audit_log,
-    _ensure_policy_seeded,
-    _sort_by_iso,
-    policies_db,
-    save_json_dict,
-    get_policy_repo,
+    get_policy_service,
 )
 from backend.models.schemas import PolicyUpdateRequest
 
@@ -24,17 +18,17 @@ router = APIRouter()
 
 
 @router.get("/policies")
-async def list_policies():
+async def list_policies(service=Depends(get_policy_service)):
     """List internal policies and procedures."""
-    _ensure_policy_seeded()
-    return {"policies": list(policies_db.values()), "total": len(policies_db)}
+    policies = service.list_policies()
+    return {"policies": policies, "total": len(policies)}
 
 
 @router.get("/policies/export")
-async def export_policies(format: str = "csv"):
+async def export_policies(format: str = "csv", service=Depends(get_policy_service)):
     """Export policies."""
-    _ensure_policy_seeded()
-    policies = _sort_by_iso(list(policies_db.values()), "created_at")
+    policies = service.list_policies()
+
     if format.lower() == "json":
         return {"policies": policies, "total": len(policies)}
     if format.lower() != "csv":
@@ -80,37 +74,30 @@ async def export_policies(format: str = "csv"):
 
 
 @router.get("/policies/{policy_id}")
-async def get_policy(policy_id: str):
+async def get_policy(policy_id: str, service=Depends(get_policy_service)):
     """Get a policy by ID."""
-    _ensure_policy_seeded()
-    policy = policies_db.get(policy_id)
+    policy = service.get_policy(policy_id)
     if not policy:
         raise HTTPException(status_code=404, detail="Policy not found")
     return policy
 
 
 @router.post("/policies/{policy_id}/update")
-async def update_policy(policy_id: str, request: PolicyUpdateRequest):
+async def update_policy(
+    policy_id: str, request: PolicyUpdateRequest, service=Depends(get_policy_service)
+):
     """Update policy status/version/owner."""
-    _ensure_policy_seeded()
-    policy = policies_db.get(policy_id)
-    if not policy:
-        raise HTTPException(status_code=404, detail="Policy not found")
-    if request.status is not None:
-        policy["status"] = request.status
-    if request.version is not None:
-        policy["version"] = request.version
-    if request.owner is not None:
-        policy["owner"] = request.owner
-    policy["updated_at"] = datetime.now(timezone.utc).isoformat()
-    save_json_dict(POLICIES_DB_PATH, policies_db)
+    updated = service.update_policy(
+        policy_id=policy_id,
+        status=request.status,
+        version=request.version,
+        owner=request.owner,
+    )
 
-    # Also save to DuckDB
-    try:
-        repo = get_policy_repo()
-        repo.save(policy)
-    except Exception as e:
-        logger.warning(f"Failed to save policy to DuckDB: {e}")
+    if not updated:
+        raise HTTPException(status_code=404, detail="Policy not found")
+
+    from backend.state import _append_audit_log
 
     _append_audit_log(
         action="policy_updated",
@@ -118,4 +105,5 @@ async def update_policy(policy_id: str, request: PolicyUpdateRequest):
         entity_id=policy_id,
         details={"status": request.status, "version": request.version},
     )
-    return policy
+
+    return updated

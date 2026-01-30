@@ -3,28 +3,13 @@
 import csv
 import io
 import logging
-import uuid
-from pathlib import Path
-from typing import Any, Dict
+from typing import Optional
 
-from fastapi import APIRouter, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, File, HTTPException, Query, UploadFile, Depends
 from fastapi.responses import StreamingResponse
 
-from backend.config import settings
 from backend.state import (
-    DOCUMENTS_DB_PATH,
-    _attach_evidence,
-    _content_hash,
-    _normalize_requirements,
-    _normalize_text,
-    _paginate,
-    _sort_by_iso,
-    documents_db,
-    doc_processor,
-    req_extractor,
-    save_documents_db,
-    vector_store,
-    get_document_repo,
+    get_document_service,
 )
 
 logger = logging.getLogger(__name__)
@@ -43,148 +28,43 @@ async def upload_document(
     allow_duplicate: bool = Query(
         True, description="Allow duplicate uploads for same content"
     ),
+    service=Depends(get_document_service),
 ):
     """
     Upload and process a regulatory document.
-
-    Args:
-        file: PDF or text file containing regulatory text
-        jurisdiction: Jurisdiction this document belongs to
-
-    Returns:
-        Processing results including extracted requirements
     """
     logger.info(f"Received upload: {file.filename} for jurisdiction: {jurisdiction}")
 
-    file_path = None
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Missing filename")
+
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty")
+
     try:
-        if not file.filename:
-            raise HTTPException(status_code=400, detail="Missing filename")
-        if Path(file.filename).suffix.lower() not in {".pdf", ".txt"}:
-            raise HTTPException(status_code=400, detail="Unsupported file format")
-
-        # Generate document ID
-        doc_id = str(uuid.uuid4())
-
-        # Save uploaded file temporarily
-        temp_dir = settings.data_dir / "temp"
-        temp_dir.mkdir(exist_ok=True)
-
-        safe_name = Path(file.filename).name
-        file_path = temp_dir / f"{doc_id}_{safe_name}"
-
-        with open(file_path, "wb") as f:
-            content = await file.read()
-            if not content:
-                raise HTTPException(status_code=400, detail="Uploaded file is empty")
-            max_size = settings.max_upload_mb * 1024 * 1024
-            if len(content) > max_size:
-                raise HTTPException(
-                    status_code=413, detail="Uploaded file is too large"
-                )
-            f.write(content)
-
-        content_hash = _content_hash(content)
-        if not allow_duplicate:
-            for doc in documents_db.values():
-                if doc.get("content_hash") == content_hash:
-                    raise HTTPException(
-                        status_code=409,
-                        detail=f"Duplicate document detected (doc_id={doc.get('doc_id')})",
-                    )
-
-        # Process document
-        processed = doc_processor.process_file(file_path)
-
-        # Extract requirements
-        full_text = processed["full_text"]
-        if not full_text.strip():
-            raise HTTPException(
-                status_code=400, detail="No text extracted from document"
-            )
-        requirements_payload = req_extractor.extract_requirements(
-            full_text, jurisdiction, force_basic=no_llm
-        )
-
-        # Chunk and add to vector store
-        chunks = doc_processor.chunk_text(full_text, chunk_size=1000, overlap=200)
-        if not chunks:
-            raise HTTPException(
-                status_code=400, detail="Document text too short to index"
-            )
-
-        from datetime import datetime, timezone
-
-        metadata = {
-            **processed["metadata"],
-            "jurisdiction": jurisdiction,
-            "entity": _normalize_text(entity),
-            "business_unit": _normalize_text(business_unit),
-            "doc_id": doc_id,
-            "content_hash": content_hash,
-            "size_bytes": len(content),
-        }
-
-        chunks_added = vector_store.add_document(doc_id, chunks, metadata)
-        if chunks_added == 0:
-            raise HTTPException(
-                status_code=400, detail="No chunks indexed for document"
-            )
-
-        # Normalize requirements and attach evidence
-        requirements = _normalize_requirements(
-            requirements_payload.get("requirements", []),
-            doc_id=doc_id,
+        result = await service.upload_document(
+            file_content=content,
+            filename=file.filename,
             jurisdiction=jurisdiction,
-            filename=safe_name,
-            entity=_normalize_text(entity),
-            business_unit=_normalize_text(business_unit),
+            entity=entity,
+            business_unit=business_unit,
+            no_llm=no_llm,
+            allow_duplicate=allow_duplicate,
         )
-        _attach_evidence(requirements, doc_id)
 
-        # Store document info
-        doc_data = {
-            "doc_id": doc_id,
-            "filename": safe_name,
-            "jurisdiction": jurisdiction,
-            "entity": _normalize_text(entity),
-            "business_unit": _normalize_text(business_unit),
-            "requirements": requirements,
-            "raw_extraction": requirements_payload.get("raw_extraction"),
-            "chunks_count": chunks_added,
-            "metadata": metadata,
-            "content_hash": content_hash,
-            "size_bytes": len(content),
-            "uploaded_at": datetime.now(timezone.utc).isoformat(),
-        }
-        documents_db[doc_id] = doc_data
-        save_documents_db(DOCUMENTS_DB_PATH, documents_db)
+        if result.get("duplicate"):
+            raise HTTPException(
+                status_code=409,
+                detail=f"Duplicate document detected (doc_id={result.get('doc_id')})",
+            )
 
-        # Also save to DuckDB
-        try:
-            repo = get_document_repo()
-            repo.save(doc_data)
-        except Exception as e:
-            logger.warning(f"Failed to save document to DuckDB: {e}")
-
-        logger.info(f"Successfully processed document {doc_id}")
-
-        return {
-            "doc_id": doc_id,
-            "filename": safe_name,
-            "jurisdiction": jurisdiction,
-            "chunks_added": chunks_added,
-            "requirements": requirements,
-        }
-
-    except HTTPException:
-        raise
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Error processing upload: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        if file_path and file_path.exists():
-            file_path.unlink()
 
 
 @router.get("/documents")
@@ -195,47 +75,35 @@ async def list_documents(
     q: str | None = None,
     limit: int | None = None,
     offset: int | None = None,
+    service=Depends(get_document_service),
 ):
     """List all processed documents."""
-    from backend.state import _all_jurisdictions
+    from backend.state import _paginate
 
-    docs = _sort_by_iso(list(documents_db.values()), "uploaded_at")
-    filtered = []
-    for doc in docs:
-        if jurisdiction and doc.get("jurisdiction") != jurisdiction:
-            continue
-        if entity and doc.get("entity") != entity:
-            continue
-        if business_unit and doc.get("business_unit") != business_unit:
-            continue
-        if q:
-            haystack = " ".join(
-                [
-                    doc.get("filename") or "",
-                    doc.get("jurisdiction") or "",
-                    doc.get("entity") or "",
-                    doc.get("business_unit") or "",
-                ]
-            ).lower()
-            if q.lower() not in haystack:
-                continue
-        filtered.append(doc)
+    docs = service.list_documents(
+        jurisdiction=jurisdiction,
+        entity=entity,
+        business_unit=business_unit,
+        q=q,
+    )
 
-    total = len(filtered)
-    paged = _paginate(filtered, limit, offset)
+    total = len(docs)
+    paged = _paginate(docs, limit, offset)
+
     return {
         "documents": paged,
         "total": total,
         "limit": limit,
         "offset": offset or 0,
-        "jurisdictions": _all_jurisdictions(),
+        "jurisdictions": service.get_all_jurisdictions(),
     }
 
 
 @router.get("/documents/export")
-async def export_documents(format: str = "csv"):
+async def export_documents(format: str = "csv", service=Depends(get_document_service)):
     """Export document metadata."""
-    docs = _sort_by_iso(list(documents_db.values()), "uploaded_at")
+    docs = service.list_documents()
+
     if format.lower() == "json":
         return {"documents": docs, "total": len(docs)}
     if format.lower() != "csv":
@@ -285,30 +153,19 @@ async def export_documents(format: str = "csv"):
 
 
 @router.get("/documents/{doc_id}")
-async def get_document(doc_id: str):
+async def get_document(doc_id: str, service=Depends(get_document_service)):
     """Get a single document with requirements."""
-    doc = documents_db.get(doc_id)
+    doc = service.get_document(doc_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
     return doc
 
 
 @router.delete("/documents/{doc_id}")
-async def delete_document(doc_id: str):
+async def delete_document(doc_id: str, service=Depends(get_document_service)):
     """Delete a document and its vector chunks."""
-    doc = documents_db.get(doc_id)
-    if not doc:
+    success = service.delete_document(doc_id)
+    if not success:
         raise HTTPException(status_code=404, detail="Document not found")
-
-    vector_store.delete_document(doc_id)
-    documents_db.pop(doc_id, None)
-    save_documents_db(DOCUMENTS_DB_PATH, documents_db)
-
-    # Also delete from DuckDB
-    try:
-        repo = get_document_repo()
-        repo.delete(doc_id)
-    except Exception as e:
-        logger.warning(f"Failed to delete document from DuckDB: {e}")
 
     return {"deleted": True, "doc_id": doc_id}

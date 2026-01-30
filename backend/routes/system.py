@@ -6,23 +6,12 @@ import json
 import logging
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 
 from backend.state import (
     STARTED_AT,
-    _all_jurisdictions,
-    _append_audit_log,
-    _count_by_field,
-    _gather_requirements,
-    _paginate,
-    _sort_by_iso,
-    audit_log,
-    documents_db,
-    evidence_db,
-    req_extractor,
-    sources_db,
-    vector_store,
+    get_system_service,
 )
 
 logger = logging.getLogger(__name__)
@@ -30,14 +19,14 @@ router = APIRouter()
 
 
 @router.get("/")
-async def root():
+async def root(service=Depends(get_system_service)):
     """Health check endpoint."""
     return {
         "status": "healthy",
         "app": "RegAtlas",
         "version": "0.1.0",
-        "documents_count": vector_store.get_document_count(),
-        "jurisdictions": _all_jurisdictions(),
+        "documents_count": service.vector_store.get_document_count(),
+        "jurisdictions": service.get_stats()["jurisdictions"],
     }
 
 
@@ -48,48 +37,25 @@ async def healthz():
 
 
 @router.get("/readyz")
-async def readyz():
+async def readyz(service=Depends(get_system_service)):
     """Readiness check to confirm data stores are available."""
     try:
-        vector_store.get_document_count()
+        service.vector_store.get_document_count()
     except Exception as exc:
         raise HTTPException(status_code=503, detail="Vector store unavailable") from exc
     return {"status": "ready"}
 
 
 @router.get("/stats")
-async def get_stats():
+async def get_stats(service=Depends(get_system_service)):
     """Get system statistics."""
-    requirements_count = sum(
-        len(doc.get("requirements", [])) for doc in documents_db.values()
-    )
-    return {
-        "total_chunks": vector_store.get_document_count(),
-        "total_documents": len(documents_db),
-        "jurisdictions": _all_jurisdictions(),
-        "llm_available": req_extractor.client is not None,
-        "total_requirements": requirements_count,
-        "total_audit_events": len(audit_log),
-        "total_sources": len(sources_db),
-        "total_evidence": len(evidence_db),
-        "started_at": STARTED_AT.isoformat(),
-        "uptime_seconds": int(
-            (datetime.now(timezone.utc) - STARTED_AT).total_seconds()
-        ),
-    }
+    return service.get_stats()
 
 
 @router.get("/entities")
-async def list_entities():
+async def list_entities(service=Depends(get_system_service)):
     """List entities and business units found in data."""
-    entities = set()
-    business_units = set()
-    for doc in documents_db.values():
-        if doc.get("entity"):
-            entities.add(doc["entity"])
-        if doc.get("business_unit"):
-            business_units.add(doc["business_unit"])
-    return {"entities": sorted(entities), "business_units": sorted(business_units)}
+    return service.get_entities()
 
 
 @router.get("/audit-log")
@@ -99,29 +65,31 @@ async def get_audit_log(
     action: str | None = None,
     limit: int | None = None,
     offset: int | None = None,
+    service=Depends(get_system_service),
 ):
     """Return audit log entries."""
-    filtered = []
-    for entry in _sort_by_iso(audit_log, "timestamp"):
-        if entity_type and entry.get("entity_type") != entity_type:
-            continue
-        if entity_id and entry.get("entity_id") != entity_id:
-            continue
-        if action and entry.get("action") != action:
-            continue
-        filtered.append(entry)
+    from backend.state import _paginate
+
+    entries = service.get_audit_log(
+        entity_type=entity_type, entity_id=entity_id, action=action
+    )
+
+    total = len(entries)
+    paged = _paginate(entries, limit, offset)
+
     return {
-        "entries": _paginate(filtered, limit, offset),
-        "total": len(filtered),
+        "entries": paged,
+        "total": total,
         "limit": limit,
         "offset": offset or 0,
     }
 
 
 @router.get("/audit-log/export")
-async def export_audit_log(format: str = "csv"):
+async def export_audit_log(format: str = "csv", service=Depends(get_system_service)):
     """Export audit log entries."""
-    entries = _sort_by_iso(audit_log, "timestamp")
+    entries = service.get_audit_log()
+
     if format.lower() == "json":
         return {"entries": entries, "total": len(entries)}
     if format.lower() != "csv":

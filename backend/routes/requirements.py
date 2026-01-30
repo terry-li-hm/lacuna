@@ -3,23 +3,13 @@
 import csv
 import io
 import logging
-from typing import Any, Dict, List
+from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 
 from backend.state import (
-    DOCUMENTS_DB_PATH,
-    _append_audit_log,
-    _count_by_field,
-    _filter_requirements,
-    _gather_requirements,
-    _paginate,
-    _sort_by_iso,
-    _validate_choice,
-    ALLOWED_REQ_STATUS,
-    documents_db,
-    save_documents_db,
+    get_requirement_service,
 )
 from backend.models.schemas import RequirementReviewRequest
 
@@ -39,11 +29,12 @@ async def list_requirements(
     q: str | None = None,
     limit: int | None = None,
     offset: int | None = None,
+    service=Depends(get_requirement_service),
 ):
     """List requirements with optional filters."""
-    requirements = _sort_by_iso(_gather_requirements(), "created_at")
-    filtered = _filter_requirements(
-        requirements,
+    from backend.state import _paginate
+
+    requirements = service.list_requirements(
         jurisdiction=jurisdiction,
         entity=entity,
         business_unit=business_unit,
@@ -53,94 +44,71 @@ async def list_requirements(
         doc_id=doc_id,
         q=q,
     )
+
+    total = len(requirements)
+    paged = _paginate(requirements, limit, offset)
+
     return {
-        "requirements": _paginate(filtered, limit, offset),
-        "total": len(filtered),
+        "requirements": paged,
+        "total": total,
         "limit": limit,
         "offset": offset or 0,
-        "types": sorted(
-            {
-                r.get("requirement_type", "")
-                for r in requirements
-                if r.get("requirement_type")
-            }
-        ),
+        "types": service.get_requirement_types(),
     }
 
 
 @router.get("/requirements/stats")
-async def requirement_stats():
+async def requirement_stats(service=Depends(get_requirement_service)):
     """Aggregate requirement counts."""
-    requirements = _gather_requirements()
-    return {
-        "total": len(requirements),
-        "by_jurisdiction": _count_by_field(requirements, "jurisdiction"),
-        "by_type": _count_by_field(requirements, "requirement_type"),
-        "by_status": _count_by_field(requirements, "status"),
-        "by_mandatory": _count_by_field(requirements, "mandatory"),
-    }
+    return service.get_stats()
 
 
 @router.get("/requirements/id/{requirement_id}")
-async def get_requirement(requirement_id: str):
+async def get_requirement(
+    requirement_id: str, service=Depends(get_requirement_service)
+):
     """Get a single requirement by ID."""
-    for req in _gather_requirements():
-        if req.get("requirement_id") == requirement_id:
-            return req
-    raise HTTPException(status_code=404, detail="Requirement not found")
+    req = service.get_requirement(requirement_id)
+    if not req:
+        raise HTTPException(status_code=404, detail="Requirement not found")
+    return req
 
 
 @router.get("/requirements/id/{requirement_id}/evidence")
-async def get_requirement_evidence(requirement_id: str):
+async def get_requirement_evidence(
+    requirement_id: str, service=Depends(get_requirement_service)
+):
     """Get evidence metadata for a requirement."""
-    for req in _gather_requirements():
-        if req.get("requirement_id") == requirement_id:
-            return {
-                "requirement_id": requirement_id,
-                "evidence": req.get("evidence") or {},
-            }
-    raise HTTPException(status_code=404, detail="Requirement not found")
+    req = service.get_requirement(requirement_id)
+    if not req:
+        raise HTTPException(status_code=404, detail="Requirement not found")
+
+    return {
+        "requirement_id": requirement_id,
+        "evidence": req.get("evidence") or {},
+    }
 
 
 @router.post("/requirements/id/{requirement_id}/review")
-async def review_requirement(requirement_id: str, request: RequirementReviewRequest):
+async def review_requirement(
+    requirement_id: str,
+    request: RequirementReviewRequest,
+    service=Depends(get_requirement_service),
+):
     """Update requirement review metadata."""
-    from datetime import datetime, timezone
-
-    updated = None
-    for doc in documents_db.values():
-        for req in doc.get("requirements", []):
-            if req.get("requirement_id") == requirement_id:
-                if request.status is not None:
-                    req["status"] = _validate_choice(
-                        request.status, ALLOWED_REQ_STATUS, "status"
-                    )
-                if request.reviewer is not None:
-                    req["reviewer"] = request.reviewer
-                if request.notes is not None:
-                    req["review_notes"] = request.notes
-                if request.tags is not None:
-                    req["tags"] = request.tags
-                if request.controls is not None:
-                    req["controls"] = request.controls
-                if request.policy_refs is not None:
-                    req["policy_refs"] = request.policy_refs
-                req["reviewed_at"] = datetime.now(timezone.utc).isoformat()
-                updated = req
-                break
-        if updated:
-            break
+    updated = service.review_requirement(
+        requirement_id=requirement_id,
+        status=request.status,
+        reviewer=request.reviewer,
+        notes=request.notes,
+        tags=request.tags,
+        controls=request.controls,
+        policy_refs=request.policy_refs,
+    )
 
     if not updated:
         raise HTTPException(status_code=404, detail="Requirement not found")
 
-    save_documents_db(DOCUMENTS_DB_PATH, documents_db)
-    _append_audit_log(
-        action="requirement_reviewed",
-        entity_type="requirement",
-        entity_id=requirement_id,
-        details={"status": request.status, "reviewer": request.reviewer},
-    )
     return updated
 
 
@@ -155,10 +123,10 @@ async def export_requirements(
     doc_id: str | None = None,
     q: str | None = None,
     format: str = "csv",
+    service=Depends(get_requirement_service),
 ):
     """Export requirements in CSV format."""
-    requirements = _filter_requirements(
-        _gather_requirements(),
+    requirements = service.list_requirements(
         jurisdiction=jurisdiction,
         entity=entity,
         business_unit=business_unit,
