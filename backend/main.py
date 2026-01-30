@@ -15,18 +15,30 @@ import re
 from fastapi import FastAPI, UploadFile, File, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, FileResponse
-from pydantic import BaseModel
 import uuid
 
 from .config import settings
 from .document_processor import DocumentProcessor
 from .requirement_extractor import RequirementExtractor
 from .vector_store import VectorStore
+from .models.schemas import (
+    QueryRequest,
+    QueryResponse,
+    CompareRequest,
+    RequirementReviewRequest,
+    SourceCreateRequest,
+    PolicyUpdateRequest,
+    WebhookCreateRequest,
+    GapAnalysisRequest,
+    GapAnalysisResponse,
+    Provenance,
+    GapRequirementMapping,
+)
 
 # Configure logging
 logging.basicConfig(
     level=settings.log_level,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -34,7 +46,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="RegAtlas",
     description="Cross-jurisdiction regulatory analytics platform for financial institutions",
-    version="0.1.0"
+    version="0.1.0",
 )
 
 # Add CORS middleware
@@ -52,7 +64,7 @@ llm_api_key = settings.openai_api_key or settings.openrouter_api_key
 req_extractor = RequirementExtractor(
     api_key=None if settings.no_llm else llm_api_key,
     model=settings.llm_model,
-    base_url=settings.openai_base_url
+    base_url=settings.openai_base_url,
 )
 vector_store = VectorStore(settings.chroma_persist_dir)
 
@@ -81,7 +93,9 @@ def load_documents_db(path: Path) -> Dict[str, Dict[str, Any]]:
 def save_documents_db(path: Path, data: Dict[str, Dict[str, Any]]) -> None:
     """Persist document metadata to disk atomically."""
     temp_path = path.with_suffix(".tmp")
-    temp_path.write_text(json.dumps(data, ensure_ascii=True, indent=2), encoding="utf-8")
+    temp_path.write_text(
+        json.dumps(data, ensure_ascii=True, indent=2), encoding="utf-8"
+    )
     temp_path.replace(path)
 
 
@@ -99,7 +113,9 @@ def load_json_dict(path: Path) -> Dict[str, Dict[str, Any]]:
 def save_json_dict(path: Path, data: Dict[str, Dict[str, Any]]) -> None:
     """Persist JSON dict atomically."""
     temp_path = path.with_suffix(".tmp")
-    temp_path.write_text(json.dumps(data, ensure_ascii=True, indent=2), encoding="utf-8")
+    temp_path.write_text(
+        json.dumps(data, ensure_ascii=True, indent=2), encoding="utf-8"
+    )
     temp_path.replace(path)
 
 
@@ -117,14 +133,18 @@ def load_json_list(path: Path) -> List[Dict[str, Any]]:
 def save_json_list(path: Path, data: List[Dict[str, Any]]) -> None:
     """Persist JSON list atomically."""
     temp_path = path.with_suffix(".tmp")
-    temp_path.write_text(json.dumps(data, ensure_ascii=True, indent=2), encoding="utf-8")
+    temp_path.write_text(
+        json.dumps(data, ensure_ascii=True, indent=2), encoding="utf-8"
+    )
     temp_path.replace(path)
 
 
-def _paginate(items: List[Dict[str, Any]], limit: int | None, offset: int | None) -> List[Dict[str, Any]]:
+def _paginate(
+    items: List[Dict[str, Any]], limit: int | None, offset: int | None
+) -> List[Dict[str, Any]]:
     if limit is None or limit <= 0:
-        return items[offset or 0:]
-    return items[offset or 0: (offset or 0) + limit]
+        return items[offset or 0 :]
+    return items[offset or 0 : (offset or 0) + limit]
 
 
 def _sort_by_iso(items: Iterable[Dict[str, Any]], field: str) -> List[Dict[str, Any]]:
@@ -147,7 +167,9 @@ def _validate_date_str(value: str | None, field: str) -> None:
         try:
             date.fromisoformat(value)
         except ValueError as exc:
-            raise HTTPException(status_code=400, detail=f"Invalid {field} date format") from exc
+            raise HTTPException(
+                status_code=400, detail=f"Invalid {field} date format"
+            ) from exc
 
 
 def _normalize_severity(value: str | None) -> str | None:
@@ -185,17 +207,27 @@ def _validate_choice(value: str | None, allowed: set[str], field: str) -> str | 
     normalized = value.lower()
     if normalized not in allowed:
         allowed_list = ", ".join(sorted(allowed))
-        raise HTTPException(status_code=400, detail=f"Invalid {field}. Allowed: {allowed_list}")
+        raise HTTPException(
+            status_code=400, detail=f"Invalid {field}. Allowed: {allowed_list}"
+        )
     return normalized
 
 
 def _validate_url(value: str) -> None:
-    if not (value.startswith("http://") or value.startswith("https://") or value.startswith("file://")):
+    if not (
+        value.startswith("http://")
+        or value.startswith("https://")
+        or value.startswith("file://")
+    ):
         raise HTTPException(status_code=400, detail="Invalid URL scheme for source")
 
 
 def _all_jurisdictions() -> List[str]:
-    stored = {doc.get("jurisdiction") for doc in documents_db.values() if doc.get("jurisdiction")}
+    stored = {
+        doc.get("jurisdiction")
+        for doc in documents_db.values()
+        if doc.get("jurisdiction")
+    }
     indexed = set(vector_store.list_jurisdictions())
     return sorted(stored | indexed)
 
@@ -203,7 +235,7 @@ def _all_jurisdictions() -> List[str]:
 def _count_by_field(items: Iterable[Dict[str, Any]], field: str) -> Dict[str, int]:
     counts: Dict[str, int] = {}
     for item in items:
-        value = (item.get(field) or "Unknown")
+        value = item.get(field) or "Unknown"
         if isinstance(value, str):
             key = value.strip() or "Unknown"
         else:
@@ -221,93 +253,6 @@ policies_db: Dict[str, Dict[str, Any]] = load_json_dict(POLICIES_DB_PATH)
 webhooks_db: Dict[str, Dict[str, Any]] = load_json_dict(WEBHOOKS_DB_PATH)
 
 
-# Pydantic models
-class QueryRequest(BaseModel):
-    query: str
-    jurisdiction: str | None = None
-    doc_id: str | None = None
-    no_llm: bool | None = None
-    n_results: int = settings.default_query_results
-
-
-class CompareRequest(BaseModel):
-    jurisdiction1: str
-    jurisdiction2: str
-    no_llm: bool | None = None
-
-
-class QueryResponse(BaseModel):
-    query: str
-    results: List[Dict[str, Any]]
-    summary: str | None = None
-
-
-class RequirementReviewRequest(BaseModel):
-    status: str | None = None
-    reviewer: str | None = None
-    notes: str | None = None
-    tags: List[str] | None = None
-    controls: List[str] | None = None
-    policy_refs: List[str] | None = None
-
-
-class SourceCreateRequest(BaseModel):
-    name: str
-    url: str
-    jurisdiction: str | None = None
-    entity: str | None = None
-    business_unit: str | None = None
-    default_severity: str | None = None
-
-
-class PolicyUpdateRequest(BaseModel):
-    status: str | None = None
-    version: str | None = None
-    owner: str | None = None
-
-
-class WebhookCreateRequest(BaseModel):
-    url: str
-    events: List[str] | None = None
-
-
-class GapAnalysisRequest(BaseModel):
-    circular_doc_id: str
-    baseline_id: str
-    is_policy_baseline: bool = False
-    no_llm: bool = False
-
-
-class Provenance(BaseModel):
-    id: str
-    source_type: str
-    doc_id: str
-    chunk_id: str
-    requirement_id: str | None = None
-    text_segment: str
-    location: Dict[str, Any] | None = None
-    verification_status: str = "verified"
-
-
-class GapRequirementMapping(BaseModel):
-    circular_req_id: str
-    description: str
-    status: str  # "Full", "Partial", "Gap"
-    reasoning: str
-    baseline_match_id: str | None = None
-    baseline_match_text: str | None = None
-    provenance: List[Provenance] = []
-
-
-class GapAnalysisResponse(BaseModel):
-    report_id: str
-    circular_id: str
-    baseline_id: str
-    generated_at: str
-    summary: Dict[str, int]
-    findings: List[GapRequirementMapping]
-
-
 @app.get("/")
 async def root():
     """Health check endpoint."""
@@ -316,7 +261,7 @@ async def root():
         "app": "RegAtlas",
         "version": "0.1.0",
         "documents_count": vector_store.get_document_count(),
-        "jurisdictions": _all_jurisdictions()
+        "jurisdictions": _all_jurisdictions(),
     }
 
 
@@ -339,24 +284,28 @@ async def readyz():
 @app.post("/upload")
 async def upload_document(
     file: UploadFile = File(...),
-    jurisdiction: str = Query(..., description="Regulatory jurisdiction (e.g., 'Hong Kong', 'Singapore')"),
+    jurisdiction: str = Query(
+        ..., description="Regulatory jurisdiction (e.g., 'Hong Kong', 'Singapore')"
+    ),
     entity: str | None = Query(None, description="Entity or subsidiary name"),
     business_unit: str | None = Query(None, description="Business unit or line"),
     no_llm: bool = Query(False, description="Disable LLM extraction"),
-    allow_duplicate: bool = Query(True, description="Allow duplicate uploads for same content")
+    allow_duplicate: bool = Query(
+        True, description="Allow duplicate uploads for same content"
+    ),
 ):
     """
     Upload and process a regulatory document.
-    
+
     Args:
         file: PDF or text file containing regulatory text
         jurisdiction: Jurisdiction this document belongs to
-        
+
     Returns:
         Processing results including extracted requirements
     """
     logger.info(f"Received upload: {file.filename} for jurisdiction: {jurisdiction}")
-    
+
     try:
         if not file.filename:
             raise HTTPException(status_code=400, detail="Missing filename")
@@ -365,21 +314,23 @@ async def upload_document(
 
         # Generate document ID
         doc_id = str(uuid.uuid4())
-        
+
         # Save uploaded file temporarily
         temp_dir = settings.data_dir / "temp"
         temp_dir.mkdir(exist_ok=True)
-        
+
         safe_name = Path(file.filename).name
         file_path = temp_dir / f"{doc_id}_{safe_name}"
-        
+
         with open(file_path, "wb") as f:
             content = await file.read()
             if not content:
                 raise HTTPException(status_code=400, detail="Uploaded file is empty")
             max_size = settings.max_upload_mb * 1024 * 1024
             if len(content) > max_size:
-                raise HTTPException(status_code=413, detail="Uploaded file is too large")
+                raise HTTPException(
+                    status_code=413, detail="Uploaded file is too large"
+                )
             f.write(content)
 
         content_hash = _content_hash(content)
@@ -388,27 +339,29 @@ async def upload_document(
                 if doc.get("content_hash") == content_hash:
                     raise HTTPException(
                         status_code=409,
-                        detail=f"Duplicate document detected (doc_id={doc.get('doc_id')})"
+                        detail=f"Duplicate document detected (doc_id={doc.get('doc_id')})",
                     )
-        
+
         # Process document
         processed = doc_processor.process_file(file_path)
-        
+
         # Extract requirements
         full_text = processed["full_text"]
         if not full_text.strip():
-            raise HTTPException(status_code=400, detail="No text extracted from document")
+            raise HTTPException(
+                status_code=400, detail="No text extracted from document"
+            )
         requirements_payload = req_extractor.extract_requirements(
-            full_text,
-            jurisdiction,
-            force_basic=no_llm
+            full_text, jurisdiction, force_basic=no_llm
         )
 
         # Chunk and add to vector store
         chunks = doc_processor.chunk_text(full_text, chunk_size=1000, overlap=200)
         if not chunks:
-            raise HTTPException(status_code=400, detail="Document text too short to index")
-        
+            raise HTTPException(
+                status_code=400, detail="Document text too short to index"
+            )
+
         metadata = {
             **processed["metadata"],
             "jurisdiction": jurisdiction,
@@ -416,13 +369,15 @@ async def upload_document(
             "business_unit": _normalize_text(business_unit),
             "doc_id": doc_id,
             "content_hash": content_hash,
-            "size_bytes": len(content)
+            "size_bytes": len(content),
         }
-        
+
         chunks_added = vector_store.add_document(doc_id, chunks, metadata)
         if chunks_added == 0:
-            raise HTTPException(status_code=400, detail="No chunks indexed for document")
-        
+            raise HTTPException(
+                status_code=400, detail="No chunks indexed for document"
+            )
+
         # Normalize requirements and attach evidence
         requirements = _normalize_requirements(
             requirements_payload.get("requirements", []),
@@ -430,7 +385,7 @@ async def upload_document(
             jurisdiction=jurisdiction,
             filename=safe_name,
             entity=_normalize_text(entity),
-            business_unit=_normalize_text(business_unit)
+            business_unit=_normalize_text(business_unit),
         )
         _attach_evidence(requirements, doc_id)
 
@@ -447,20 +402,20 @@ async def upload_document(
             "metadata": metadata,
             "content_hash": content_hash,
             "size_bytes": len(content),
-            "uploaded_at": datetime.now(timezone.utc).isoformat()
+            "uploaded_at": datetime.now(timezone.utc).isoformat(),
         }
         save_documents_db(DOCUMENTS_DB_PATH, documents_db)
-        
+
         logger.info(f"Successfully processed document {doc_id}")
-        
+
         return {
             "doc_id": doc_id,
             "filename": safe_name,
             "jurisdiction": jurisdiction,
             "chunks_added": chunks_added,
-            "requirements": requirements
+            "requirements": requirements,
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -475,20 +430,20 @@ async def upload_document(
 async def query_documents(request: QueryRequest):
     """
     Query regulatory documents using RAG.
-    
+
     Args:
         request: Query request with search terms and optional filters
-        
+
     Returns:
         Relevant document chunks and optional LLM-generated summary
     """
     logger.info(f"Query: '{request.query}' (jurisdiction: {request.jurisdiction})")
-    
+
     try:
         if request.n_results < 1 or request.n_results > settings.max_query_results:
             raise HTTPException(
                 status_code=400,
-                detail=f"n_results must be between 1 and {settings.max_query_results}"
+                detail=f"n_results must be between 1 and {settings.max_query_results}",
             )
 
         # Search vector store
@@ -500,42 +455,42 @@ async def query_documents(request: QueryRequest):
             query_text=request.query,
             n_results=request.n_results,
             jurisdiction=request.jurisdiction,
-            filters=filters or None
+            filters=filters or None,
         )
-        
+
         # Optionally generate summary with LLM
         summary = None
         if req_extractor.client and results and not request.no_llm:
             context = "\n\n".join([r["document"] for r in results[:3]])
-            
+
             try:
                 from openai import OpenAI
-                client = OpenAI(
-                    api_key=llm_api_key,
-                    base_url=settings.openai_base_url
-                )
-                
+
+                client = OpenAI(api_key=llm_api_key, base_url=settings.openai_base_url)
+
                 response = client.chat.completions.create(
                     model=settings.llm_model,
                     messages=[
-                        {"role": "system", "content": "You are a regulatory compliance expert. Provide concise, accurate answers based on the provided regulatory text."},
-                        {"role": "user", "content": f"Based on the following regulatory text, answer this question: {request.query}\n\nContext:\n{context}"}
+                        {
+                            "role": "system",
+                            "content": "You are a regulatory compliance expert. Provide concise, accurate answers based on the provided regulatory text.",
+                        },
+                        {
+                            "role": "user",
+                            "content": f"Based on the following regulatory text, answer this question: {request.query}\n\nContext:\n{context}",
+                        },
                     ],
                     temperature=0.1,
-                    max_tokens=500
+                    max_tokens=500,
                 )
-                
+
                 summary = response.choices[0].message.content or "No summary generated"
-                
+
             except Exception as e:
                 logger.warning(f"Could not generate summary: {e}")
-        
-        return QueryResponse(
-            query=request.query,
-            results=results,
-            summary=summary
-        )
-        
+
+        return QueryResponse(query=request.query, results=results, summary=summary)
+
     except Exception as e:
         logger.error(f"Error processing query: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -545,67 +500,65 @@ async def query_documents(request: QueryRequest):
 async def compare_jurisdictions(request: CompareRequest):
     """
     Compare regulatory requirements between two jurisdictions.
-    
+
     Args:
         request: Comparison request specifying two jurisdictions
-        
+
     Returns:
         Comparison summary highlighting similarities and differences
     """
     logger.info(f"Comparing: {request.jurisdiction1} vs {request.jurisdiction2}")
-    
+
     try:
         # Find documents for each jurisdiction
-        docs1 = [doc for doc in documents_db.values() 
-                if doc["jurisdiction"] == request.jurisdiction1]
-        docs2 = [doc for doc in documents_db.values() 
-                if doc["jurisdiction"] == request.jurisdiction2]
-        
+        docs1 = [
+            doc
+            for doc in documents_db.values()
+            if doc["jurisdiction"] == request.jurisdiction1
+        ]
+        docs2 = [
+            doc
+            for doc in documents_db.values()
+            if doc["jurisdiction"] == request.jurisdiction2
+        ]
+
         if not docs1:
             raise HTTPException(
                 status_code=404,
-                detail=f"No documents found for jurisdiction: {request.jurisdiction1}"
+                detail=f"No documents found for jurisdiction: {request.jurisdiction1}",
             )
-        
+
         if not docs2:
             raise HTTPException(
                 status_code=404,
-                detail=f"No documents found for jurisdiction: {request.jurisdiction2}"
+                detail=f"No documents found for jurisdiction: {request.jurisdiction2}",
             )
-        
+
         # Aggregate requirements
-        req1 = {
-            "jurisdiction": request.jurisdiction1,
-            "requirements": []
-        }
-        req2 = {
-            "jurisdiction": request.jurisdiction2,
-            "requirements": []
-        }
-        
+        req1 = {"jurisdiction": request.jurisdiction1, "requirements": []}
+        req2 = {"jurisdiction": request.jurisdiction2, "requirements": []}
+
         for doc in docs1:
             req1["requirements"].extend(_extract_requirements_from_doc(doc))
-        
+
         for doc in docs2:
             req2["requirements"].extend(_extract_requirements_from_doc(doc))
-        
+
         # Generate comparison
         comparison = req_extractor.compare_requirements(
-            req1,
-            req2,
-            force_basic=bool(request.no_llm)
+            req1, req2, force_basic=bool(request.no_llm)
         )
-        
+
         return {
             "jurisdiction1": request.jurisdiction1,
             "jurisdiction2": request.jurisdiction2,
             "comparison": comparison,
             "documents_compared": {
                 request.jurisdiction1: len(docs1),
-                request.jurisdiction2: len(docs2)
-            }
+                request.jurisdiction2: len(docs2),
+            },
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -619,72 +572,84 @@ async def gap_analysis(request: GapAnalysisRequest):
     Perform a gap analysis between a new circular and a baseline.
     """
     logger.info(f"Gap Analysis: {request.circular_doc_id} vs {request.baseline_id}")
-    
+
     try:
         # 1. Verify Circular Document exists
         if request.circular_doc_id not in documents_db:
-            raise HTTPException(status_code=404, detail=f"Circular document {request.circular_doc_id} not found")
-        
+            raise HTTPException(
+                status_code=404,
+                detail=f"Circular document {request.circular_doc_id} not found",
+            )
+
         circular_doc = documents_db[request.circular_doc_id]
         circular_requirements = _extract_requirements_from_doc(circular_doc)
-        
+
         if not circular_requirements:
-            raise HTTPException(status_code=400, detail="Circular document has no extracted requirements")
-        
+            raise HTTPException(
+                status_code=400,
+                detail="Circular document has no extracted requirements",
+            )
+
         # 2. Verify Baseline exists
         baseline_id = request.baseline_id
         if request.is_policy_baseline:
             if baseline_id not in policies_db:
-                raise HTTPException(status_code=404, detail=f"Policy baseline {baseline_id} not found")
+                raise HTTPException(
+                    status_code=404, detail=f"Policy baseline {baseline_id} not found"
+                )
         else:
             if baseline_id not in documents_db:
-                raise HTTPException(status_code=404, detail=f"Document baseline {baseline_id} not found")
-        
+                raise HTTPException(
+                    status_code=404, detail=f"Document baseline {baseline_id} not found"
+                )
+
         findings = []
         summary = {"Full": 0, "Partial": 0, "Gap": 0}
-        
+
         # 3. Perform Gap Analysis for each Circular Requirement
         for req in circular_requirements:
             # Search baseline for relevant context
             # Use 'filters' to target either 'doc_id' or 'policy_id' (if implemented)
             # For now, we assume policy chunks are also in VectorStore with doc_id = policy_id
             filters = {"doc_id": baseline_id}
-            
+
             baseline_chunks = vector_store.query(
-                query_text=req.get("description", ""),
-                n_results=3,
-                filters=filters
+                query_text=req.get("description", ""), n_results=3, filters=filters
             )
-            
+
             # Analyze gap
             analysis = req_extractor.perform_gap_analysis(
                 circular_req=req,
                 baseline_chunks=baseline_chunks,
-                force_basic=bool(request.no_llm)
+                force_basic=bool(request.no_llm),
             )
-            
+
             status = analysis.get("status", "Gap")
             summary[status] = summary.get(status, 0) + 1
-            
-            findings.append(GapRequirementMapping(
-                circular_req_id=str(uuid.uuid4()),
-                description=req.get("description", "No description"),
-                status=status,
-                reasoning=analysis.get("reasoning", "No reasoning provided"),
-                provenance=[Provenance(**p) for p in analysis.get("provenance", [])]
-            ))
-        
+
+            findings.append(
+                GapRequirementMapping(
+                    circular_req_id=str(uuid.uuid4()),
+                    description=req.get("description", "No description"),
+                    status=status,
+                    reasoning=analysis.get("reasoning", "No reasoning provided"),
+                    provenance=[
+                        Provenance(**p) for p in analysis.get("provenance", [])
+                    ],
+                )
+            )
+
         report_id = f"gap_{uuid.uuid4().hex[:8]}"
-        
+
         return GapAnalysisResponse(
             report_id=report_id,
             circular_id=request.circular_doc_id,
             baseline_id=request.baseline_id,
             generated_at=datetime.now(timezone.utc).isoformat(),
             summary=summary,
-            findings=findings
+            findings=findings,
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -699,7 +664,7 @@ async def list_documents(
     business_unit: str | None = None,
     q: str | None = None,
     limit: int | None = None,
-    offset: int | None = None
+    offset: int | None = None,
 ):
     """List all processed documents."""
     docs = _sort_by_iso(list(documents_db.values()), "uploaded_at")
@@ -717,7 +682,7 @@ async def list_documents(
                     doc.get("filename") or "",
                     doc.get("jurisdiction") or "",
                     doc.get("entity") or "",
-                    doc.get("business_unit") or ""
+                    doc.get("business_unit") or "",
                 ]
             ).lower()
             if q.lower() not in haystack:
@@ -731,7 +696,7 @@ async def list_documents(
         "total": total,
         "limit": limit,
         "offset": offset or 0,
-        "jurisdictions": _all_jurisdictions()
+        "jurisdictions": _all_jurisdictions(),
     }
 
 
@@ -742,7 +707,9 @@ async def export_documents(format: str = "csv"):
     if format.lower() == "json":
         return {"documents": docs, "total": len(docs)}
     if format.lower() != "csv":
-        raise HTTPException(status_code=400, detail="Only CSV or JSON export is supported")
+        raise HTTPException(
+            status_code=400, detail="Only CSV or JSON export is supported"
+        )
 
     buffer = io.StringIO()
     writer = csv.DictWriter(
@@ -757,29 +724,31 @@ async def export_documents(format: str = "csv"):
             "requirements_count",
             "size_bytes",
             "content_hash",
-            "uploaded_at"
-        ]
+            "uploaded_at",
+        ],
     )
     writer.writeheader()
     for doc in docs:
-        writer.writerow({
-            "doc_id": doc.get("doc_id"),
-            "filename": doc.get("filename"),
-            "jurisdiction": doc.get("jurisdiction"),
-            "entity": doc.get("entity"),
-            "business_unit": doc.get("business_unit"),
-            "chunks_count": doc.get("chunks_count"),
-            "requirements_count": len(doc.get("requirements") or []),
-            "size_bytes": doc.get("size_bytes"),
-            "content_hash": doc.get("content_hash"),
-            "uploaded_at": doc.get("uploaded_at")
-        })
+        writer.writerow(
+            {
+                "doc_id": doc.get("doc_id"),
+                "filename": doc.get("filename"),
+                "jurisdiction": doc.get("jurisdiction"),
+                "entity": doc.get("entity"),
+                "business_unit": doc.get("business_unit"),
+                "chunks_count": doc.get("chunks_count"),
+                "requirements_count": len(doc.get("requirements") or []),
+                "size_bytes": doc.get("size_bytes"),
+                "content_hash": doc.get("content_hash"),
+                "uploaded_at": doc.get("uploaded_at"),
+            }
+        )
 
     buffer.seek(0)
     return StreamingResponse(
         iter([buffer.getvalue()]),
         media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=documents.csv"}
+        headers={"Content-Disposition": "attachment; filename=documents.csv"},
     )
 
 
@@ -794,9 +763,7 @@ async def get_document(doc_id: str):
 
 @app.get("/documents/{doc_id}/requirements")
 async def list_document_requirements(
-    doc_id: str,
-    limit: int | None = None,
-    offset: int | None = None
+    doc_id: str, limit: int | None = None, offset: int | None = None
 ):
     """List requirements for a specific document."""
     doc = documents_db.get(doc_id)
@@ -807,7 +774,7 @@ async def list_document_requirements(
         "requirements": _paginate(requirements, limit, offset),
         "total": len(requirements),
         "limit": limit,
-        "offset": offset or 0
+        "offset": offset or 0,
     }
 
 
@@ -836,7 +803,7 @@ async def list_requirements(
     doc_id: str | None = None,
     q: str | None = None,
     limit: int | None = None,
-    offset: int | None = None
+    offset: int | None = None,
 ):
     """List requirements with optional filters."""
     requirements = _sort_by_iso(_gather_requirements(), "created_at")
@@ -849,14 +816,20 @@ async def list_requirements(
         mandatory=mandatory,
         status=status,
         doc_id=doc_id,
-        q=q
+        q=q,
     )
     return {
         "requirements": _paginate(filtered, limit, offset),
         "total": len(filtered),
         "limit": limit,
         "offset": offset or 0,
-        "types": sorted({r.get("requirement_type", "") for r in requirements if r.get("requirement_type")})
+        "types": sorted(
+            {
+                r.get("requirement_type", "")
+                for r in requirements
+                if r.get("requirement_type")
+            }
+        ),
     }
 
 
@@ -869,7 +842,7 @@ async def requirement_stats():
         "by_jurisdiction": _count_by_field(requirements, "jurisdiction"),
         "by_type": _count_by_field(requirements, "requirement_type"),
         "by_status": _count_by_field(requirements, "status"),
-        "by_mandatory": _count_by_field(requirements, "mandatory")
+        "by_mandatory": _count_by_field(requirements, "mandatory"),
     }
 
 
@@ -887,7 +860,10 @@ async def get_requirement_evidence(requirement_id: str):
     """Get evidence metadata for a requirement."""
     for req in _gather_requirements():
         if req.get("requirement_id") == requirement_id:
-            return {"requirement_id": requirement_id, "evidence": req.get("evidence") or {}}
+            return {
+                "requirement_id": requirement_id,
+                "evidence": req.get("evidence") or {},
+            }
     raise HTTPException(status_code=404, detail="Requirement not found")
 
 
@@ -899,7 +875,9 @@ async def review_requirement(requirement_id: str, request: RequirementReviewRequ
         for req in doc.get("requirements", []):
             if req.get("requirement_id") == requirement_id:
                 if request.status is not None:
-                    req["status"] = _validate_choice(request.status, ALLOWED_REQ_STATUS, "status")
+                    req["status"] = _validate_choice(
+                        request.status, ALLOWED_REQ_STATUS, "status"
+                    )
                 if request.reviewer is not None:
                     req["reviewer"] = request.reviewer
                 if request.notes is not None:
@@ -924,7 +902,7 @@ async def review_requirement(requirement_id: str, request: RequirementReviewRequ
         action="requirement_reviewed",
         entity_type="requirement",
         entity_id=requirement_id,
-        details={"status": request.status, "reviewer": request.reviewer}
+        details={"status": request.status, "reviewer": request.reviewer},
     )
     return updated
 
@@ -939,7 +917,7 @@ async def export_requirements(
     status: str | None = None,
     doc_id: str | None = None,
     q: str | None = None,
-    format: str = "csv"
+    format: str = "csv",
 ):
     """Export requirements in CSV format."""
     requirements = _filter_requirements(
@@ -951,13 +929,15 @@ async def export_requirements(
         mandatory=mandatory,
         status=status,
         doc_id=doc_id,
-        q=q
+        q=q,
     )
 
     if format.lower() == "json":
         return {"requirements": requirements, "total": len(requirements)}
     if format.lower() != "csv":
-        raise HTTPException(status_code=400, detail="Only CSV or JSON export is supported")
+        raise HTTPException(
+            status_code=400, detail="Only CSV or JSON export is supported"
+        )
 
     buffer = io.StringIO()
     writer = csv.DictWriter(
@@ -981,40 +961,41 @@ async def export_requirements(
             "filename",
             "source_snippet",
             "evidence_chunk_id",
-            "evidence_text"
-        ]
+            "evidence_text",
+        ],
     )
     writer.writeheader()
     for req in requirements:
-        writer.writerow({
-            "requirement_id": req.get("requirement_id"),
-            "jurisdiction": req.get("jurisdiction"),
-            "requirement_type": req.get("requirement_type"),
-            "description": req.get("description"),
-            "details": req.get("details"),
-            "mandatory": req.get("mandatory"),
-            "confidence": req.get("confidence"),
-            "status": req.get("status"),
-            "reviewer": req.get("reviewer"),
-            "review_notes": req.get("review_notes"),
-            "controls": ",".join(req.get("controls") or []),
-            "policy_refs": ",".join(req.get("policy_refs") or []),
-            "entity": req.get("entity"),
-            "business_unit": req.get("business_unit"),
-            "doc_id": req.get("doc_id"),
-            "filename": req.get("filename"),
-            "source_snippet": req.get("source_snippet"),
-            "evidence_chunk_id": req.get("evidence", {}).get("chunk_id"),
-            "evidence_text": req.get("evidence", {}).get("text")
-        })
+        writer.writerow(
+            {
+                "requirement_id": req.get("requirement_id"),
+                "jurisdiction": req.get("jurisdiction"),
+                "requirement_type": req.get("requirement_type"),
+                "description": req.get("description"),
+                "details": req.get("details"),
+                "mandatory": req.get("mandatory"),
+                "confidence": req.get("confidence"),
+                "status": req.get("status"),
+                "reviewer": req.get("reviewer"),
+                "review_notes": req.get("review_notes"),
+                "controls": ",".join(req.get("controls") or []),
+                "policy_refs": ",".join(req.get("policy_refs") or []),
+                "entity": req.get("entity"),
+                "business_unit": req.get("business_unit"),
+                "doc_id": req.get("doc_id"),
+                "filename": req.get("filename"),
+                "source_snippet": req.get("source_snippet"),
+                "evidence_chunk_id": req.get("evidence", {}).get("chunk_id"),
+                "evidence_text": req.get("evidence", {}).get("text"),
+            }
+        )
 
     buffer.seek(0)
     return StreamingResponse(
         iter([buffer.getvalue()]),
         media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=requirements.csv"}
+        headers={"Content-Disposition": "attachment; filename=requirements.csv"},
     )
-
 
 
 @app.get("/entities")
@@ -1027,10 +1008,7 @@ async def list_entities():
             entities.add(doc["entity"])
         if doc.get("business_unit"):
             business_units.add(doc["business_unit"])
-    return {
-        "entities": sorted(entities),
-        "business_units": sorted(business_units)
-    }
+    return {"entities": sorted(entities), "business_units": sorted(business_units)}
 
 
 @app.get("/policies")
@@ -1048,31 +1026,44 @@ async def export_policies(format: str = "csv"):
     if format.lower() == "json":
         return {"policies": policies, "total": len(policies)}
     if format.lower() != "csv":
-        raise HTTPException(status_code=400, detail="Only CSV or JSON export is supported")
+        raise HTTPException(
+            status_code=400, detail="Only CSV or JSON export is supported"
+        )
 
     buffer = io.StringIO()
     writer = csv.DictWriter(
         buffer,
-        fieldnames=["policy_id", "title", "summary", "status", "version", "owner", "created_at", "updated_at"]
+        fieldnames=[
+            "policy_id",
+            "title",
+            "summary",
+            "status",
+            "version",
+            "owner",
+            "created_at",
+            "updated_at",
+        ],
     )
     writer.writeheader()
     for policy in policies:
-        writer.writerow({
-            "policy_id": policy.get("policy_id"),
-            "title": policy.get("title"),
-            "summary": policy.get("summary"),
-            "status": policy.get("status"),
-            "version": policy.get("version"),
-            "owner": policy.get("owner"),
-            "created_at": policy.get("created_at"),
-            "updated_at": policy.get("updated_at")
-        })
+        writer.writerow(
+            {
+                "policy_id": policy.get("policy_id"),
+                "title": policy.get("title"),
+                "summary": policy.get("summary"),
+                "status": policy.get("status"),
+                "version": policy.get("version"),
+                "owner": policy.get("owner"),
+                "created_at": policy.get("created_at"),
+                "updated_at": policy.get("updated_at"),
+            }
+        )
 
     buffer.seek(0)
     return StreamingResponse(
         iter([buffer.getvalue()]),
         media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=policies.csv"}
+        headers={"Content-Disposition": "attachment; filename=policies.csv"},
     )
 
 
@@ -1105,7 +1096,7 @@ async def update_policy(policy_id: str, request: PolicyUpdateRequest):
         action="policy_updated",
         entity_type="policy",
         entity_id=policy_id,
-        details={"status": request.status, "version": request.version}
+        details={"status": request.status, "version": request.version},
     )
     return policy
 
@@ -1123,23 +1114,21 @@ async def add_source(request: SourceCreateRequest):
         "entity": _normalize_text(request.entity),
         "business_unit": _normalize_text(request.business_unit),
         "default_severity": request.default_severity or "medium",
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
     save_json_dict(SOURCES_DB_PATH, sources_db)
     _append_audit_log(
         action="source_added",
         entity_type="source",
         entity_id=source_id,
-        details={"name": request.name}
+        details={"name": request.name},
     )
     return sources_db[source_id]
 
 
 @app.get("/sources")
 async def list_sources(
-    q: str | None = None,
-    limit: int | None = None,
-    offset: int | None = None
+    q: str | None = None, limit: int | None = None, offset: int | None = None
 ):
     """List all regulatory sources."""
     sources = _sort_by_iso(list(sources_db.values()), "created_at")
@@ -1152,7 +1141,7 @@ async def list_sources(
                     source.get("url") or "",
                     source.get("jurisdiction") or "",
                     source.get("entity") or "",
-                    source.get("business_unit") or ""
+                    source.get("business_unit") or "",
                 ]
             ).lower()
             if q.lower() in haystack:
@@ -1162,7 +1151,7 @@ async def list_sources(
         "sources": _paginate(sources, limit, offset),
         "total": len(sources),
         "limit": limit,
-        "offset": offset or 0
+        "offset": offset or 0,
     }
 
 
@@ -1183,9 +1172,7 @@ async def delete_source(source_id: str):
     sources_db.pop(source_id, None)
     save_json_dict(SOURCES_DB_PATH, sources_db)
     _append_audit_log(
-        action="source_deleted",
-        entity_type="source",
-        entity_id=source_id
+        action="source_deleted", entity_type="source", entity_id=source_id
     )
     return {"deleted": True, "source_id": source_id}
 
@@ -1200,7 +1187,7 @@ async def add_webhook(request: WebhookCreateRequest):
         "webhook_id": webhook_id,
         "url": request.url,
         "events": request.events or ["document.uploaded", "gap_analysis.completed"],
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
     save_json_dict(WEBHOOKS_DB_PATH, webhooks_db)
     return webhooks_db[webhook_id]
@@ -1208,9 +1195,7 @@ async def add_webhook(request: WebhookCreateRequest):
 
 @app.get("/webhooks")
 async def list_webhooks(
-    q: str | None = None,
-    limit: int | None = None,
-    offset: int | None = None
+    q: str | None = None, limit: int | None = None, offset: int | None = None
 ):
     """List webhooks."""
     webhooks = _sort_by_iso(list(webhooks_db.values()), "created_at")
@@ -1218,10 +1203,7 @@ async def list_webhooks(
         filtered = []
         for hook in webhooks:
             haystack = " ".join(
-                [
-                    hook.get("url") or "",
-                    ",".join(hook.get("events") or [])
-                ]
+                [hook.get("url") or "", ",".join(hook.get("events") or [])]
             ).lower()
             if q.lower() in haystack:
                 filtered.append(hook)
@@ -1230,7 +1212,7 @@ async def list_webhooks(
         "webhooks": _paginate(webhooks, limit, offset),
         "total": len(webhooks),
         "limit": limit,
-        "offset": offset or 0
+        "offset": offset or 0,
     }
 
 
@@ -1256,11 +1238,13 @@ async def delete_webhook(webhook_id: str):
 async def upload_evidence(
     entity_type: str = Query(..., description="requirement"),
     entity_id: str = Query(..., description="Target entity ID"),
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
 ):
     """Upload evidence file and link it to a requirement."""
     if entity_type != "requirement":
-        raise HTTPException(status_code=400, detail="Only requirement entity_type is supported")
+        raise HTTPException(
+            status_code=400, detail="Only requirement entity_type is supported"
+        )
 
     evidence_id = str(uuid.uuid4())
     base_dir = settings.data_dir / "evidence" / entity_type / entity_id
@@ -1283,7 +1267,7 @@ async def upload_evidence(
         "filename": safe_name,
         "path": str(file_path),
         "uploaded_at": datetime.now(timezone.utc).isoformat(),
-        "size_bytes": len(content)
+        "size_bytes": len(content),
     }
     evidence_db.append(entry)
     save_json_list(EVIDENCE_DB_PATH, evidence_db)
@@ -1291,7 +1275,7 @@ async def upload_evidence(
         action="evidence_uploaded",
         entity_type=entity_type,
         entity_id=entity_id,
-        details={"evidence_id": evidence_id, "filename": safe_name}
+        details={"evidence_id": evidence_id, "filename": safe_name},
     )
     return entry
 
@@ -1301,7 +1285,7 @@ async def list_evidence(
     entity_type: str | None = None,
     entity_id: str | None = None,
     limit: int | None = None,
-    offset: int | None = None
+    offset: int | None = None,
 ):
     """List evidence records."""
     filtered = []
@@ -1314,21 +1298,23 @@ async def list_evidence(
         enriched = {
             **entry,
             "file_exists": path.exists(),
-            "file_size": path.stat().st_size if path.exists() else None
+            "file_size": path.stat().st_size if path.exists() else None,
         }
         filtered.append(enriched)
     return {
         "evidence": _paginate(filtered, limit, offset),
         "total": len(filtered),
         "limit": limit,
-        "offset": offset or 0
+        "offset": offset or 0,
     }
 
 
 @app.get("/evidence/{evidence_id}/download")
 async def download_evidence(evidence_id: str):
     """Download an evidence file by ID."""
-    entry = next((item for item in evidence_db if item.get("evidence_id") == evidence_id), None)
+    entry = next(
+        (item for item in evidence_db if item.get("evidence_id") == evidence_id), None
+    )
     if not entry:
         raise HTTPException(status_code=404, detail="Evidence not found")
     path = Path(entry.get("path") or "")
@@ -1340,7 +1326,9 @@ async def download_evidence(evidence_id: str):
 @app.delete("/evidence/{evidence_id}")
 async def delete_evidence(evidence_id: str):
     """Delete an evidence record and file."""
-    entry = next((item for item in evidence_db if item.get("evidence_id") == evidence_id), None)
+    entry = next(
+        (item for item in evidence_db if item.get("evidence_id") == evidence_id), None
+    )
     if not entry:
         raise HTTPException(status_code=404, detail="Evidence not found")
     path = Path(entry.get("path") or "")
@@ -1352,7 +1340,7 @@ async def delete_evidence(evidence_id: str):
         action="evidence_deleted",
         entity_type=entry.get("entity_type") or "evidence",
         entity_id=entry.get("entity_id") or evidence_id,
-        details={"evidence_id": evidence_id}
+        details={"evidence_id": evidence_id},
     )
     return {"deleted": True, "evidence_id": evidence_id}
 
@@ -1363,7 +1351,7 @@ async def export_integrations():
     return {
         "requirements": _gather_requirements(),
         "documents": list(documents_db.values()),
-        "generated_at": datetime.now(timezone.utc).isoformat()
+        "generated_at": datetime.now(timezone.utc).isoformat(),
     }
 
 
@@ -1373,7 +1361,7 @@ async def get_audit_log(
     entity_id: str | None = None,
     action: str | None = None,
     limit: int | None = None,
-    offset: int | None = None
+    offset: int | None = None,
 ):
     """Return audit log entries."""
     filtered = []
@@ -1389,7 +1377,7 @@ async def get_audit_log(
         "entries": _paginate(filtered, limit, offset),
         "total": len(filtered),
         "limit": limit,
-        "offset": offset or 0
+        "offset": offset or 0,
     }
 
 
@@ -1400,35 +1388,41 @@ async def export_audit_log(format: str = "csv"):
     if format.lower() == "json":
         return {"entries": entries, "total": len(entries)}
     if format.lower() != "csv":
-        raise HTTPException(status_code=400, detail="Only CSV or JSON export is supported")
+        raise HTTPException(
+            status_code=400, detail="Only CSV or JSON export is supported"
+        )
 
     buffer = io.StringIO()
     writer = csv.DictWriter(
         buffer,
-        fieldnames=["timestamp", "action", "entity_type", "entity_id", "details"]
+        fieldnames=["timestamp", "action", "entity_type", "entity_id", "details"],
     )
     writer.writeheader()
     for entry in entries:
-        writer.writerow({
-            "timestamp": entry.get("timestamp"),
-            "action": entry.get("action"),
-            "entity_type": entry.get("entity_type"),
-            "entity_id": entry.get("entity_id"),
-            "details": json.dumps(entry.get("details") or {}, ensure_ascii=True)
-        })
+        writer.writerow(
+            {
+                "timestamp": entry.get("timestamp"),
+                "action": entry.get("action"),
+                "entity_type": entry.get("entity_type"),
+                "entity_id": entry.get("entity_id"),
+                "details": json.dumps(entry.get("details") or {}, ensure_ascii=True),
+            }
+        )
 
     buffer.seek(0)
     return StreamingResponse(
         iter([buffer.getvalue()]),
         media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=audit_log.csv"}
+        headers={"Content-Disposition": "attachment; filename=audit_log.csv"},
     )
 
 
 @app.get("/stats")
 async def get_stats():
     """Get system statistics."""
-    requirements_count = sum(len(doc.get("requirements", [])) for doc in documents_db.values())
+    requirements_count = sum(
+        len(doc.get("requirements", [])) for doc in documents_db.values()
+    )
     return {
         "total_chunks": vector_store.get_document_count(),
         "total_documents": len(documents_db),
@@ -1439,7 +1433,9 @@ async def get_stats():
         "total_sources": len(sources_db),
         "total_evidence": len(evidence_db),
         "started_at": STARTED_AT.isoformat(),
-        "uptime_seconds": int((datetime.now(timezone.utc) - STARTED_AT).total_seconds())
+        "uptime_seconds": int(
+            (datetime.now(timezone.utc) - STARTED_AT).total_seconds()
+        ),
     }
 
 
@@ -1449,32 +1445,34 @@ def _normalize_requirements(
     jurisdiction: str,
     filename: str,
     entity: str | None = None,
-    business_unit: str | None = None
+    business_unit: str | None = None,
 ) -> List[Dict[str, Any]]:
     normalized = []
     for req in requirements:
-        normalized.append({
-            "requirement_id": str(uuid.uuid4()),
-            "jurisdiction": jurisdiction,
-            "doc_id": doc_id,
-            "filename": filename,
-            "requirement_type": req.get("requirement_type") or "Unknown",
-            "description": req.get("description"),
-            "details": req.get("details"),
-            "mandatory": req.get("mandatory") or "Unknown",
-            "confidence": req.get("confidence", "Medium"),
-            "source_snippet": req.get("source_snippet"),
-            "entity": entity,
-            "business_unit": business_unit,
-            "status": "new",
-            "reviewer": None,
-            "review_notes": None,
-            "tags": [],
-            "controls": [],
-            "policy_refs": [],
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "evidence": {}
-        })
+        normalized.append(
+            {
+                "requirement_id": str(uuid.uuid4()),
+                "jurisdiction": jurisdiction,
+                "doc_id": doc_id,
+                "filename": filename,
+                "requirement_type": req.get("requirement_type") or "Unknown",
+                "description": req.get("description"),
+                "details": req.get("details"),
+                "mandatory": req.get("mandatory") or "Unknown",
+                "confidence": req.get("confidence", "Medium"),
+                "source_snippet": req.get("source_snippet"),
+                "entity": entity,
+                "business_unit": business_unit,
+                "status": "new",
+                "reviewer": None,
+                "review_notes": None,
+                "tags": [],
+                "controls": [],
+                "policy_refs": [],
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "evidence": {},
+            }
+        )
     return normalized
 
 
@@ -1484,22 +1482,20 @@ def _attach_evidence(requirements: List[Dict[str, Any]], doc_id: str) -> None:
             [
                 req.get("requirement_type") or "",
                 req.get("description") or "",
-                req.get("details") or ""
+                req.get("details") or "",
             ]
         ).strip()
         if not query_text:
             continue
         results = vector_store.query(
-            query_text=query_text,
-            n_results=1,
-            filters={"doc_id": doc_id}
+            query_text=query_text, n_results=1, filters={"doc_id": doc_id}
         )
         if results:
             match = results[0]
             req["evidence"] = {
                 "chunk_id": match.get("id"),
                 "text": match.get("document"),
-                "metadata": match.get("metadata")
+                "metadata": match.get("metadata"),
             }
 
 
@@ -1516,7 +1512,7 @@ def _gather_requirements() -> List[Dict[str, Any]]:
                 jurisdiction=doc.get("jurisdiction") or "Unknown",
                 filename=doc.get("filename") or "Unknown",
                 entity=doc.get("entity"),
-                business_unit=doc.get("business_unit")
+                business_unit=doc.get("business_unit"),
             )
             _attach_evidence(reqs, doc.get("doc_id") or doc_id)
             doc["requirements"] = reqs
@@ -1529,7 +1525,7 @@ def _gather_requirements() -> List[Dict[str, Any]]:
                 jurisdiction=doc.get("jurisdiction") or "Unknown",
                 filename=doc.get("filename") or "Unknown",
                 entity=doc.get("entity"),
-                business_unit=doc.get("business_unit")
+                business_unit=doc.get("business_unit"),
             )
             _attach_evidence(reqs, doc.get("doc_id") or doc_id)
             doc["requirements"] = reqs
@@ -1552,7 +1548,7 @@ def _filter_requirements(
     mandatory: str | None = None,
     status: str | None = None,
     doc_id: str | None = None,
-    q: str | None = None
+    q: str | None = None,
 ) -> List[Dict[str, Any]]:
     filtered = []
     mandatory_norm = _normalize_mandatory(mandatory)
@@ -1578,7 +1574,7 @@ def _filter_requirements(
                     req.get("requirement_type") or "",
                     req.get("description") or "",
                     req.get("details") or "",
-                    req.get("source_snippet") or ""
+                    req.get("source_snippet") or "",
                 ]
             ).lower()
             if q.lower() not in haystack:
@@ -1605,7 +1601,9 @@ def _ensure_policy_seeded() -> None:
     for path in policy_dir.glob("*.md"):
         policy_id = path.stem
         content = path.read_text(encoding="utf-8")
-        title = content.splitlines()[0].replace("#", "").strip() if content else policy_id
+        title = (
+            content.splitlines()[0].replace("#", "").strip() if content else policy_id
+        )
         policies_db[policy_id] = {
             "policy_id": policy_id,
             "title": title,
@@ -1615,7 +1613,7 @@ def _ensure_policy_seeded() -> None:
             "version": "1.0",
             "owner": "Compliance",
             "created_at": datetime.now(timezone.utc).isoformat(),
-            "updated_at": None
+            "updated_at": None,
         }
     save_json_dict(POLICIES_DB_PATH, policies_db)
 
@@ -1634,10 +1632,7 @@ def _dispatch_webhooks(event: str, payload: Dict[str, Any]) -> None:
             continue
         body = json.dumps({"event": event, "payload": payload}).encode("utf-8")
         request = urllib.request.Request(
-            url,
-            data=body,
-            headers={"Content-Type": "application/json"},
-            method="POST"
+            url, data=body, headers={"Content-Type": "application/json"}, method="POST"
         )
         try:
             with urllib.request.urlopen(request, timeout=5):
@@ -1647,17 +1642,14 @@ def _dispatch_webhooks(event: str, payload: Dict[str, Any]) -> None:
 
 
 def _append_audit_log(
-    action: str,
-    entity_type: str,
-    entity_id: str,
-    details: Dict[str, Any] | None = None
+    action: str, entity_type: str, entity_id: str, details: Dict[str, Any] | None = None
 ) -> None:
     entry = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "action": action,
         "entity_type": entity_type,
         "entity_id": entity_id,
-        "details": details or {}
+        "details": details or {},
     }
     audit_log.append(entry)
     save_json_list(AUDIT_LOG_PATH, audit_log)
@@ -1665,4 +1657,5 @@ def _append_audit_log(
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
