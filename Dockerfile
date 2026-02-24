@@ -22,10 +22,9 @@ RUN pip install --no-cache-dir --upgrade pip \
 RUN adduser --disabled-password --gecos "" appuser \
     && chown -R appuser:appuser /app
 
-USER appuser
-
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD curl -fsS http://localhost:8000/healthz || exit 1
 
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Fix volume permissions at runtime (volume mounts as root after build)
+CMD ["sh", "-c", "chown -R appuser:appuser /app/data 2>/dev/null; exec runuser -u appuser -- uvicorn backend.main:app --host 0.0.0.0 --port 8000"]
