@@ -1,7 +1,7 @@
 [project]
-name = "reg-atlas"
+name = "meridian-reg"
 version = "0.1.0"
-description = "RegAtlas - Cross-jurisdiction regulatory analytics platform for financial institutions"
+description = "Meridian - Cross-jurisdiction regulatory analytics platform for financial institutions"
 requires-python = ">=3.10"
 dependencies = [
     "fastapi>=0.109.0",
@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 [project.scripts]
-regatlas = "cli.main:app"
+meridian = "cli.main:app"
 
 [project.optional-dependencies]
 dev = [

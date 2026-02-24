@@ -1,4 +1,4 @@
-"""Gap analysis routes for RegAtlas API."""
+"""Gap analysis routes for Meridian API."""
 
 import logging
 from fastapi import APIRouter, HTTPException, Depends

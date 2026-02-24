@@ -14,7 +14,7 @@ with patch("backend.state.init_state"), patch("backend.state.init_components"):
 
 @pytest.fixture
 def client():
-    """Test client for RegAtlas API."""
+    """Test client for Meridian API."""
     return TestClient(app)
 
 

@@ -1,4 +1,4 @@
-"""Evidence routes for RegAtlas API."""
+"""Evidence routes for Meridian API."""
 
 import logging
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Query

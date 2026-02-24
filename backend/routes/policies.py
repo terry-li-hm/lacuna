@@ -1,4 +1,4 @@
-"""Policy routes for RegAtlas API."""
+"""Policy routes for Meridian API."""
 
 import csv
 import io

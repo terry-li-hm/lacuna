@@ -1,4 +1,4 @@
-"""Integration routes for RegAtlas API."""
+"""Integration routes for Meridian API."""
 
 import logging
 from datetime import datetime, timezone

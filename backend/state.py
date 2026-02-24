@@ -1,4 +1,4 @@
-"""Shared state and utilities for RegAtlas backend."""
+"""Shared state and utilities for Meridian backend."""
 
 import hashlib
 import json

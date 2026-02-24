@@ -1,4 +1,4 @@
-"""Query routes for RegAtlas API."""
+"""Query routes for Meridian API."""
 
 import logging
 from fastapi import APIRouter, HTTPException, Depends

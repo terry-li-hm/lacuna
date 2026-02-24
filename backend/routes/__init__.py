@@ -1,4 +1,4 @@
-"""Route exports for RegAtlas API."""
+"""Route exports for Meridian API."""
 
 from .documents import router as documents_router
 from .requirements import router as requirements_router

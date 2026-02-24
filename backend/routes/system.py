@@ -1,4 +1,4 @@
-"""System routes for RegAtlas API."""
+"""System routes for Meridian API."""
 
 import csv
 import io
@@ -18,12 +18,12 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("/status")
 async def root(service=Depends(get_system_service)):
-    """Health check endpoint."""
+    """Application status endpoint."""
     return {
         "status": "healthy",
-        "app": "RegAtlas",
+        "app": "Meridian",
         "version": "0.1.0",
         "documents_count": service.vector_store.get_document_count(),
         "jurisdictions": service.get_stats()["jurisdictions"],

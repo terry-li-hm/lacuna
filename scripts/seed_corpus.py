@@ -3,11 +3,11 @@
 # requires-python = ">=3.10"
 # dependencies = ["httpx"]
 # ///
-"""Seed RegAtlas with real regulatory documents and configure horizon scanning.
+"""Seed Meridian with real regulatory documents and configure horizon scanning.
 
 Usage:
     python scripts/seed_corpus.py                          # default: http://localhost:8000
-    python scripts/seed_corpus.py --target https://reg-atlas.onrender.com
+    python scripts/seed_corpus.py --target https://meridian-production-1bdb.up.railway.app
 """
 
 import argparse
@@ -93,7 +93,7 @@ SAMPLE_CHANGES = [
 
 
 def upload_document(client: httpx.Client, base_url: str, path: Path, jurisdiction: str, name: str) -> dict | None:
-    """Upload a single document to RegAtlas."""
+    """Upload a single document to Meridian."""
     if not path.exists():
         print(f"  SKIP  {name} — file not found: {path}")
         return None
@@ -169,7 +169,7 @@ def trigger_scan(client: httpx.Client, base_url: str) -> dict | None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Seed RegAtlas with regulatory corpus")
+    parser = argparse.ArgumentParser(description="Seed Meridian with regulatory corpus")
     parser.add_argument("--target", default="http://localhost:8000", help="API base URL")
     parser.add_argument("--skip-docs", action="store_true", help="Skip document uploads")
     parser.add_argument("--skip-sources", action="store_true", help="Skip source registration")
@@ -178,7 +178,7 @@ def main():
     args = parser.parse_args()
 
     base_url = args.target.rstrip("/")
-    print(f"\nRegAtlas Seed Script")
+    print(f"\nMeridian Seed Script")
     print(f"Target: {base_url}")
 
     client = httpx.Client()

@@ -9,7 +9,7 @@ from backend.config import settings
 logger = logging.getLogger(__name__)
 
 # Database path
-DB_PATH: Path = settings.data_dir / "regatlas.duckdb"
+DB_PATH: Path = settings.data_dir / "meridian.duckdb"
 
 # Connection singleton
 _connection: Optional["duckdb.DuckDBPyConnection"] = None

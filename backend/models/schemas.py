@@ -1,4 +1,4 @@
-"""Pydantic models for RegAtlas API."""
+"""Pydantic models for Meridian API."""
 
 from typing import Any, Dict, List
 

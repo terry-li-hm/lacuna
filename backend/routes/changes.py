@@ -1,4 +1,4 @@
-"""Change tracking and horizon scanning routes for RegAtlas API."""
+"""Change tracking and horizon scanning routes for Meridian API."""
 
 import csv
 import io

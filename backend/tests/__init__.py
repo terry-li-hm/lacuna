@@ -1,1 +1,1 @@
-# RegAtlas backend tests.
+# Meridian backend tests.

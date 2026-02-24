@@ -1,8 +1,11 @@
-"""FastAPI application for regulatory analytics tool."""
+"""FastAPI application for Meridian regulatory analytics platform."""
 
 import logging
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from backend.config import settings
 from backend.routes import (
@@ -25,9 +28,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+
 # Initialize app
 app = FastAPI(
-    title="RegAtlas",
+    title="Meridian",
     description="Cross-jurisdiction regulatory analytics platform for financial institutions",
     version="0.1.0",
 )
@@ -55,6 +60,12 @@ app.include_router(query_router, tags=["query"])
 app.include_router(integrations_router, tags=["integrations"])
 app.include_router(evidence_router, tags=["evidence"])
 app.include_router(changes_router, tags=["changes"])
+
+@app.get("/", include_in_schema=False)
+async def serve_frontend():
+    """Serve the frontend dashboard."""
+    return FileResponse(FRONTEND_DIR / "index.html")
+
 
 if __name__ == "__main__":
     import uvicorn

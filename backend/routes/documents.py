@@ -1,4 +1,4 @@
-"""Document routes for RegAtlas API."""
+"""Document routes for Meridian API."""
 
 import csv
 import io

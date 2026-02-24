@@ -1,4 +1,4 @@
-"""RegAtlas models package."""
+"""Meridian models package."""
 
 from .schemas import (
     CompareRequest,
