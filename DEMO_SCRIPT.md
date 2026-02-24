@@ -120,7 +120,7 @@ Briefly mention the RSS feed sources:
 ## Anti-patterns — Don't Do This
 
 - Don't upload a document live (takes 30s-2min for LLM extraction, awkward silence)
-- Don't run the gap analysis demo button at the top (it's hardcoded to specific doc IDs that may not match)
+- The "Review Draft Analysis" button at the top works — it runs a real gap analysis (Consumer Protection vs Financial Services guidance) via Claude Sonnet. Takes ~30s. Use it if you want to show the agentic analysis, but be aware of the wait time.
 - Don't show the API config section (bottom of page) — it exposes the infrastructure
 - Don't try to explain the tech stack unless asked — lead with the business value
 - Don't say "I built this in a weekend" — say "I've been working on this" (frames it as serious)
