@@ -14,6 +14,7 @@ from backend.routes import (
     query_router,
     integrations_router,
     evidence_router,
+    changes_router,
 )
 from backend import state
 
@@ -53,6 +54,7 @@ app.include_router(policies_router, tags=["policies"])
 app.include_router(query_router, tags=["query"])
 app.include_router(integrations_router, tags=["integrations"])
 app.include_router(evidence_router, tags=["evidence"])
+app.include_router(changes_router, tags=["changes"])
 
 if __name__ == "__main__":
     import uvicorn

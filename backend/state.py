@@ -26,6 +26,7 @@ SOURCES_DB_PATH = settings.data_dir / "sources_db.json"
 EVIDENCE_DB_PATH = settings.data_dir / "evidence_db.json"
 POLICIES_DB_PATH = settings.data_dir / "policies_db.json"
 WEBHOOKS_DB_PATH = settings.data_dir / "webhooks_db.json"
+CHANGES_DB_PATH = settings.data_dir / "changes_db.json"
 STARTED_AT = datetime.now(timezone.utc)
 ALLOWED_REQ_STATUS = {"new", "reviewed", "action_required"}
 
@@ -199,6 +200,7 @@ sources_db: Dict[str, Dict[str, Any]] = {}
 evidence_db: List[Dict[str, Any]] = []
 policies_db: Dict[str, Dict[str, Any]] = {}
 webhooks_db: Dict[str, Dict[str, Any]] = {}
+changes_db: Dict[str, Dict[str, Any]] = {}
 
 # Repository instances
 _document_repo: Optional[DocumentRepository] = None
@@ -215,6 +217,8 @@ _system_service: Optional[Any] = None
 _query_service: Optional[Any] = None
 _integration_service: Optional[Any] = None
 _evidence_service: Optional[Any] = None
+_change_service: Optional[Any] = None
+_scan_service: Optional[Any] = None
 
 # Components - will be initialized in main.py
 doc_processor = None
@@ -362,9 +366,33 @@ def get_evidence_service():
     return _evidence_service
 
 
+def get_change_service():
+    """Get or create the change service singleton."""
+    global _change_service
+    if _change_service is None:
+        from backend.services.change_service import ChangeService
+
+        _change_service = ChangeService(
+            changes_db=changes_db, audit_repo=get_audit_log_repo()
+        )
+    return _change_service
+
+
+def get_scan_service():
+    """Get or create the scan service singleton."""
+    global _scan_service
+    if _scan_service is None:
+        from backend.services.scan_service import ScanService
+
+        _scan_service = ScanService(
+            sources_db=sources_db, change_service=get_change_service()
+        )
+    return _scan_service
+
+
 def init_state():
     """Initialize global state from disk."""
-    global documents_db, audit_log, sources_db, evidence_db, policies_db, webhooks_db
+    global documents_db, audit_log, sources_db, evidence_db, policies_db, webhooks_db, changes_db
     # Initialize DuckDB first
     init_db()
     # Load JSON as fallback / legacy support
@@ -374,6 +402,7 @@ def init_state():
     evidence_db = load_json_list(EVIDENCE_DB_PATH)
     policies_db = load_json_dict(POLICIES_DB_PATH)
     webhooks_db = load_json_dict(WEBHOOKS_DB_PATH)
+    changes_db = load_json_dict(CHANGES_DB_PATH)
 
 
 def init_components():

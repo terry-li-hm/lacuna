@@ -4,7 +4,7 @@ import logging
 from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Depends
 
-from backend.state import get_integration_service, documents_db, _gather_requirements
+from backend.state import get_integration_service, get_scan_service, documents_db, _gather_requirements
 from backend.models.schemas import SourceCreateRequest, WebhookCreateRequest
 
 logger = logging.getLogger(__name__)
@@ -78,6 +78,12 @@ async def get_webhook(webhook_id: str, service=Depends(get_integration_service))
 async def delete_webhook(webhook_id: str, service=Depends(get_integration_service)):
     """Delete a webhook."""
     return service.delete_webhook(webhook_id)
+
+
+@router.post("/scan")
+async def scan_sources(service=Depends(get_scan_service)):
+    """Scan all registered RSS/Atom sources for new regulatory changes."""
+    return service.scan_all_sources()
 
 
 @router.get("/integrations/export")
