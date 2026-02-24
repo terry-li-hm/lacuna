@@ -12,24 +12,29 @@ logger = logging.getLogger(__name__)
 class RequirementExtractor:
     """Extract and categorize regulatory requirements using LLM."""
     
+    CHUNK_SIZE = 12000  # chars per extraction window
+    CHUNK_OVERLAP = 500  # overlap between windows
+
     def __init__(
         self,
         api_key: str | None = None,
-        model: str = "openai/gpt-3.5-turbo",
+        model: str = "openai/gpt-4o-mini",
+        gap_analysis_model: str | None = None,
         base_url: str = "https://openrouter.ai/api/v1"
     ):
         if os.getenv("REG_ATLAS_NO_LLM") == "1":
             api_key = None
         self.api_key = api_key
         self.model = model
+        self.gap_analysis_model = gap_analysis_model or model
         self.client = None
-        
+
         if api_key:
             self.client = OpenAI(
                 api_key=api_key,
                 base_url=base_url
             )
-            logger.info(f"Initialized OpenRouter client with model: {model}")
+            logger.info(f"Initialized OpenRouter client with model: {model}, gap analysis: {self.gap_analysis_model}")
         else:
             logger.warning("No OpenRouter API key provided - extraction features limited")
     
@@ -54,10 +59,17 @@ class RequirementExtractor:
             return self._basic_extraction(text, jurisdiction)
         
         try:
-            prompt = f"""Analyze the following regulatory text from {jurisdiction} and extract key requirements.
+            # Process document in chunks to handle long texts
+            chunks = self._chunk_text(text)
+            all_requirements = []
+            raw_parts = []
+
+            for i, chunk in enumerate(chunks):
+                chunk_label = f" (section {i+1}/{len(chunks)})" if len(chunks) > 1 else ""
+                prompt = f"""Analyze the following regulatory text from {jurisdiction}{chunk_label} and extract key requirements.
 
 For each requirement, identify:
-1. Requirement type (e.g., Capital Adequacy, Liquidity, AML/KYC, Reporting, Governance)
+1. Requirement type (e.g., Capital Adequacy, Liquidity, AML/KYC, Reporting, Governance, AI/Technology, Consumer Protection, Data Privacy, Risk Management)
 2. Brief description of the requirement
 3. Any specific thresholds, ratios, or deadlines mentioned
 4. Whether it's mandatory or recommended
@@ -65,7 +77,7 @@ For each requirement, identify:
 6. A short source snippet (<= 200 chars) quoted from the text
 
 Text:
-{text[:4000]}  # Limit context length
+{chunk}
 
 Provide output in the following structured format:
 REQUIREMENT_TYPE: [type]
@@ -77,29 +89,79 @@ SOURCE_SNIPPET: [quoted excerpt]
 ---
 """
 
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": "You are a regulatory compliance expert specializing in financial services regulations."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.1,
-                max_tokens=1000
-            )
-            
-            extracted_text = response.choices[0].message.content or ""
-            requirements = self._parse_extraction(extracted_text, jurisdiction)
-            
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": "You are a regulatory compliance expert specializing in financial services regulations."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.1,
+                    max_tokens=2000
+                )
+
+                extracted_text = response.choices[0].message.content or ""
+                raw_parts.append(extracted_text)
+                all_requirements.extend(self._parse_extraction(extracted_text, jurisdiction))
+
+            # Deduplicate by description similarity
+            requirements = self._deduplicate_requirements(all_requirements)
+
             return {
                 "jurisdiction": jurisdiction,
                 "requirements": requirements,
-                "raw_extraction": extracted_text
+                "raw_extraction": "\n---\n".join(raw_parts)
             }
             
         except Exception as e:
             logger.error(f"Error extracting requirements: {e}")
             return self._basic_extraction(text, jurisdiction)
     
+    def _chunk_text(self, text: str) -> List[str]:
+        """Split text into overlapping chunks for processing."""
+        if len(text) <= self.CHUNK_SIZE:
+            return [text]
+        chunks = []
+        start = 0
+        while start < len(text):
+            end = start + self.CHUNK_SIZE
+            # Try to break at a paragraph or sentence boundary
+            if end < len(text):
+                for boundary in ["\n\n", ".\n", ". ", "\n"]:
+                    last = text.rfind(boundary, start + self.CHUNK_SIZE // 2, end)
+                    if last != -1:
+                        end = last + len(boundary)
+                        break
+            chunks.append(text[start:end])
+            start = end - self.CHUNK_OVERLAP
+        return chunks
+
+    def _deduplicate_requirements(self, requirements: List[Dict[str, str]]) -> List[Dict[str, str]]:
+        """Remove near-duplicate requirements based on description overlap."""
+        if len(requirements) <= 1:
+            return requirements
+        seen_descriptions = []
+        unique = []
+        for req in requirements:
+            desc = (req.get("description") or "").lower().strip()
+            if not desc:
+                unique.append(req)
+                continue
+            is_dup = False
+            for seen in seen_descriptions:
+                # Simple word overlap check
+                words_new = set(desc.split())
+                words_seen = set(seen.split())
+                if len(words_new) == 0:
+                    break
+                overlap = len(words_new & words_seen) / max(len(words_new), len(words_seen))
+                if overlap > 0.7:
+                    is_dup = True
+                    break
+            if not is_dup:
+                seen_descriptions.append(desc)
+                unique.append(req)
+        return unique
+
     def _parse_extraction(self, text: str, jurisdiction: str) -> List[Dict[str, str]]:
         """Parse LLM output into structured requirements."""
         requirements = []
@@ -289,12 +351,13 @@ Response Format:
 """
 
             response = self.client.chat.completions.create(
-                model=self.model,
+                model=self.gap_analysis_model,
                 messages=[
                     {"role": "system", "content": "You are a regulatory compliance auditor. Always output valid JSON."},
                     {"role": "user", "content": prompt}
                 ],
-                temperature=0.1
+                temperature=0.1,
+                max_tokens=1500
             )
 
             result_text = response.choices[0].message.content or "{}"

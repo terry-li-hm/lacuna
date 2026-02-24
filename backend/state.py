@@ -388,6 +388,7 @@ def init_components():
     req_extractor = RequirementExtractor(
         api_key=None if settings.no_llm else llm_api_key,
         model=settings.llm_model,
+        gap_analysis_model=settings.gap_analysis_model,
         base_url=settings.openai_base_url,
     )
     vector_store = VectorStore(settings.chroma_persist_dir)

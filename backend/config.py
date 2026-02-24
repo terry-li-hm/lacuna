@@ -25,7 +25,8 @@ class Settings(BaseSettings):
     
     # Model Configuration
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
-    llm_model: str = "openai/gpt-3.5-turbo"  # OpenRouter uses provider/model format
+    llm_model: str = "openai/gpt-4o-mini"  # Default for extraction
+    gap_analysis_model: str = "anthropic/claude-sonnet-4-20250514"  # For structured regulatory reasoning
     
     class Config:
         env_file = ".env"
