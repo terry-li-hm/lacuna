@@ -168,12 +168,8 @@ def _validate_choice(value: str | None, allowed: set[str], field: str) -> str | 
 
 
 def _validate_url(value: str) -> None:
-    if not (
-        value.startswith("http://")
-        or value.startswith("https://")
-        or value.startswith("file://")
-    ):
-        raise HTTPException(status_code=400, detail="Invalid URL scheme for source")
+    if not (value.startswith("http://") or value.startswith("https://")):
+        raise HTTPException(status_code=400, detail="Invalid URL scheme — only http(s) allowed")
 
 
 def _count_by_field(items: Iterable[Dict[str, Any]], field: str) -> Dict[str, int]:
@@ -424,13 +420,7 @@ def init_components():
 
 
 def _all_jurisdictions() -> List[str]:
-    stored = {
-        doc.get("jurisdiction")
-        for doc in documents_db.values()
-        if doc.get("jurisdiction")
-    }
-    indexed = set(vector_store.list_jurisdictions())
-    return sorted(stored | indexed)
+    return get_document_repo().get_all_jurisdictions()
 
 
 def _normalize_requirements(

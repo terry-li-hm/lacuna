@@ -3,7 +3,6 @@
 import logging
 from typing import List, Dict, Any, Optional
 from fastapi import HTTPException
-from openai import OpenAI
 
 from backend.config import settings
 
@@ -39,13 +38,7 @@ class QueryService:
         if self.req_extractor.client and results and not no_llm:
             context = "\n\n".join([r["document"] for r in results[:3]])
             try:
-                from backend import state
-
-                client = OpenAI(
-                    api_key=state.llm_api_key, base_url=settings.openai_base_url
-                )
-
-                response = client.chat.completions.create(
+                response = self.req_extractor.client.chat.completions.create(
                     model=settings.llm_model,
                     messages=[
                         {

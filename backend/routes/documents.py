@@ -42,6 +42,13 @@ async def upload_document(
     if not content:
         raise HTTPException(status_code=400, detail="Uploaded file is empty")
 
+    from backend.config import settings
+    max_bytes = settings.max_upload_mb * 1024 * 1024
+    if len(content) > max_bytes:
+        raise HTTPException(
+            status_code=413, detail=f"File too large (max {settings.max_upload_mb}MB)"
+        )
+
     try:
         result = await service.upload_document(
             file_content=content,
@@ -63,8 +70,8 @@ async def upload_document(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.error(f"Error processing upload: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error processing upload: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/documents")

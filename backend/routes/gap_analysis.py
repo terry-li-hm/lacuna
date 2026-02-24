@@ -36,5 +36,5 @@ async def gap_analysis(
             status_code=404 if "not found" in str(e).lower() else 400, detail=str(e)
         )
     except Exception as e:
-        logger.error(f"Error performing gap analysis: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error performing gap analysis: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")

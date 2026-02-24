@@ -177,7 +177,5 @@ class DocumentService:
         return self.doc_repo.delete(doc_id)
 
     def get_all_jurisdictions(self) -> List[str]:
-        """Get all jurisdictions from documents and vector store."""
-        repo_jurisdictions = set(self.doc_repo.get_all_jurisdictions())
-        vector_jurisdictions = set(self.vector_store.list_jurisdictions())
-        return sorted(list(repo_jurisdictions | vector_jurisdictions))
+        """Get all jurisdictions from document repository."""
+        return self.doc_repo.get_all_jurisdictions()

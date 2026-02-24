@@ -107,6 +107,9 @@ class EvidenceService:
         if not entry:
             raise HTTPException(status_code=404, detail="Evidence not found")
         path = Path(entry.get("path") or "")
+        evidence_root = settings.data_dir / "evidence"
+        if not path.resolve().is_relative_to(evidence_root.resolve()):
+            raise HTTPException(status_code=403, detail="Access denied")
         if not path.exists():
             raise HTTPException(status_code=404, detail="Evidence file missing on disk")
         return path, entry.get("filename") or path.name

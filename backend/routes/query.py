@@ -30,8 +30,8 @@ async def query_documents(request: QueryRequest, service=Depends(get_query_servi
             no_llm=request.no_llm,
         )
     except Exception as e:
-        logger.error(f"Error processing query: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error processing query: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/compare")
@@ -49,5 +49,5 @@ async def compare_jurisdictions(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error comparing jurisdictions: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error comparing jurisdictions: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
