@@ -104,7 +104,7 @@ def upload_document(client: httpx.Client, base_url: str, path: Path, jurisdictio
                 f"{base_url}/upload",
                 files={"file": (path.name, f, "application/pdf")},
                 params={"jurisdiction": jurisdiction},
-                timeout=120,
+                timeout=600,
             )
         if response.status_code == 409:
             print(f"  EXISTS {name}")
