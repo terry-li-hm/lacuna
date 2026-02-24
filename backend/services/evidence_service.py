@@ -22,9 +22,11 @@ class EvidenceService:
     ) -> Dict[str, Any]:
         from backend.state import save_json_list, EVIDENCE_DB_PATH
 
-        if entity_type != "requirement":
+        allowed = {"requirement", "change", "policy"}
+        if entity_type not in allowed:
             raise HTTPException(
-                status_code=400, detail="Only requirement entity_type is supported"
+                status_code=400,
+                detail=f"entity_type must be one of: {', '.join(sorted(allowed))}",
             )
 
         evidence_id = str(uuid.uuid4())

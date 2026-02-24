@@ -161,6 +161,16 @@ async def get_document(doc_id: str, service=Depends(get_document_service)):
     return doc
 
 
+@router.get("/documents/{doc_id}/requirements")
+async def get_document_requirements(doc_id: str, service=Depends(get_document_service)):
+    """Get requirements extracted from a specific document."""
+    doc = service.get_document(doc_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    requirements = doc.get("requirements", [])
+    return {"doc_id": doc_id, "requirements": requirements, "total": len(requirements)}
+
+
 @router.delete("/documents/{doc_id}")
 async def delete_document(doc_id: str, service=Depends(get_document_service)):
     """Delete a document and its vector chunks."""

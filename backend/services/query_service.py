@@ -74,14 +74,15 @@ class QueryService:
         no_llm: bool = False,
     ) -> Dict[str, Any]:
         """Compare regulatory requirements between two jurisdictions."""
-        from backend.state import _extract_requirements_from_doc
+        from backend.state import _extract_requirements_from_doc, get_document_repo
 
-        docs1 = [
-            doc for doc in documents_db.values() if doc["jurisdiction"] == jurisdiction1
-        ]
-        docs2 = [
-            doc for doc in documents_db.values() if doc["jurisdiction"] == jurisdiction2
-        ]
+        # Prefer doc_repo (DuckDB) over in-memory documents_db
+        all_docs = documents_db.values()
+        if not documents_db:
+            all_docs = get_document_repo().list_all()
+
+        docs1 = [doc for doc in all_docs if doc.get("jurisdiction") == jurisdiction1]
+        docs2 = [doc for doc in all_docs if doc.get("jurisdiction") == jurisdiction2]
 
         if not docs1:
             raise HTTPException(
