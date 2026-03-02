@@ -1,4 +1,4 @@
-# Meridian — Project Reference
+# Lacuna — Project Reference
 
 ## Deployment
 
@@ -10,7 +10,7 @@
 
 ## Package Names
 
-- PyPI / npm / crates.io: `meridian-reg`
+- PyPI / npm / crates.io: `lacunae` (platform stubs)
 - Demo CLI: `lacuna` (~/bin/lacuna) — `lacuna gap/query/docs/warmup`
 
 ## Gotchas
@@ -34,7 +34,7 @@
 - `4fdb030f-90d4-46ea-a104-121347c762d9` — FCA AI Update (no_llm)
 - `c071bf07-dac5-4370-8538-c92c753db760` — MAS AI Risk Management Consultation 2025
 - `36c7686e-c6f7-4807-adb8-03d0afe5d3e1` — MAS AI Model Risk Management 2024
-- `ef3d9bff-a442-443f-97ca-9fc7d0108618` — **Meridian Demo Baseline (illustrative, Capco-authored, no HSBC branding)**
+- `ef3d9bff-a442-443f-97ca-9fc7d0108618` — **Lacuna Demo Baseline (illustrative, Capco-authored, no HSBC branding)**
 - `b55c5916-28ae-449b-bd61-54dea2bbbcc1` — NIST AI RMF 1.0 (second baseline, no_llm, 131 chunks)
 
 ## Demo Gap Analysis (pre-calibrated, cached)

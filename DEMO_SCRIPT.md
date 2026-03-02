@@ -1,4 +1,4 @@
-# Meridian — Demo Script for Tobin
+# Lacuna — Demo Script for Tobin
 
 **URL:** https://meridian-production-1bdb.up.railway.app
 **Duration:** 5-7 minutes
@@ -27,12 +27,12 @@
 
 > "Tobin, I built something I think directly addresses the delta problem — when a new circular drops, how much does it add to what your existing standard already covers?"
 
-Open Meridian. The dashboard loads showing:
+Open Lacuna. The dashboard loads showing:
 - 8 real regulatory documents across 4 jurisdictions
 - Overdue alerts badge in the corner
 - The Regulatory Radar section at the top with a live HKMA/PCPD detection
 
-> "This is Meridian — it ingests regulatory circulars from HKMA, MAS, the EU AI Act, and FCA, extracts the specific requirements, and lets you compare them. The idea: your Global AI Standard is the baseline. New regulation comes in. Meridian tells you exactly what's covered and what isn't — with citations back to the paragraph."
+> "This is Lacuna — it ingests regulatory circulars from HKMA, MAS, the EU AI Act, and FCA, extracts the specific requirements, and lets you compare them. The idea: your Global AI Standard is the baseline. New regulation comes in. Lacuna tells you exactly what's covered and what isn't — with citations back to the paragraph."
 
 ---
 
@@ -60,7 +60,7 @@ Set jurisdiction to **European Union**.
 
 Navigate to the **Gap Analysis** section. Select:
 - **Circular:** HKMA Consumer Protection 2024
-- **Baseline:** Meridian Demo Baseline (the illustrative policy doc, already in the system)
+- **Baseline:** Lacuna Demo Baseline (the illustrative policy doc, already in the system)
 
 Submit. Result returns instantly (pre-cached):
 
@@ -80,7 +80,7 @@ Click into a **Gap** finding:
 
 > "The Partial findings are where the work actually lives. Each one isn't 'mostly fine' — each one is a governance decision: does the existing control language satisfy this requirement, or does it need to be amended? That question currently takes a compliance team days of manual cross-referencing. This produces the same output in seconds, with citations ready for the drafter."
 
-**On the tool's approach — if Tobin probes:** "The tool identifies topical relevance and semantic coverage — it flags where the policy language addresses the regulatory requirement. Determining whether it's *legally equivalent* is your call. That's the division of labour: Meridian gives you the paragraph-level map, you apply the legal judgment."
+**On the tool's approach — if Tobin probes:** "The tool identifies topical relevance and semantic coverage — it flags where the policy language addresses the regulatory requirement. Determining whether it's *legally equivalent* is your call. That's the division of labour: Lacuna gives you the paragraph-level map, you apply the legal judgment."
 
 **If Tobin asks to run it against a real HSBC document:** "That's exactly the point. This baseline is illustrative — it's showing you the workflow. The moment you drop in your actual Chapter 5, the analysis runs the same way against real text. The interesting test is whether it performs just as cleanly on messier internal language. Happy to try that live if you have something accessible."
 
