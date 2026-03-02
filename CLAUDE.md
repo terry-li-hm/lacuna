@@ -11,7 +11,7 @@
 ## Package Names
 
 - PyPI / npm / crates.io: `lacunae` (platform stubs)
-- Demo CLI: `lacuna` (~/bin/lacuna) — `lacuna gap/query/docs/warmup`
+- Demo CLI: `lacuna` (~/bin/lacuna) — `lacuna gap/query/docs/warmup/preflight`
 
 ## Gotchas
 
@@ -22,20 +22,22 @@
 
 ## Corpus
 
-8 docs, 4 jurisdictions (HK, SG, EU, UK), 1390 chunks, 341+ requirements. EU AI Act and FCA uploaded with `no_llm` (chunks but no extracted requirements).
+12 docs, 5 jurisdictions (HK, SG, EU, UK, Global), ~1600 chunks, 341+ requirements. EU AI Act, FCA, NIST crosswalk, and Singapore GenAI Framework uploaded with `no_llm` (chunks but no extracted requirements).
 
 ## Key Doc IDs (current deployment)
 
-- `7f247634-cdcb-455a-bd02-7083feb1ed6e` — HKMA Consumer Protection 2024 (8 reqs)
-- `a4d64616-f9c1-4ec7-a8b8-e5c2e04d8b5d` — HKMA GenAI Financial Services 2024 (132 reqs)
-- `eccf4ae5-dd33-49f6-b9f8-97bfd3b0181e` — HKMA Sandbox Arrangement (9 reqs)
-- `dc5333c9-95cd-49ac-b2ed-12a88b7145f5` — HKMA SPM CA-G-1 (1 req)
-- `ebcc1f4b-77d2-4f97-8251-512eaf388685` — EU AI Act (no_llm)
-- `4fdb030f-90d4-46ea-a104-121347c762d9` — FCA AI Update (no_llm)
-- `c071bf07-dac5-4370-8538-c92c753db760` — MAS AI Risk Management Consultation 2025
-- `36c7686e-c6f7-4807-adb8-03d0afe5d3e1` — MAS AI Model Risk Management 2024
-- `ef3d9bff-a442-443f-97ca-9fc7d0108618` — **Lacuna Demo Baseline (illustrative, Capco-authored, no HSBC branding)**
-- `b55c5916-28ae-449b-bd61-54dea2bbbcc1` — NIST AI RMF 1.0 (second baseline, no_llm, 131 chunks)
+- `7f247634-cdcb-455a-bd02-7083feb1ed6e` — HKMA Consumer Protection 2024 (8 reqs) — alias: `hkma-cp`
+- `a4d64616-f9c1-4ec7-a8b8-e5c2e04d8b5d` — HKMA GenAI Financial Services 2024 (132 reqs) — alias: `hkma-gai`
+- `eccf4ae5-dd33-49f6-b9f8-97bfd3b0181e` — HKMA Sandbox Arrangement (9 reqs) — alias: `hkma-sandbox`
+- `dc5333c9-95cd-49ac-b2ed-12a88b7145f5` — HKMA SPM CA-G-1 (1 req) — alias: `hkma-spm`
+- `ebcc1f4b-77d2-4f97-8251-512eaf388685` — EU AI Act (no_llm) — alias: `eu-ai-act`
+- `4fdb030f-90d4-46ea-a104-121347c762d9` — FCA AI Update (no_llm) — alias: `fca`
+- `c071bf07-dac5-4370-8538-c92c753db760` — MAS AI Risk Management Consultation 2025 — alias: `mas-consult`
+- `36c7686e-c6f7-4807-adb8-03d0afe5d3e1` — MAS AI Model Risk Management 2024 — alias: `mas-mrmf`
+- `ef3d9bff-a442-443f-97ca-9fc7d0108618` — **Lacuna Demo Baseline (illustrative, Capco-authored, no HSBC branding)** — alias: `demo-baseline`
+- `b55c5916-28ae-449b-bd61-54dea2bbbcc1` — NIST AI RMF 1.0 (no_llm, 131 chunks) — alias: `nist-rmf`
+- `47c8640c-05a3-484a-b730-1e1cc22179bd` — NIST AI RMF → ISO 42001 Crosswalk (no_llm, 32 chunks) — alias: `nist-iso42001`
+- `9138e0ea-c3fb-4b85-95d8-893a81726449` — Singapore GenAI Governance Framework 2024 (no_llm, 73 chunks) — alias: `sg-genai`
 
 ## Demo Gap Analysis (pre-calibrated, cached)
 
