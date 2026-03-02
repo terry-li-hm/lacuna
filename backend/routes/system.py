@@ -49,7 +49,14 @@ async def readyz(service=Depends(get_system_service)):
 @router.get("/stats")
 async def get_stats(service=Depends(get_system_service)):
     """Get system statistics."""
-    return service.get_stats()
+    from backend.state import get_change_service
+    stats = service.get_stats()
+    try:
+        changes = get_change_service().list_changes()
+        stats["total_changes"] = len(changes)
+    except Exception:
+        stats["total_changes"] = 0
+    return stats
 
 
 @router.get("/entities")
