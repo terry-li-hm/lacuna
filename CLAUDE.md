@@ -34,14 +34,14 @@
 - `4fdb030f-90d4-46ea-a104-121347c762d9` — FCA AI Update (no_llm) — alias: `fca`
 - `c071bf07-dac5-4370-8538-c92c753db760` — MAS AI Risk Management Consultation 2025 — alias: `mas-consult`
 - `36c7686e-c6f7-4807-adb8-03d0afe5d3e1` — MAS AI Model Risk Management 2024 — alias: `mas-mrmf`
-- `ef3d9bff-a442-443f-97ca-9fc7d0108618` — **Lacuna Demo Baseline (illustrative, Capco-authored, no HSBC branding)** — alias: `demo-baseline`
+- `ef3d9bff-a442-443f-97ca-9fc7d0108618` — **Codex Argentum v1.0 (illustrative AI governance baseline, Capco-authored, no HSBC branding)** — alias: `demo-baseline`
 - `b55c5916-28ae-449b-bd61-54dea2bbbcc1` — NIST AI RMF 1.0 (no_llm, 131 chunks) — alias: `nist-rmf`
 - `47c8640c-05a3-484a-b730-1e1cc22179bd` — NIST AI RMF → ISO 42001 Crosswalk (no_llm, 32 chunks) — alias: `nist-iso42001`
 - `9138e0ea-c3fb-4b85-95d8-893a81726449` — Singapore GenAI Governance Framework 2024 (no_llm, 73 chunks) — alias: `sg-genai`
 
 ## Demo Gap Analysis (pre-calibrated, cached)
 
-**Primary demo — HKMA Consumer Protection vs illustrative baseline:**
+**Primary demo — HKMA Consumer Protection vs Codex Argentum v1.0:**
 - circular_doc_id: `7f247634-cdcb-455a-bd02-7083feb1ed6e`
 - baseline_id: `ef3d9bff-a442-443f-97ca-9fc7d0108618`
 - is_policy_baseline: false

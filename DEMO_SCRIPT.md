@@ -60,7 +60,7 @@ Set jurisdiction to **European Union**.
 
 Navigate to the **Gap Analysis** section. Select:
 - **Circular:** HKMA Consumer Protection 2024
-- **Baseline:** Lacuna Demo Baseline (the illustrative policy doc, already in the system)
+- **Baseline:** Codex Argentum v1.0 (the illustrative policy baseline, already in the system)
 
 Submit. Result returns instantly (pre-cached):
 
@@ -147,6 +147,6 @@ Briefly mention the RSS feed sources:
 - Don't show the API config section (bottom of page) — it exposes the infrastructure
 - Don't try to explain the tech stack unless asked — lead with the business value
 - Don't say "I built this in a weekend" — say "I've been working on this" (frames it as serious)
-- **Don't present the illustrative baseline as if it reflects real HSBC policy.** It's a demo input. If Tobin asks about it: "It's a Capco-authored illustrative set — structured like what a policy chapter would look like, so the gap analysis has something realistic to work against. The real test is running it against your actual standard."
-- **Don't let the output leave the meeting without context.** If Tobin wants to share the gap analysis results, make sure the framing travels with it: "This is a demo run against an illustrative baseline, not an assessment of HSBC's actual compliance position."
+- **Don't present the Codex Argentum as if it reflects real HSBC policy.** It's a demo input. If Tobin asks about it: "It's a Capco-authored illustrative baseline — structured like what a policy chapter would look like, so the gap analysis has something realistic to work against. The real test is running it against your actual standard."
+- **Don't let the output leave the meeting without context.** If Tobin wants to share the gap analysis results, make sure the framing travels with it: "This is a demo run against the Codex Argentum illustrative baseline, not an assessment of HSBC's actual compliance position."
 - **Don't claim legal equivalence.** If a finding says "Partial," that's a signal for human review — not a determination that the policy partially satisfies a legal obligation. Make this explicit if Tobin probes the methodology.
