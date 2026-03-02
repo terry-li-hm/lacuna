@@ -1,0 +1,423 @@
+MERIDIAN DEMO BASELINE
+ILLUSTRATIVE AI REQUIREMENTS SET — CAPCO-AUTHORED
+
+DISCLAIMER (applies to every page of this document): This document was
+authored by Capco for demonstration purposes only. It does not represent,
+replace, supplement, or approximate any HSBC policy, standard, control, or
+regulatory position. It has no effective date and carries no policy authority.
+It is not for distribution outside the demo context without explicit written
+agreement.
+
+This document is a synthetic illustrative baseline for demonstrating
+paragraph-level gap analysis against regulatory circulars. Requirements are
+based on publicly available frameworks including HSBC's published Principles
+for the Ethical Use of Data and AI (July 2024), PRA SS1/23, NIST AI RMF,
+and industry practice. No internal HSBC documents were used.
+
+==============================================================================
+
+1. PURPOSE AND SCOPE
+
+1.1 This illustrative requirements set establishes notional mandatory
+requirements for the development, deployment, and ongoing management of
+Generative AI (GenAI) systems within a hypothetical financial institution
+operating across multiple regulated jurisdictions.
+
+1.2 This baseline applies to all GenAI systems that:
+  (a) generate natural language, code, images, or other content outputs;
+  (b) are deployed in customer-facing or employee-facing contexts; or
+  (c) are used to inform, influence, or determine business decisions.
+
+1.3 Requirements supplement notional ethical AI principles and risk
+tiering methodology. They apply in addition to any obligations under model
+risk management policy, operational resilience frameworks, data privacy
+policy, and applicable regulatory obligations.
+
+1.4 Where requirements conflict with a higher-tier mandatory obligation
+(including applicable regulatory requirements), the higher-tier obligation
+takes precedence.
+
+==============================================================================
+
+DISCLAIMER: Capco-authored demo document. No HSBC policy status.
+
+==============================================================================
+
+2. DEFINITIONS
+
+GenAI System: Any AI system that generates outputs — including text, code,
+images, audio, or structured data — using large language models, diffusion
+models, or other foundation model architectures.
+
+Autonomous Output: A GenAI output delivered to a customer, counterparty, or
+regulator without mandatory human review before transmission.
+
+Higher-Risk GenAI System: A GenAI system that produces Autonomous Outputs
+in a customer-facing context, or that is classified at the highest risk tier
+under the applicable risk tiering framework.
+
+Foundation Model: A large-scale AI model trained on broad data that may be
+adapted (via fine-tuning, retrieval augmentation, or prompt engineering) for
+downstream tasks. Includes models operated by third-party providers.
+
+Hallucination: A GenAI output that presents factually incorrect, fabricated,
+or misleading information as accurate.
+
+AI System Owner: The named individual accountable for the governance, risk
+management, and ongoing compliance of a GenAI system.
+
+==============================================================================
+
+DISCLAIMER: Capco-authored demo document. No HSBC policy status.
+
+==============================================================================
+
+3. PRE-DEPLOYMENT REQUIREMENTS
+
+3.1 All GenAI systems shall be classified under a formal risk assessment
+process before any deployment to production or user testing beyond the
+development team.
+
+3.2 Higher-risk GenAI systems shall obtain formal approval from the AI
+governance review body before deployment to production. Approval shall be
+documented and retained for a minimum of seven years.
+
+3.3 Medium-risk GenAI systems shall obtain formal approval from a delegated
+AI review panel before deployment.
+
+3.4 Lower-risk GenAI systems shall obtain sign-off from the business unit
+risk function before deployment.
+
+3.5 All GenAI systems shall undergo a documented Responsible AI Assessment
+before deployment. The assessment shall evaluate the system against the
+institution's ethical AI principles and identify mitigations for any
+principle where full compliance cannot be demonstrated.
+
+3.6 Any GenAI system using a Foundation Model provided by a third party
+shall complete a Third-Party AI Vendor Assessment before entering
+production.
+
+3.7 A named AI System Owner at an appropriately senior level shall be
+designated for each higher-risk GenAI system before deployment.
+
+==============================================================================
+
+DISCLAIMER: Capco-authored demo document. No HSBC policy status.
+
+==============================================================================
+
+4. TRANSPARENCY AND DISCLOSURE
+
+4.1 Any customer-facing GenAI system shall disclose to customers, at or
+before first interaction, that they are engaging with an AI system.
+
+4.2 Disclosure language shall be clear, prominent, and in the primary
+language of the customer's jurisdiction. Disclosure shall not be buried in
+terms and conditions or accessible only through hyperlinks.
+
+4.3 Where a GenAI system assists a human employee in communications with
+customers (co-pilot mode), disclosure shall be made that AI tools are used
+in preparing responses, unless the AI contribution is limited to spelling
+correction or formatting.
+
+4.4 All GenAI systems used in regulated activities shall maintain output
+logs sufficient to reconstruct any specific interaction upon regulatory
+request. Logs shall be retained for a minimum of seven years.
+
+4.5 Where a GenAI system produces outputs used to support a material
+decision affecting a customer (including credit assessment, fraud
+determination, or product recommendation), the system shall record the
+inputs and outputs associated with each decision.
+
+4.6 The institution shall maintain an internal AI system register recording
+all GenAI systems in production, their risk classification, approval status,
+AI System Owner, and date of last review.
+
+4.7 Where a customer requests explanation of an AI-assisted decision, the
+institution shall provide a meaningful explanation in plain language within
+five business days.
+
+==============================================================================
+
+DISCLAIMER: Capco-authored demo document. No HSBC policy status.
+
+==============================================================================
+
+5. HUMAN OVERSIGHT REQUIREMENTS
+
+5.1 No GenAI system shall produce Autonomous Outputs in a customer-facing
+context without prior governance body approval of the autonomous deployment
+mode.
+
+5.2 Higher-risk GenAI systems shall implement mandatory human review for
+all outputs that:
+  (a) directly determine customer eligibility for a financial product;
+  (b) result in account restriction, suspension, or closure; or
+  (c) constitute regulatory filings or disclosures.
+
+5.3 All customer-facing GenAI systems shall implement a human escalation
+pathway. Where a customer requests human assistance, escalation shall be
+accessible at any point in the interaction. The institution shall ensure
+customers are not required to interact solely with an AI system against
+their preference.
+
+5.4 Employee-facing GenAI systems used in regulated activities shall
+incorporate controls to prevent employees from presenting AI-generated
+content to customers without review. These controls shall be documented in
+the system's governance record.
+
+5.5 GenAI systems used to support model risk management or compliance
+activities shall have their outputs reviewed by a qualified subject matter
+expert before any regulatory submission or material decision.
+
+5.6 AI System Owners shall document and periodically report the human
+override rate for higher-risk GenAI systems. Sustained override rates above
+20% shall trigger a formal review of system quality.
+
+==============================================================================
+
+DISCLAIMER: Capco-authored demo document. No HSBC policy status.
+
+==============================================================================
+
+6. DATA QUALITY AND PRIVACY
+
+6.1 All training data, retrieval corpora, and fine-tuning datasets used by
+GenAI systems shall be subject to documented data quality assessment before
+use. The assessment shall address representativeness, recency, completeness,
+and known biases.
+
+6.2 GenAI systems shall not process Special Category Personal Data or
+equivalent sensitive data categories without a lawful basis documented in a
+Data Privacy Impact Assessment and appropriate governance approval.
+
+6.3 GenAI systems shall implement controls to prevent customer data from
+being used to train or improve third-party Foundation Models without
+explicit customer consent.
+
+6.4 Where GenAI systems operate with retrieval-augmented generation (RAG),
+the retrieval corpus shall be subject to data governance controls equivalent
+to those applied to the system's primary inputs.
+
+6.5 GenAI systems shall be assessed for bias against protected
+characteristics before deployment. Bias assessment results shall be
+documented and reviewed at each periodic review cycle.
+
+6.6 Data used in GenAI systems shall be subject to data minimisation
+principles. GenAI systems shall not retain customer interaction data beyond
+the period required for the documented business purpose.
+
+==============================================================================
+
+DISCLAIMER: Capco-authored demo document. No HSBC policy status.
+
+==============================================================================
+
+7. MODEL DOCUMENTATION AND VALIDATION
+
+7.1 All higher-risk and medium-risk GenAI systems shall maintain a Model
+Card documenting:
+  (a) intended purpose and scope of use;
+  (b) foundation model identity and version;
+  (c) training data sources and reference dates;
+  (d) known limitations and failure modes;
+  (e) bias assessment results;
+  (f) human oversight controls; and
+  (g) monitoring approach and metrics.
+
+7.2 Model Cards shall be updated at each material change, including
+foundation model version upgrades, significant prompt engineering changes,
+and retrieval corpus updates.
+
+7.3 Higher-risk GenAI systems shall undergo independent model validation
+before deployment to production. Validation shall include adversarial
+testing to assess hallucination rates and prompt injection susceptibility.
+
+7.4 Where a third-party Foundation Model is updated by the provider, the
+AI System Owner shall assess whether the update requires re-validation
+before continuing production use.
+
+7.5 Hallucination rate benchmarks shall be established for each higher-risk
+and medium-risk system at deployment. Where the hallucination rate exceeds
+the approved threshold in production, the AI System Owner shall initiate a
+formal review within five business days.
+
+==============================================================================
+
+DISCLAIMER: Capco-authored demo document. No HSBC policy status.
+
+==============================================================================
+
+8. THIRD-PARTY AND VENDOR REQUIREMENTS
+
+8.1 All GenAI systems using third-party Foundation Models shall complete a
+Third-Party AI Vendor Assessment before deployment, addressing:
+  (a) vendor AI governance maturity;
+  (b) data processing and retention practices;
+  (c) model update notification procedures; and
+  (d) incident response obligations.
+
+8.2 Contracts with third-party AI providers shall require the provider to:
+  (a) notify the institution of material model updates with a minimum of
+      30 days notice;
+  (b) provide model documentation upon request; and
+  (c) cooperate with the institution's regulatory audit requirements.
+
+8.3 The institution shall maintain a concentration risk register for
+third-party AI dependencies. Where more than 30% of production GenAI
+systems depend on a single provider, senior risk oversight shall be
+notified.
+
+8.4 Third-party AI vendors shall be subject to ongoing due diligence
+consistent with applicable outsourcing and third-party risk frameworks.
+
+==============================================================================
+
+DISCLAIMER: Capco-authored demo document. No HSBC policy status.
+
+==============================================================================
+
+9. MONITORING AND ONGOING COMPLIANCE
+
+9.1 All production GenAI systems shall be subject to performance monitoring.
+Monitoring cadence shall be proportionate to risk classification:
+  - Monthly for higher-risk systems
+  - Quarterly for medium-risk systems
+  - Annual self-attestation for lower-risk systems
+
+9.2 Monitoring for higher-risk and medium-risk systems shall include, at
+minimum:
+  (a) output quality sampling;
+  (b) hallucination rate tracking;
+  (c) bias indicator monitoring; and
+  (d) human override rate where applicable.
+
+9.3 All GenAI systems shall undergo a formal periodic review proportionate
+to risk classification. Reviews shall confirm that the risk tier remains
+appropriate and that the Responsible AI Assessment remains current.
+
+9.4 Material changes to a GenAI system shall trigger an expedited review
+to assess whether the change alters the risk classification or requires
+re-approval.
+
+9.5 The AI governance function shall produce a consolidated GenAI
+monitoring report for the senior oversight body at least quarterly,
+summarising production incidents, monitoring exceptions, and emerging
+risk indicators.
+
+Note: Requirements for systemic risk reporting to regulators at portfolio
+level are under review and will be addressed in a subsequent revision
+following finalisation of relevant regulatory guidance.
+
+==============================================================================
+
+DISCLAIMER: Capco-authored demo document. No HSBC policy status.
+
+==============================================================================
+
+10. INCIDENT MANAGEMENT
+
+10.1 An AI incident is defined as any unintended, harmful, or unexpected
+output from a GenAI system that results in: customer harm, financial loss,
+reputational damage, regulatory breach, or data loss.
+
+10.2 AI incidents shall be reported to the AI System Owner and the AI
+governance function within 24 hours of identification.
+
+10.3 Higher-risk GenAI incidents shall be escalated to the senior AI
+oversight body within two business days. The AI System Owner shall produce
+a root cause analysis within 10 business days.
+
+10.4 GenAI systems involved in a confirmed incident shall be subject to
+suspension from production pending root cause analysis, unless the AI
+System Owner and AI governance function jointly determine that continued
+operation is appropriate with documented rationale.
+
+10.5 The institution shall report AI incidents to relevant regulators in
+accordance with applicable regulatory notification obligations. Specific
+notification timelines vary by jurisdiction and are determined by applicable
+regulatory requirements. [Note: Jurisdiction-specific AI incident
+notification timelines remain under review pending finalisation of
+regulatory guidance in key markets.]
+
+10.6 Lessons learned from AI incidents shall be shared across business
+units within 30 days of root cause analysis completion.
+
+==============================================================================
+
+DISCLAIMER: Capco-authored demo document. No HSBC policy status.
+
+==============================================================================
+
+11. AGENTIC AI SYSTEMS
+
+11.1 An Agentic AI System is a GenAI system that executes multi-step tasks
+with limited human intervention, including systems that:
+  (a) access external APIs or tools autonomously;
+  (b) execute actions with real-world consequences (e.g. sending
+      communications, executing transactions, modifying data); or
+  (c) chain multiple AI model calls or spawn sub-agents.
+
+11.2 All Agentic AI Systems shall be classified at the highest risk tier
+and subject to full governance body approval regardless of other risk
+scoring.
+
+11.3 Agentic AI Systems shall implement explicit scope constraints limiting:
+  (a) categories of action the system may take autonomously;
+  (b) maximum financial exposure per autonomous action; and
+  (c) the ability to modify the system's own scope or permissions.
+
+11.4 Human checkpoint requirements for Agentic AI Systems shall be defined
+at the design stage and documented in the governance record. Checkpoints
+shall be required before any irreversible action.
+
+==============================================================================
+
+DISCLAIMER: Capco-authored demo document. No HSBC policy status.
+
+==============================================================================
+
+APPENDIX A: SOURCE FRAMEWORKS
+
+This illustrative document draws on the following publicly available
+frameworks:
+
+- HSBC Principles for the Ethical Use of Data and AI (July 2024) — public
+- PRA SS1/23 Model Risk Management Principles (May 2024)
+- NIST AI Risk Management Framework (January 2023)
+- MAS FEAT Principles (2019)
+- Singapore Model AI Governance Framework, 2nd Edition (2020)
+
+No internal HSBC documents were used or referenced in drafting this
+baseline.
+
+APPENDIX B: REGULATORY COVERAGE NOTES
+
+This baseline was designed to partially cover requirements from the
+following regulatory sources, for use as a gap analysis demonstration:
+
+- HKMA: GenAI Consumer Protection Circular (August 2024) — partial coverage
+  by design; gaps are intentional for demonstration
+- HKMA: SPM on AI in Financial Services (CA-G-1)
+
+The following regulatory requirements are NOT incorporated in this
+illustrative baseline and will show as gaps in gap analysis:
+
+- 2019 BDAI Guiding Principles (explicit extension to GenAI not referenced)
+- EU AI Act Articles 9-15 (high-risk system documentation requirements)
+- Jurisdiction-specific incident notification timelines
+
+This is intentional for demonstration purposes — these gaps illustrate the
+tool's ability to identify where a real policy would require amendment.
+
+==============================================================================
+
+DISCLAIMER: This document was authored by Capco for demonstration purposes
+only. It does not represent, replace, supplement, or approximate any HSBC
+policy, standard, control, or regulatory position. It has no effective date
+and carries no policy authority. It is not for distribution outside the
+demo context without explicit written agreement.
+
+Capco-authored illustrative requirements set. Version 1.0. March 2026.
+
+END OF DOCUMENT
