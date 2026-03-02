@@ -65,9 +65,9 @@ Navigate to the **Gap Analysis** section. Select:
 Submit. Result returns instantly (pre-cached):
 
 ```
-Full:    1   ← Transparency/disclosure — baseline covers this clearly
-Partial: 5   ← Governance accountability, human-in-the-loop, fairness, opt-out, PDPO
-Gap:     2   ← BDAI Guiding Principles reference, proactive consumer protection use
+Full:    0
+Partial: 3   ← Governance accountability, fairness/bias, customer opt-out
+Gap:     4   ← BDAI Guiding Principles, transparency, PDPO/data privacy, proactive consumer protection
 ```
 
 Click into a **Partial** finding — show the reasoning:
