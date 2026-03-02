@@ -53,7 +53,7 @@ async def get_stats(service=Depends(get_system_service)):
     stats = service.get_stats()
     try:
         changes = get_change_service().list_changes()
-        stats["total_changes"] = len(changes)
+        stats["total_changes"] = changes.get("total", 0)
     except Exception:
         stats["total_changes"] = 0
     return stats
