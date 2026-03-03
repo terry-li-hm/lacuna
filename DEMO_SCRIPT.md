@@ -1,6 +1,6 @@
 # Lacuna — Demo Script for Tobin
 
-**URL:** https://meridian-production-1bdb.up.railway.app
+**URL:** https://lacuna.sh
 **Duration:** 5-7 minutes
 **Context:** Day 1 at Capco. Tobin is HSBC's AI Regulatory Management Lead (AIMS Responsible AI). His actual pain: when new regulation drops, how much does it add to what HSBC's existing AI Standard already covers? The existing standard covers previous requirements — the ongoing work is **delta analysis for new requirements**, with paragraph-level citations to drive policy amendments.
 
@@ -8,15 +8,9 @@
 
 ## Setup (before the demo)
 
-1. Open the URL in Chrome, full screen
-2. Verify the dashboard loads with documents and stats
-3. Pre-warm the gap analysis cache — run this once before the meeting:
-   ```
-   curl -s -X POST "https://meridian-production-1bdb.up.railway.app/gap-analysis" \
-     -H "Content-Type: application/json" \
-     -d '{"circular_doc_id":"7f247634-cdcb-455a-bd02-7083feb1ed6e","baseline_id":"ef3d9bff-a442-443f-97ca-9fc7d0108618","is_policy_baseline":false}'
-   ```
-   (First run ~30s via LLM; repeat runs return instantly from cache. Cache resets on Railway restart.)
+1. `lacuna preflight` — full health check (API + all docs + cache warmup). Expected: `PASS — demo ready.`
+2. Open https://lacuna.sh in Chrome, full screen
+3. Verify the dashboard loads with documents and stats
 4. Have these queries ready to paste:
    - `What are HKMA's requirements for GenAI consumer protection?`
    - `What are the high-risk AI system requirements under the EU AI Act?`
