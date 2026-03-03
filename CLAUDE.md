@@ -4,7 +4,7 @@
 
 - **Railway project:** `56536e61-c258-4ea6-a074-531ecb57e36a`
 - **Railway service:** `838bfe97-b9e3-4eb0-b1d5-2a3db86006b9`
-- **URL:** https://lacuna-production-8dbb.up.railway.app
+- **URL:** https://lacuna.sh (custom domain) — Railway: https://lacuna-production-8dbb.up.railway.app
 - **Volume:** mounted at `/app/data` (persists DuckDB + ChromaDB + JSON stores)
 - **Deploy:** `railway up --detach` (not GitHub auto-deploy)
 
@@ -36,18 +36,19 @@
 - `0b9af5df-3c6a-4b33-8ea5-741161122e17` — FCA AI Update (no_llm) — alias: `fca`
 - `42af8c8b-ff0a-4431-a89f-320e0cfd7c04` — MAS AI Risk Management Consultation 2025 — alias: `mas-consult`
 - `7aa4d4a2-d707-4508-82af-78958a36dc68` — MAS AI Model Risk Management 2024 — alias: `mas-mrmf`
-- `3a1e50ec-5340-4c06-b92a-3600986bb9c7` — **Codex Argentum v1.0 (illustrative AI governance baseline, Capco-authored, no HSBC branding)** — alias: `demo-baseline`
+- `2dc4de40-a058-4906-bff4-9aa11e1e6ba4` — **Codex Argentum v1.1 (illustrative AI governance baseline, Capco-authored, no HSBC branding)** — alias: `demo-baseline`
 - `bca67e5b-babe-4870-b0a1-e99e87e327a4` — NIST AI RMF 1.0 (no_llm, 131 chunks) — alias: `nist-rmf`
 - `d9716356-d8f3-43b6-9e20-ce4ce0c32098` — NIST AI RMF → ISO 42001 Crosswalk (no_llm, 32 chunks) — alias: `nist-iso42001`
 - `5b1a0507-c478-43d9-b911-c8a8fdb3d0e4` — Singapore GenAI Governance Framework 2024 (no_llm, 73 chunks) — alias: `sg-genai`
 
 ## Demo Gap Analysis (pre-calibrated, cached)
 
-**Primary demo — HKMA Consumer Protection vs Codex Argentum v1.0:**
+**Primary demo — HKMA Consumer Protection vs Codex Argentum v1.1:**
 - circular_doc_id: `86bcafef-0fbb-4e04-932b-75bd1d2c7b3f`
-- baseline_id: `3a1e50ec-5340-4c06-b92a-3600986bb9c7`
+- baseline_id: `2dc4de40-a058-4906-bff4-9aa11e1e6ba4`
 - is_policy_baseline: false
 - Result: 0 Full, 3 Partial, 4 Gap — paragraph-level reasoning + provenance citations
+- ⚠ Codex Argentum updated to v1.1 (§3.9, §8.1e added Mar 3) — re-warm before next demo, results will differ
 
 **Second baseline (credibility test — doc you didn't write):**
 - baseline_id: `bca67e5b-babe-4870-b0a1-e99e87e327a4` (NIST AI RMF)
@@ -58,3 +59,13 @@
 ## Demo
 
 See `DEMO_SCRIPT.md`. Gap analysis demo button uses Consumer Protection vs Financial Services guidance (Claude Sonnet 4 via OpenRouter).
+
+## Re-upload Workflow (Codex Argentum)
+
+When updating and re-uploading `codex-argentum-v1.txt`:
+1. Delete current doc: `curl -X DELETE "$BASE/documents/<doc_id>"`
+2. Upload with 600s timeout (LLM extraction takes 2-3 min, Railway 5-min HTTP timeout is tight): `curl --max-time 600 -X POST "$BASE/upload?jurisdiction=ILLUSTRATIVE" -F "file=@demo-docs/codex-argentum-v1.txt;type=text/plain" -o /tmp/lacuna-upload.json`
+3. Run in background — `/tmp/lacuna-upload.json` is written on completion
+4. Get new doc ID: `python3 -c "import json; d=json.load(open('/tmp/lacuna-upload.json')); print(d['doc_id'])"`
+5. Update both doc ID entries in CLAUDE.md (corpus list + demo gap analysis config)
+6. Flag demo cache as stale — re-warm before next demo
