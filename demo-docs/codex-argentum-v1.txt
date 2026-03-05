@@ -100,6 +100,35 @@ production.
 3.7 A named AI System Owner at an appropriately senior level shall be
 designated for each higher-risk GenAI system before deployment.
 
+3.8 The risk assessment required under 3.1 shall evaluate materiality
+across three dimensions:
+  (a) Impact — the severity of potential harm to customers, the
+      institution, or market integrity if the system fails or produces
+      harmful outputs;
+  (b) Complexity — the technical complexity of the system, including
+      degree of autonomy, multi-step chaining, and opacity of outputs;
+  (c) Reliance — the degree to which business decisions or customer
+      outcomes depend on the system's outputs without independent
+      verification.
+The combination of scores across these dimensions shall determine risk
+tier assignment and the applicable governance pathway.
+
+3.9 The business case for any higher-risk or medium-risk GenAI system
+shall include a total cost of ownership (TCO) analysis addressing:
+  (a) current and projected API or infrastructure costs over the
+      expected operational lifetime of the system;
+  (b) a pricing sensitivity scenario modelling the impact of a
+      material cost increase (minimum 3x baseline) on the viability
+      of the system;
+  (c) estimated switching costs if the primary vendor or model is
+      replaced, including re-engineering, retraining, and workflow
+      change costs; and
+  (d) the point at which vendor lock-in makes migration economically
+      impractical.
+TCO analyses shall be reviewed at each periodic governance review and
+updated where material changes in vendor pricing or market conditions
+have occurred.
+
 ==============================================================================
 
 DISCLAIMER: Capco-authored demo document. No HSBC policy status.
@@ -254,8 +283,23 @@ DISCLAIMER: Capco-authored demo document. No HSBC policy status.
 Third-Party AI Vendor Assessment before deployment, addressing:
   (a) vendor AI governance maturity;
   (b) data processing and retention practices;
-  (c) model update notification procedures; and
-  (d) incident response obligations.
+  (c) model update notification procedures;
+  (d) incident response obligations;
+  (e) geopolitical availability risk — assessment of whether the vendor's
+      continued availability could be impaired by government restrictions,
+      export controls, sanctions, or politically motivated access
+      prohibitions relevant to the institution's operating jurisdictions,
+      including plausible scenarios under which the vendor becomes
+      unavailable to regulated entities, and the institution's documented
+      contingency plan for each material scenario; and
+  (f) vendor ethical alignment — assessment of the vendor's published
+      usage policies, ethical red lines, and acceptable use restrictions
+      to confirm they are compatible with the institution's intended use
+      cases, including any regulated activities (AML, fraud, credit
+      decisioning, surveillance). Where a vendor's ethical constraints
+      restrict a material intended use case, the institution shall
+      document the restriction and identify an alternative approach
+      before proceeding to deployment.
 
 8.2 Contracts with third-party AI providers shall require the provider to:
   (a) notify the institution of material model updates with a minimum of
@@ -270,6 +314,16 @@ notified.
 
 8.4 Third-party AI vendors shall be subject to ongoing due diligence
 consistent with applicable outsourcing and third-party risk frameworks.
+
+8.5 Contracts with third-party AI providers shall require the provider
+to notify the institution of any material change to usage policies,
+acceptable use restrictions, or availability of the AI system that may
+affect the institution's ability to operate regulated services. Where a
+provider restricts or prohibits a use case after deployment, the
+institution shall have a documented contingency plan enabling continuity
+of service within 30 days. The institution shall maintain a vendor
+concentration risk review that explicitly addresses regulatory and
+geopolitical risks that could impair vendor availability.
 
 ==============================================================================
 
@@ -387,6 +441,7 @@ frameworks:
 - NIST AI Risk Management Framework (January 2023)
 - MAS FEAT Principles (2019)
 - Singapore Model AI Governance Framework, 2nd Edition (2020)
+- MAS Guidelines for Artificial Intelligence (AI) Risk Management (November 2025)
 
 No internal HSBC documents were used or referenced in drafting this
 baseline.
@@ -406,9 +461,18 @@ illustrative baseline and will show as gaps in gap analysis:
 - 2019 BDAI Guiding Principles (explicit extension to GenAI not referenced)
 - EU AI Act Articles 9-15 (high-risk system documentation requirements)
 - Jurisdiction-specific incident notification timelines
+- MAS AIRM: Board-level AI risk reporting cadence and MI pack requirements
+- MAS AIRM: AI system inventory completeness attestation obligations
 
 This is intentional for demonstration purposes — these gaps illustrate the
 tool's ability to identify where a real policy would require amendment.
+
+MAS AIRM (November 2025) is partially incorporated in this baseline:
+requirements 3.8 (materiality assessment), 8.5 (usage policy stability),
+6.5 (bias assessment), and 9.1-9.2 (monitoring cadence) align with MAS
+lifecycle control expectations. Gaps are intentional — the baseline does
+not yet fully cover MAS AIRM governance and board-level reporting
+obligations.
 
 ==============================================================================
 
@@ -418,6 +482,11 @@ policy, standard, control, or regulatory position. It has no effective date
 and carries no policy authority. It is not for distribution outside the
 demo context without explicit written agreement.
 
-Capco-authored illustrative requirements set. Version 1.0. March 2026.
+Capco-authored illustrative requirements set. Version 1.1. March 2026.
+Changes in v1.1: Added §3.8 (materiality assessment dimensions per MAS AIRM),
+§3.9 (AI total cost of ownership and pricing sensitivity requirements),
+§8.1(e) (geopolitical vendor availability risk assessment),
+§8.5 (usage policy stability and vendor prohibition risk), updated source
+frameworks and Appendix B to reflect MAS AIRM November 2025.
 
 END OF DOCUMENT

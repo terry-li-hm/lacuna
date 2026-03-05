@@ -8,7 +8,7 @@
 - **Volume:** mounted at `/app/data` (persists DuckDB + ChromaDB + JSON stores)
 - **Deploy:** `railway up --detach` (not GitHub auto-deploy)
 
-> Old project (meridian): `c2b227f0` — keep alive until lacuna.sh custom domain confirmed working.
+> Old project (meridian): `c2b227f0` — deleted Mar 3 2026.
 
 ## Package Names
 
@@ -63,6 +63,9 @@ See `DEMO_SCRIPT.md`. Gap analysis demo button uses Consumer Protection vs Finan
 ## Re-upload Workflow (Codex Argentum)
 
 When updating and re-uploading `codex-argentum-v1.txt`:
+```bash
+BASE="https://lacuna.sh"
+```
 1. Delete current doc: `curl -X DELETE "$BASE/documents/<doc_id>"`
 2. Upload with 600s timeout (LLM extraction takes 2-3 min, Railway 5-min HTTP timeout is tight): `curl --max-time 600 -X POST "$BASE/upload?jurisdiction=ILLUSTRATIVE" -F "file=@demo-docs/codex-argentum-v1.txt;type=text/plain" -o /tmp/lacuna-upload.json`
 3. Run in background — `/tmp/lacuna-upload.json` is written on completion
