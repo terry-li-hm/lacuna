@@ -411,6 +411,102 @@
             color: var(--accent);
         }
 
+        .remediation-summary {
+            margin: 0 0 12px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #f8f5ef;
+        }
+
+        .remediation-summary-text {
+            font-size: 12px;
+            color: var(--ink-2);
+            margin-bottom: 6px;
+        }
+
+        .remediation-progress-track {
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            background: #e8e4dc;
+            overflow: hidden;
+        }
+
+        .remediation-progress-fill {
+            width: 0%;
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--accent), #0f5b53);
+            transition: width 0.25s ease;
+        }
+
+        .remediation-cell {
+            min-width: 220px;
+        }
+
+        .remediation-status-select {
+            width: 100%;
+            margin-bottom: 6px;
+            font-size: 12px;
+            padding: 7px 8px;
+        }
+
+        .remediation-inline-status {
+            min-height: 14px;
+            font-size: 11px;
+            color: var(--accent);
+        }
+
+        .remediation-inline-status.error {
+            color: #7c2d1a;
+        }
+
+        .remediation-notes-toggle {
+            width: 100%;
+            padding: 6px 8px;
+            font-size: 11px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--ink-2);
+            cursor: pointer;
+        }
+
+        .remediation-notes-row td {
+            background: #fbfbfa;
+            border-bottom: 1px solid var(--border);
+            padding: 10px;
+        }
+
+        .remediation-notes-panel {
+            display: grid;
+            gap: 8px;
+        }
+
+        .remediation-notes-panel textarea {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #fff;
+            font-size: 12px;
+            color: var(--ink-1);
+            padding: 8px;
+            resize: vertical;
+            min-height: 72px;
+        }
+
+        .remediation-notes-panel textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .remediation-notes-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
         @media (max-width: 768px) {
             .main-grid {
                 grid-template-columns: 1fr;
@@ -1270,6 +1366,20 @@
             { value: 'd9716356-d8f3-43b6-9e20-ce4ce0c32098', label: 'NIST AI RMF -> ISO 42001 Crosswalk (ILLUSTRATIVE)' }
         ];
 
+        const REMEDIATION_STATUS_OPTIONS = ['Open', 'In Progress', 'Addressed', 'Not Applicable'];
+        const REMEDIATION_STATUS_LOOKUP = {
+            open: 'Open',
+            'in progress': 'In Progress',
+            'in-progress': 'In Progress',
+            addressed: 'Addressed',
+            'not applicable': 'Not Applicable',
+            'not-applicable': 'Not Applicable'
+        };
+
+        let remediationState = new Map();
+        let remediationFindingOrder = [];
+        let remediationContext = { circularId: '', baselineId: '' };
+
         function setApiStatus(text, state = 'info') {
             const statusEl = document.getElementById('apiStatus');
             statusEl.textContent = text;
@@ -1486,6 +1596,179 @@
             resultsEl.classList.remove('hidden');
             // Scroll to results
             resultsEl.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function normalizeRemediationStatus(value) {
+            if (!value) return 'Open';
+            const key = String(value).trim().toLowerCase();
+            return REMEDIATION_STATUS_LOOKUP[key] || 'Open';
+        }
+
+        function initRemediationState(data) {
+            remediationState = new Map();
+            remediationFindingOrder = [];
+            remediationContext = { circularId: data.circular_id || '', baselineId: data.baseline_id || '' };
+            (data.findings || []).forEach((finding) => {
+                const reqId = finding.circular_req_id;
+                if (!reqId) return;
+                remediationFindingOrder.push(reqId);
+                remediationState.set(reqId, {
+                    status: normalizeRemediationStatus(finding.review_status || finding.annotation_status || finding.review?.status),
+                    reviewer: finding.reviewer || finding.owner || finding.review?.reviewer || '',
+                    notes: finding.notes || finding.review?.notes || ''
+                });
+            });
+        }
+
+        function remediationStatusOptionsHtml(status) {
+            return REMEDIATION_STATUS_OPTIONS.map((option) => (
+                `<option value="${option}"${status === option ? ' selected' : ''}>${option}</option>`
+            )).join('');
+        }
+
+        function setRemediationFeedback(reqId, message, type = 'success') {
+            const feedbackEl = document.querySelector(`.remediation-inline-status[data-req-id="${reqId}"]`);
+            if (!feedbackEl) return;
+            feedbackEl.textContent = message;
+            feedbackEl.classList.toggle('error', type === 'error');
+            if (type === 'success') {
+                setTimeout(() => {
+                    if (feedbackEl.textContent === message) {
+                        feedbackEl.textContent = '';
+                        feedbackEl.classList.remove('error');
+                    }
+                }, 1300);
+            }
+        }
+
+        function updateRemediationSummary() {
+            const textEl = document.getElementById('remediationSummaryText');
+            const barEl = document.getElementById('remediationProgressFill');
+            if (!textEl || !barEl) return;
+            const total = remediationFindingOrder.length;
+            const addressed = remediationFindingOrder.filter((reqId) => {
+                const row = remediationState.get(reqId);
+                return row && row.status === 'Addressed';
+            }).length;
+            const pct = total > 0 ? Math.round((addressed / total) * 100) : 0;
+            textEl.textContent = `Remediation: ${addressed}/${total} addressed (${pct}%)`;
+            barEl.style.width = `${pct}%`;
+        }
+
+        function applyRemediationStateToDom() {
+            remediationFindingOrder.forEach((reqId) => {
+                const current = remediationState.get(reqId) || { status: 'Open', reviewer: '', notes: '' };
+                const statusEl = document.querySelector(`.remediation-status-select[data-req-id="${reqId}"]`);
+                if (statusEl) statusEl.value = current.status;
+                const ownerEl = document.querySelector(`.remediation-owner-input[data-req-id="${reqId}"]`);
+                if (ownerEl) ownerEl.value = current.reviewer || '';
+                const notesEl = document.querySelector(`.remediation-notes-input[data-req-id="${reqId}"]`);
+                if (notesEl) notesEl.value = current.notes || '';
+            });
+            updateRemediationSummary();
+        }
+
+        async function postRequirementReview(reqId, payload) {
+            const response = await fetch(`${API_BASE}/requirements/id/${encodeURIComponent(reqId)}/review`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                let errorDetail = '';
+                try {
+                    const data = await response.json();
+                    errorDetail = data.detail || '';
+                } catch (err) {
+                    errorDetail = '';
+                }
+                throw new Error(errorDetail || 'Save failed');
+            }
+        }
+
+        async function hydrateRemediationPlanIfAvailable() {
+            if (!remediationContext.circularId || !remediationContext.baselineId) return;
+            try {
+                const params = new URLSearchParams({
+                    circular_doc_id: remediationContext.circularId,
+                    baseline_id: remediationContext.baselineId
+                });
+                const response = await fetch(`${API_BASE}/remediation/plan?${params.toString()}`);
+                if (response.status === 404) return;
+                if (!response.ok) return;
+                const plan = await response.json();
+                const rows = Array.isArray(plan?.findings) ? plan.findings
+                    : Array.isArray(plan?.items) ? plan.items
+                    : Array.isArray(plan?.requirements) ? plan.requirements
+                    : [];
+                rows.forEach((row) => {
+                    const reqId = row.circular_req_id || row.requirement_id || row.req_id || row.id;
+                    if (!reqId || !remediationState.has(reqId)) return;
+                    remediationState.set(reqId, {
+                        status: normalizeRemediationStatus(row.review_status || row.annotation_status || row.status),
+                        reviewer: row.reviewer || row.owner || '',
+                        notes: row.notes || ''
+                    });
+                });
+                applyRemediationStateToDom();
+            } catch (error) {
+                console.debug('Remediation plan unavailable:', error);
+            }
+        }
+
+        async function setupGapRemediation(data) {
+            initRemediationState(data);
+            applyRemediationStateToDom();
+
+            document.querySelectorAll('.remediation-status-select').forEach((selectEl) => {
+                selectEl.addEventListener('change', async (event) => {
+                    const reqId = event.target.dataset.reqId;
+                    const row = remediationState.get(reqId) || { reviewer: '', notes: '' };
+                    row.status = normalizeRemediationStatus(event.target.value);
+                    remediationState.set(reqId, row);
+                    updateRemediationSummary();
+                    try {
+                        await postRequirementReview(reqId, { status: row.status });
+                        setRemediationFeedback(reqId, 'Saved ✓', 'success');
+                    } catch (error) {
+                        setRemediationFeedback(reqId, 'Error', 'error');
+                    }
+                });
+            });
+
+            document.querySelectorAll('.remediation-notes-toggle').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const reqId = btn.dataset.reqId;
+                    const notesRow = document.querySelector(`.remediation-notes-row[data-req-id="${reqId}"]`);
+                    if (!notesRow) return;
+                    const willOpen = notesRow.classList.contains('hidden');
+                    notesRow.classList.toggle('hidden');
+                    btn.textContent = willOpen ? '▲ Notes' : '▼ Notes';
+                });
+            });
+
+            document.querySelectorAll('.remediation-save-notes').forEach((btn) => {
+                btn.addEventListener('click', async () => {
+                    const reqId = btn.dataset.reqId;
+                    const statusEl = document.querySelector(`.remediation-status-select[data-req-id="${reqId}"]`);
+                    const ownerEl = document.querySelector(`.remediation-owner-input[data-req-id="${reqId}"]`);
+                    const notesEl = document.querySelector(`.remediation-notes-input[data-req-id="${reqId}"]`);
+                    const row = remediationState.get(reqId) || { status: 'Open', reviewer: '', notes: '' };
+                    row.status = normalizeRemediationStatus(statusEl ? statusEl.value : row.status);
+                    row.reviewer = ownerEl ? ownerEl.value.trim() : '';
+                    row.notes = notesEl ? notesEl.value.trim() : '';
+                    remediationState.set(reqId, row);
+                    updateRemediationSummary();
+                    try {
+                        await postRequirementReview(reqId, { status: row.status, reviewer: row.reviewer, notes: row.notes });
+                        setRemediationFeedback(reqId, 'Saved ✓', 'success');
+                    } catch (error) {
+                        setRemediationFeedback(reqId, 'Error', 'error');
+                    }
+                });
+            });
+
+            await hydrateRemediationPlanIfAvailable();
         }
 
         async function demoJan2026Gap() {
@@ -2212,7 +2495,8 @@
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.detail || 'Gap analysis failed');
                 
-                showResults(renderGapFindingsTable(data));
+                showResults(renderGapFindingsTable(data, { enableRemediation: true }));
+                await setupGapRemediation(data);
                 showStatus('Gap analysis complete', 'success');
             } catch (error) {
                 showStatus(error.message, 'error');
@@ -2222,7 +2506,8 @@
             }
         });
 
-        function renderGapFindingsTable(data) {
+        function renderGapFindingsTable(data, options = {}) {
+            const enableRemediation = options.enableRemediation === true;
             let html = `
                 <h3>Gap Analysis Report</h3>
                 <div class="stats" style="margin-bottom: 20px;">
@@ -2248,12 +2533,23 @@
                                     </button>
                                 </div>
                             `;
-                    
-                            html += `<table class="table">                <thead>
+            if (enableRemediation) {
+                html += `
+                    <div class="remediation-summary">
+                        <div id="remediationSummaryText" class="remediation-summary-text">Remediation: 0/0 addressed (0%)</div>
+                        <div class="remediation-progress-track">
+                            <div id="remediationProgressFill" class="remediation-progress-fill"></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `<table class="table">                <thead>
                     <tr>
                         <th>Status</th>
                         <th>Requirement</th>
                         <th>Reasoning & Evidence</th>
+                        ${enableRemediation ? '<th>Remediation</th>' : ''}
                     </tr>
                 </thead>
                 <tbody>`;
@@ -2261,6 +2557,17 @@
             data.findings.forEach(f => {
                 const statusClass = f.status === 'Full' ? 'badge' : (f.status === 'Partial' ? 'badge warn' : 'badge warn');
                 const color = f.status === 'Full' ? 'var(--accent)' : (f.status === 'Partial' ? 'var(--accent-2)' : '#7c2d1a');
+                const reqId = f.circular_req_id || '';
+                const defaultRemediationStatus = normalizeRemediationStatus(f.review_status || f.annotation_status || f.review?.status);
+                const reviewCell = enableRemediation ? `
+                    <td class="remediation-cell">
+                        <select class="remediation-status-select" data-req-id="${reqId}" ${reqId ? '' : 'disabled'}>
+                            ${remediationStatusOptionsHtml(defaultRemediationStatus)}
+                        </select>
+                        <button type="button" class="remediation-notes-toggle" data-req-id="${reqId}" ${reqId ? '' : 'disabled'}>▼ Notes</button>
+                        <div class="remediation-inline-status" data-req-id="${reqId}"></div>
+                    </td>
+                ` : '';
                 
                 html += `<tr>
                     <td><span class="${statusClass}" style="background-color: ${color}22; color: ${color};">${f.status}</span></td>
@@ -2273,7 +2580,24 @@
                                 <div class="muted" style="margin-top: 4px;">Doc ID: ${p.doc_id}</div>
                             </div>`).join('')}
                     </td>
+                    ${reviewCell}
                 </tr>`;
+
+                if (enableRemediation) {
+                    html += `
+                        <tr class="remediation-notes-row hidden" data-req-id="${reqId}">
+                            <td colspan="4">
+                                <div class="remediation-notes-panel">
+                                    <input type="text" class="remediation-owner-input" data-req-id="${reqId}" placeholder="Owner / Reviewer">
+                                    <textarea class="remediation-notes-input" data-req-id="${reqId}" placeholder="Add remediation notes"></textarea>
+                                    <div class="remediation-notes-actions">
+                                        <button type="button" class="btn-secondary remediation-save-notes" data-req-id="${reqId}" ${reqId ? '' : 'disabled'}>Save notes</button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
             });
             
             html += `</tbody></table>`;
@@ -3005,7 +3329,7 @@
             expansionRow.innerHTML = `
                 <td colspan="5" style="background: #fbfbfa; padding: 20px; border-bottom: 2px solid var(--accent);">
                     <div class="findings-container">
-                        ${renderGapFindingsTable(data)}
+                        ${renderGapFindingsTable(data, { enableRemediation: false })}
                     </div>
                 </td>
             `;
