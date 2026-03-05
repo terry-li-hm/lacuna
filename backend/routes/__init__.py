@@ -9,6 +9,7 @@ from .query import router as query_router
 from .integrations import router as integrations_router
 from .evidence import router as evidence_router
 from .changes import router as changes_router
+from .remediation import router as remediation_router
 
 __all__ = [
     "documents_router",
@@ -20,4 +21,5 @@ __all__ = [
     "integrations_router",
     "evidence_router",
     "changes_router",
+    "remediation_router",
 ]
