@@ -5,7 +5,7 @@
 - **Railway project:** `56536e61-c258-4ea6-a074-531ecb57e36a`
 - **Railway service:** `838bfe97-b9e3-4eb0-b1d5-2a3db86006b9`
 - **URL:** https://lacuna.sh (custom domain) — Railway: https://lacuna-production-8dbb.up.railway.app
-- **Volume:** mounted at `/app/data` (persists DuckDB + ChromaDB + JSON stores)
+- **Volume:** `lacuna-volume` mounted at `/app/data` (persists DuckDB + ChromaDB + JSON stores) — created Mar 6 2026; was missing before, data was ephemeral
 - **Deploy:** `railway up --detach` (not GitHub auto-deploy)
 
 > Old project (meridian): `c2b227f0` — deleted Mar 3 2026.
@@ -24,28 +24,26 @@
 
 ## Corpus
 
-12 docs, 5 jurisdictions (HK, SG, EU, UK, Global), ~1600 chunks, 341+ requirements. EU AI Act, FCA, NIST crosswalk, and Singapore GenAI Framework uploaded with `no_llm` (chunks but no extracted requirements).
+9 docs currently live (Mar 6 2026 re-seed), 4 jurisdictions (HK, SG, EU, UK). NIST RMF, NIST ISO 42001, SG GenAI not yet re-uploaded (PDFs not in repo). EU AI Act and FCA uploaded with `no_llm`.
 
 ## Key Doc IDs (current deployment)
 
-- `86bcafef-0fbb-4e04-932b-75bd1d2c7b3f` — HKMA Consumer Protection 2024 (7 reqs) — alias: `hkma-cp`
-- `b49334de-4f79-4dde-99ca-52c861b3351c` — HKMA GenAI Financial Services 2024 (130 reqs) — alias: `hkma-gai`
-- `6abfcf50-d0ac-44c9-9608-b187cd683009` — HKMA Sandbox Arrangement (9 reqs) — alias: `hkma-sandbox`
-- `ec614bf1-4962-4c77-b40b-e35461e8d54b` — HKMA SPM CA-G-1 (1 req) — alias: `hkma-spm`
-- `4a8de9c2-027a-4799-af3a-afff5b72528f` — EU AI Act (no_llm) — alias: `eu-ai-act`
-- `0b9af5df-3c6a-4b33-8ea5-741161122e17` — FCA AI Update (no_llm) — alias: `fca`
-- `42af8c8b-ff0a-4431-a89f-320e0cfd7c04` — MAS AI Risk Management Consultation 2025 — alias: `mas-consult`
-- `7aa4d4a2-d707-4508-82af-78958a36dc68` — MAS AI Model Risk Management 2024 — alias: `mas-mrmf`
-- `2dc4de40-a058-4906-bff4-9aa11e1e6ba4` — **Codex Argentum v1.1 (illustrative AI governance baseline, Capco-authored, no HSBC branding)** — alias: `demo-baseline`
-- `bca67e5b-babe-4870-b0a1-e99e87e327a4` — NIST AI RMF 1.0 (no_llm, 131 chunks) — alias: `nist-rmf`
-- `d9716356-d8f3-43b6-9e20-ce4ce0c32098` — NIST AI RMF → ISO 42001 Crosswalk (no_llm, 32 chunks) — alias: `nist-iso42001`
-- `5b1a0507-c478-43d9-b911-c8a8fdb3d0e4` — Singapore GenAI Governance Framework 2024 (no_llm, 73 chunks) — alias: `sg-genai`
+- `5b666c4a-0ed7-44c0-a565-5ecfa1facd83` — HKMA Consumer Protection 2024 (7 reqs) — alias: `hkma-cp`
+- `2de0a78d-f2c0-4284-a643-aeefa137d27d` — HKMA GenAI Financial Services 2024 (130 reqs) — alias: `hkma-gai`
+- `3e61ede3-c8cd-4f77-a333-9ee0ff42b4a1` — HKMA Sandbox Arrangement (9 reqs) — alias: `hkma-sandbox`
+- `4fb571e0-0faa-4e99-bfd5-0363f1977839` — HKMA SPM CA-G-1 (1 req) — alias: `hkma-spm`
+- `78640fb1-1f40-464d-bbe3-a9d1178ed4ee` — EU AI Act (no_llm) — alias: `eu-ai-act`
+- `89f8be36-4b6e-43e8-9808-9e62246b012b` — FCA AI Update (no_llm) — alias: `fca`
+- `304413dd-a589-473f-bace-22a6f4f797ff` — MAS AI Risk Management Consultation 2025 — alias: `mas-consult`
+- `f393fb98-4642-4f19-9e44-55c359d97990` — MAS AI Model Risk Management 2024 — alias: `mas-mrmf`
+- `61d7fa56-9a17-4835-a029-a6863fedfc6d` — **Codex Argentum v1.1 (illustrative AI governance baseline, Capco-authored, no HSBC branding)** — alias: `demo-baseline`
+- *(nist-rmf, nist-iso42001, sg-genai not re-uploaded — source PDFs not in repo. Upload manually if needed for demo.)*
 
 ## Demo Gap Analysis (pre-calibrated, cached)
 
 **Primary demo — HKMA Consumer Protection vs Codex Argentum v1.1:**
-- circular_doc_id: `86bcafef-0fbb-4e04-932b-75bd1d2c7b3f`
-- baseline_id: `2dc4de40-a058-4906-bff4-9aa11e1e6ba4`
+- circular_doc_id: `5b666c4a-0ed7-44c0-a565-5ecfa1facd83`
+- baseline_id: `61d7fa56-9a17-4835-a029-a6863fedfc6d`
 - is_policy_baseline: false
 - Result: 0 Full, 3 Partial, 4 Gap — paragraph-level reasoning + provenance citations
 - ⚠ Codex Argentum updated to v1.1 (§3.9, §8.1e added Mar 3) — re-warm before next demo, results will differ
@@ -59,6 +57,26 @@
 ## Demo
 
 See `DEMO_SCRIPT.md`. Gap analysis demo button uses Consumer Protection vs Financial Services guidance (Claude Sonnet 4 via OpenRouter).
+
+## Corpus Rebuild (after volume loss / fresh deploy)
+
+All source PDFs are in `data/documents/corpus/` in the repo. Run the seed script:
+```bash
+python3 /tmp/lacuna-seed.py   # creates /tmp/lacuna-seed.py first — see below
+```
+
+Seed script location: `tools/seed_corpus.py` (checked in). After seed completes, update UUID mappings:
+```bash
+python3 tools/update_aliases.py   # reads /tmp/lacuna-new-ids.json, updates bin/lacuna + CLAUDE.md
+```
+
+**Corpus PDFs available locally:**
+- `data/documents/corpus/hkma/` — 4 HKMA docs (hkma-cp, hkma-gai, hkma-sandbox, hkma-spm)
+- `data/documents/corpus/eu/` — EU AI Act (no_llm)
+- `data/documents/corpus/uk/` — FCA AI Update (no_llm)
+- `data/documents/corpus/mas/` — 2 MAS docs
+- `demo-docs/codex-argentum-v1.txt` — Codex Argentum v1.1
+- **Missing locally:** NIST RMF, NIST ISO 42001, SG GenAI Framework (were uploaded no_llm; not in git)
 
 ## Re-upload Workflow (Codex Argentum)
 
