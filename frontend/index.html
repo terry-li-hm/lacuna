@@ -345,6 +345,55 @@
             font-size: 11px;
         }
 
+        .upload-dropzone {
+            width: 100%;
+            padding: 28px 16px;
+            border: 2px dashed rgba(23, 122, 107, 0.4);
+            border-radius: 16px;
+            text-align: center;
+            background: #f8fbfa;
+            color: var(--ink-2);
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .upload-dropzone:hover,
+        .upload-dropzone.dragover {
+            border-color: var(--accent);
+            background: #eef8f5;
+        }
+
+        .upload-dropzone strong {
+            color: var(--ink-1);
+            font-weight: 600;
+        }
+
+        .inline-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--ink-2);
+        }
+
+        .spinner-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            border: 2px solid rgba(42, 91, 100, 0.25);
+            border-top-color: var(--accent);
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         .table td button.copy-btn {
             background: transparent;
             border: 1px solid var(--border);
@@ -524,6 +573,32 @@
                 </div>
                 <button type="submit" id="compareBtn">Compare</button>
             </form>
+        </div>
+
+        <div class="card">
+            <h2>Upload Client Baseline</h2>
+            <p class="muted" style="margin-bottom: 15px;">Upload your policy document to use as a gap analysis baseline. Supported: PDF, DOCX, TXT.</p>
+            <form id="baselineUploadForm">
+                <div class="form-group">
+                    <input type="file" id="baselineFileInput" accept=".pdf,.docx,.txt" class="hidden">
+                    <div id="baselineDropzone" class="upload-dropzone" role="button" tabindex="0">
+                        <strong>Drop file here or click to browse</strong>
+                        <div class="muted" id="baselineDropzoneHint" style="margin-top: 6px;">No file selected</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="baselineDocName">Document name</label>
+                    <input type="text" id="baselineDocName" placeholder="e.g. HSBC AI Standard v3" required>
+                </div>
+                <div class="form-group">
+                    <label class="inline-check">
+                        <input type="checkbox" id="baselineNoLlm">
+                        Skip requirement extraction (faster, use for large documents)
+                    </label>
+                </div>
+                <button type="submit" id="baselineUploadBtn">Upload Document</button>
+            </form>
+            <div id="baselineUploadStatus" class="status hidden" role="status" aria-live="polite" style="margin-top: 15px;"></div>
         </div>
 
         <div class="card">
@@ -1170,6 +1245,30 @@
         }
 
         let API_BASE = localStorage.getItem(API_BASE_STORAGE_KEY) || defaultApiBase();
+        let selectedBaselineUploadFile = null;
+
+        const CAPCO_BASELINE_IDS = new Set([
+            '2dc4de40-a058-4906-bff4-9aa11e1e6ba4', // Codex Argentum v1.1
+            'bca67e5b-babe-4870-b0a1-e99e87e327a4', // NIST AI RMF 1.0
+            'd9716356-d8f3-43b6-9e20-ce4ce0c32098'  // NIST AI RMF -> ISO 42001 Crosswalk
+        ]);
+
+        const FALLBACK_CIRCULAR_OPTIONS = [
+            { value: '86bcafef-0fbb-4e04-932b-75bd1d2c7b3f', label: 'HKMA Consumer Protection 2024 (Hong Kong)' },
+            { value: 'b49334de-4f79-4dde-99ca-52c861b3351c', label: 'HKMA GenAI Financial Services 2024 (Hong Kong)' },
+            { value: '6abfcf50-d0ac-44c9-9608-b187cd683009', label: 'HKMA GenAI Sandbox Arrangement 2024 (Hong Kong)' },
+            { value: 'ec614bf1-4962-4c77-b40b-e35461e8d54b', label: 'HKMA SPM CA-G-1 Revised 2024 (Hong Kong)' },
+            { value: '42af8c8b-ff0a-4431-a89f-320e0cfd7c04', label: 'MAS AI Risk Management Consultation 2025 (Singapore)' },
+            { value: '7aa4d4a2-d707-4508-82af-78958a36dc68', label: 'MAS AI Model Risk Management 2024 (Singapore)' },
+            { value: '4a8de9c2-027a-4799-af3a-afff5b72528f', label: 'EU AI Act (Regulation 2024/1689) (European Union)' },
+            { value: '0b9af5df-3c6a-4b33-8ea5-741161122e17', label: 'FCA AI Update 2024 (United Kingdom)' }
+        ];
+
+        const FALLBACK_CAPCO_BASELINES = [
+            { value: '2dc4de40-a058-4906-bff4-9aa11e1e6ba4', label: 'Codex Argentum v1.1 (ILLUSTRATIVE)' },
+            { value: 'bca67e5b-babe-4870-b0a1-e99e87e327a4', label: 'NIST AI Risk Management Framework 1.0 (ILLUSTRATIVE)' },
+            { value: 'd9716356-d8f3-43b6-9e20-ce4ce0c32098', label: 'NIST AI RMF -> ISO 42001 Crosswalk (ILLUSTRATIVE)' }
+        ];
 
         function setApiStatus(text, state = 'info') {
             const statusEl = document.getElementById('apiStatus');
@@ -1195,9 +1294,79 @@
             checkApiStatus();
         }
 
+        function requirementsCountForDoc(doc) {
+            if (typeof doc.requirements_count === 'number') return doc.requirements_count;
+            if (Array.isArray(doc.requirements)) return doc.requirements.length;
+            return 0;
+        }
+
+        function isIllustrativeDoc(doc) {
+            return (doc.jurisdiction || '').toUpperCase() === 'ILLUSTRATIVE';
+        }
+
+        function isRegulatoryCircular(doc) {
+            // Heuristic: non-ILLUSTRATIVE documents are treated as circulars.
+            return !isIllustrativeDoc(doc);
+        }
+
+        function docDisplayLabel(doc, includeRequirementWarning = false) {
+            const filename = doc.filename || doc.doc_id || 'Unknown document';
+            const jurisdiction = doc.jurisdiction || 'Unknown';
+            const reqCount = requirementsCountForDoc(doc);
+            const noReqSuffix = includeRequirementWarning && reqCount === 0 ? ' (⚠ no requirements)' : '';
+            return `${filename} (${jurisdiction})${noReqSuffix}`;
+        }
+
+        function clearAndSetPlaceholder(selectEl, text) {
+            selectEl.innerHTML = '';
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = text;
+            selectEl.appendChild(placeholder);
+        }
+
+        function appendOption(selectEl, value, text) {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = text;
+            selectEl.appendChild(option);
+        }
+
+        function appendOptionGroup(selectEl, label, options) {
+            const group = document.createElement('optgroup');
+            group.label = label;
+            if (!options.length) {
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.textContent = '(none)';
+                placeholder.disabled = true;
+                group.appendChild(placeholder);
+            } else {
+                options.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt.value;
+                    option.textContent = opt.label;
+                    group.appendChild(option);
+                });
+            }
+            selectEl.appendChild(group);
+        }
+
+        function setFallbackGapSelectors(circularSel, baselineSel, currentCircular, currentBaseline) {
+            clearAndSetPlaceholder(circularSel, 'Select Circular...');
+            FALLBACK_CIRCULAR_OPTIONS.forEach(opt => appendOption(circularSel, opt.value, opt.label));
+            circularSel.value = currentCircular;
+
+            clearAndSetPlaceholder(baselineSel, 'Select Baseline Document...');
+            appendOptionGroup(baselineSel, 'Capco baselines', FALLBACK_CAPCO_BASELINES);
+            appendOptionGroup(baselineSel, 'Uploaded baselines', []);
+            baselineSel.value = currentBaseline;
+        }
+
         async function updateGapSelectors() {
             try {
                 const docRes = await fetch(`${API_BASE}/documents`);
+                if (!docRes.ok) throw new Error('Failed to load documents');
                 const docData = await docRes.json();
                 const circularSel = document.getElementById('gapCircular');
                 const baselineSel = document.getElementById('gapBaseline');
@@ -1207,39 +1376,50 @@
                 const currentCircular = circularSel.value;
                 const currentBaseline = baselineSel.value;
 
-                circularSel.innerHTML = '<option value="">Select Circular...</option>';
-                docs.forEach(doc => {
-                    const opt = document.createElement('option');
-                    opt.value = doc.doc_id;
-                    opt.textContent = `${doc.filename || doc.doc_id} (${doc.jurisdiction})`;
-                    circularSel.appendChild(opt);
-                });
-                circularSel.value = currentCircular;
+                clearAndSetPlaceholder(circularSel, 'Select Circular...');
+                const circularDocs = docs.filter(doc => isRegulatoryCircular(doc));
+                circularDocs.forEach(doc => appendOption(circularSel, doc.doc_id, docDisplayLabel(doc, false)));
+                if (currentCircular && Array.from(circularSel.options).some(opt => opt.value === currentCircular)) {
+                    circularSel.value = currentCircular;
+                }
 
                 const isPolicy = document.getElementById('gapIsPolicy').value === 'true';
                 if (isPolicy) {
                     const polRes = await fetch(`${API_BASE}/policies`);
+                    if (!polRes.ok) throw new Error('Failed to load policies');
                     const polData = await polRes.json();
-                    baselineSel.innerHTML = '<option value="">Select Policy...</option>';
+                    clearAndSetPlaceholder(baselineSel, 'Select Policy...');
                     const policies = Array.isArray(polData) ? polData : (polData.policies || []);
                     policies.forEach(p => {
-                        const opt = document.createElement('option');
-                        opt.value = p.policy_id || p.id;
-                        opt.textContent = p.name || p.title;
-                        baselineSel.appendChild(opt);
+                        appendOption(baselineSel, p.policy_id || p.id, p.name || p.title);
                     });
                 } else {
-                    baselineSel.innerHTML = '<option value="">Select Baseline Document...</option>';
-                    docs.forEach(doc => {
-                        const opt = document.createElement('option');
-                        opt.value = doc.doc_id;
-                        opt.textContent = `${doc.filename || doc.doc_id} (${doc.jurisdiction})`;
-                        baselineSel.appendChild(opt);
+                    clearAndSetPlaceholder(baselineSel, 'Select Baseline Document...');
+                    const baselineDocs = docs.filter(doc => {
+                        const reqCount = requirementsCountForDoc(doc);
+                        return isIllustrativeDoc(doc) || (reqCount > 0 && !isRegulatoryCircular(doc));
                     });
+
+                    const capcoBaselines = baselineDocs
+                        .filter(doc => CAPCO_BASELINE_IDS.has(doc.doc_id))
+                        .map(doc => ({ value: doc.doc_id, label: docDisplayLabel(doc, true) }));
+                    const uploadedBaselines = baselineDocs
+                        .filter(doc => !CAPCO_BASELINE_IDS.has(doc.doc_id))
+                        .map(doc => ({ value: doc.doc_id, label: docDisplayLabel(doc, true) }));
+
+                    appendOptionGroup(baselineSel, 'Capco baselines', capcoBaselines);
+                    appendOptionGroup(baselineSel, 'Uploaded baselines', uploadedBaselines);
                 }
-                baselineSel.value = currentBaseline;
+                if (currentBaseline && Array.from(baselineSel.options).some(opt => opt.value === currentBaseline)) {
+                    baselineSel.value = currentBaseline;
+                }
             } catch (err) {
                 console.error('Error updating gap selectors:', err);
+                const circularSel = document.getElementById('gapCircular');
+                const baselineSel = document.getElementById('gapBaseline');
+                const currentCircular = circularSel.value;
+                const currentBaseline = baselineSel.value;
+                setFallbackGapSelectors(circularSel, baselineSel, currentCircular, currentBaseline);
             }
         }
 
@@ -1271,6 +1451,32 @@
             setTimeout(() => {
                 statusEl.classList.add('hidden');
             }, 5000);
+        }
+
+        function setBaselineUploadStatus(message, type = 'info', spinning = false) {
+            const statusEl = document.getElementById('baselineUploadStatus');
+            if (!statusEl) return;
+            statusEl.className = `status ${type}`;
+            statusEl.classList.remove('hidden');
+            statusEl.innerHTML = spinning
+                ? `<span class="spinner-dot" aria-hidden="true"></span>${message}`
+                : message;
+        }
+
+        function renderBaselineFileSelection(file) {
+            const hint = document.getElementById('baselineDropzoneHint');
+            hint.textContent = file ? file.name : 'No file selected';
+        }
+
+        function syncDropzoneFile(file) {
+            selectedBaselineUploadFile = file || null;
+            renderBaselineFileSelection(selectedBaselineUploadFile);
+        }
+
+        function isSupportedBaselineFile(file) {
+            if (!file) return false;
+            const lowerName = file.name.toLowerCase();
+            return lowerName.endsWith('.pdf') || lowerName.endsWith('.docx') || lowerName.endsWith('.txt');
         }
 
         function showResults(content) {
@@ -1587,6 +1793,120 @@
             }
         }
 
+        function extractErrorDetail(payload, fallback) {
+            if (!payload) return fallback;
+            if (typeof payload === 'string') return payload;
+            if (payload.detail) return payload.detail;
+            if (payload.message) return payload.message;
+            return fallback;
+        }
+
+        function initBaselineUploadCard() {
+            const dropzone = document.getElementById('baselineDropzone');
+            const fileInput = document.getElementById('baselineFileInput');
+            const form = document.getElementById('baselineUploadForm');
+
+            if (!dropzone || !fileInput || !form) return;
+
+            const openFilePicker = () => fileInput.click();
+            dropzone.addEventListener('click', openFilePicker);
+            dropzone.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openFilePicker();
+                }
+            });
+
+            ['dragenter', 'dragover'].forEach(evt => {
+                dropzone.addEventListener(evt, (event) => {
+                    event.preventDefault();
+                    dropzone.classList.add('dragover');
+                });
+            });
+            ['dragleave', 'drop'].forEach(evt => {
+                dropzone.addEventListener(evt, (event) => {
+                    event.preventDefault();
+                    dropzone.classList.remove('dragover');
+                });
+            });
+
+            fileInput.addEventListener('change', () => {
+                syncDropzoneFile(fileInput.files && fileInput.files[0] ? fileInput.files[0] : null);
+            });
+
+            dropzone.addEventListener('drop', (event) => {
+                const file = event.dataTransfer && event.dataTransfer.files ? event.dataTransfer.files[0] : null;
+                syncDropzoneFile(file);
+            });
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const uploadBtn = document.getElementById('baselineUploadBtn');
+                const nameInput = document.getElementById('baselineDocName');
+                const noLlm = document.getElementById('baselineNoLlm').checked;
+                const selectedFile = selectedBaselineUploadFile || (fileInput.files && fileInput.files[0]);
+
+                if (!isSupportedBaselineFile(selectedFile)) {
+                    setBaselineUploadStatus('Please select a .pdf, .docx, or .txt file.', 'error');
+                    return;
+                }
+
+                const docName = nameInput.value.trim();
+                if (!docName) {
+                    setBaselineUploadStatus('Document name is required.', 'error');
+                    return;
+                }
+
+                uploadBtn.disabled = true;
+                setBaselineUploadStatus(`Uploading and processing ${selectedFile.name}...`, 'info', true);
+
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+
+                const controller = new AbortController();
+                const timeoutId = window.setTimeout(() => controller.abort(), 120000);
+                const url = new URL(`${API_BASE}/upload`);
+                url.searchParams.set('jurisdiction', 'ILLUSTRATIVE');
+                url.searchParams.set('name', docName);
+                if (noLlm) {
+                    url.searchParams.set('no_llm', 'true');
+                }
+
+                try {
+                    const response = await fetch(url.toString(), {
+                        method: 'POST',
+                        body: formData,
+                        signal: controller.signal
+                    });
+
+                    const payload = await response.json().catch(() => null);
+                    if (!response.ok) {
+                        throw new Error(extractErrorDetail(payload, 'Upload failed'));
+                    }
+
+                    const docId = payload.doc_id || payload.id || 'unknown';
+                    setBaselineUploadStatus(
+                        `Uploaded — doc_id: ${docId}. Now available in the Gap Analysis baseline dropdown.`,
+                        'success'
+                    );
+                    await updateGapSelectors();
+                    loadDocuments();
+                    loadStats();
+                    form.reset();
+                    syncDropzoneFile(null);
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        setBaselineUploadStatus('Upload timed out after 120 seconds.', 'error');
+                    } else {
+                        setBaselineUploadStatus(error.message, 'error');
+                    }
+                } finally {
+                    window.clearTimeout(timeoutId);
+                    uploadBtn.disabled = false;
+                }
+            });
+        }
+
         // Upload form handler
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1875,20 +2195,7 @@
 
         document.getElementById('gapIsPolicy').addEventListener('change', updateGapSelectors);
 
-        // Load stats on page load
-        loadStats();
-        loadDocuments();
-        loadRequirements();
-        loadChanges();
-        loadEntities();
-        loadSources();
-        loadAlerts();
-        loadPolicies();
-        updateGapSelectors();
-        checkApiStatus();
-
         const apiBaseInput = document.getElementById('apiBaseInput');
-        apiBaseInput.value = API_BASE;
         document.getElementById('saveApiBaseBtn').addEventListener('click', () => {
             setApiBase(apiBaseInput.value.trim());
             showStatus('API base saved', 'success');
@@ -1900,12 +2207,28 @@
             loadSources();
             loadAlerts();
             loadPolicies();
+            updateGapSelectors();
         });
         apiBaseInput.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
                 event.preventDefault();
                 document.getElementById('saveApiBaseBtn').click();
             }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            apiBaseInput.value = API_BASE;
+            initBaselineUploadCard();
+            loadStats();
+            loadDocuments();
+            loadRequirements();
+            loadChanges();
+            loadEntities();
+            loadSources();
+            loadAlerts();
+            loadPolicies();
+            updateGapSelectors();
+            checkApiStatus();
         });
 
         document.querySelector('#changesTable tbody').addEventListener('click', async (event) => {
