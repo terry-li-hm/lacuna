@@ -1436,6 +1436,46 @@
             }
         }
 
+        async function exportGapPdf(circularId, baselineId) {
+            const btn = document.getElementById('exportGapPdfBtn');
+            const spinner = document.getElementById('exportPdfSpinner');
+            
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+            
+            try {
+                const response = await fetch(`${API_BASE}/gap-analysis/export`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        circular_doc_id: circularId,
+                        baseline_id: baselineId,
+                        is_policy_baseline: false,
+                        no_llm: isNoLlmMode()
+                    })
+                });
+                
+                if (!response.ok) throw new Error('PDF export failed');
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `lacuna-gap-report-${circularId.slice(0, 8)}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showStatus('PDF Report exported', 'success');
+            } catch (error) {
+                showStatus(`Export failed: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+            }
+        }
+
         async function loadDocuments(filters = {}) {
             try {
                 setTableLoading('#documentsTable', 'Loading documents...', 8);
@@ -1834,15 +1874,19 @@
                         <div class="stat-value" style="color: var(--accent-2);">${data.summary.Partial}</div>
                         <div class="stat-label">Partial</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value" style="color: #7c2d1a;">${data.summary.Gap}</div>
-                        <div class="stat-label">Gaps</div>
-                    </div>
-                </div>
-            `;
-            
-            html += `<table class="table">
-                <thead>
+                                    <div class="stat-item">
+                                        <div class="stat-value" style="color: #7c2d1a;">${data.summary.Gap}</div>
+                                        <div class="stat-label">Gaps</div>
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 20px; text-align: right;">
+                                    <button id="exportGapPdfBtn" class="btn-secondary" onclick="exportGapPdf('${data.circular_id}', '${data.baseline_id}')">
+                                        <span id="exportPdfSpinner" class="hidden">⌛</span> Export PDF Report
+                                    </button>
+                                </div>
+                            `;
+                    
+                            html += `<table class="table">                <thead>
                     <tr>
                         <th>Status</th>
                         <th>Requirement</th>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Regulatory Gap Analysis Report</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+            @bottom-right {
+                content: "Page " counter(page) " of " counter(pages);
+                font-family: sans-serif;
+                font-size: 9pt;
+                color: #666;
+            }
+            @bottom-left {
+                content: "Lacuna | Capco AI Regulatory Practice | Confidential";
+                font-family: sans-serif;
+                font-size: 9pt;
+                color: #666;
+            }
+        }
+
+        @page :first {
+            margin: 0;
+            @bottom-right { content: none; }
+            @bottom-left { content: none; }
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #333;
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Cover Page */
+        .cover-page {
+            background-color: #1D2329;
+            color: white;
+            height: 100vh;
+            width: 100%;
+            display: table;
+            text-align: center;
+        }
+
+        .cover-content {
+            display: table-cell;
+            vertical-align: middle;
+            padding: 40px;
+        }
+
+        .brand-lacuna {
+            font-size: 72pt;
+            font-weight: 700;
+            letter-spacing: -3px;
+            color: #E04E39;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .report-title {
+            font-size: 24pt;
+            font-weight: 400;
+            margin-bottom: 60px;
+            color: white;
+        }
+
+        .compare-info {
+            font-size: 14pt;
+            margin-bottom: 10px;
+            color: #eee;
+        }
+
+        .generated-date {
+            font-size: 10pt;
+            color: #999;
+            margin-top: 40px;
+        }
+
+        .cover-footer {
+            position: absolute;
+            bottom: 40px;
+            width: 100%;
+            text-align: center;
+            font-size: 11pt;
+            color: #ccc;
+        }
+
+        /* Common Page Elements */
+        .page-break {
+            page-break-before: always;
+        }
+
+        h1, h2, h3 {
+            color: #1D2329;
+        }
+
+        /* Summary Page */
+        .summary-stats {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 10px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            padding: 20px;
+            text-align: center;
+            border-radius: 4px;
+            color: white;
+            width: 33.33%;
+        }
+
+        .stat-full { background-color: #22c55e; }
+        .stat-partial { background-color: #f59e0b; }
+        .stat-gap { background-color: #ef4444; }
+
+        .stat-number {
+            font-size: 36pt;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 12pt;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        /* Findings */
+        .finding-section {
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .finding-white { background-color: #ffffff; border: 1px solid #eee; }
+        .finding-grey { background-color: #f9fafb; border: 1px solid #eee; }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 9pt;
+            font-weight: 700;
+            color: white;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .status-badge.Full { background-color: #22c55e; }
+        .status-badge.Partial { background-color: #f59e0b; }
+        .status-badge.Gap { background-color: #ef4444; }
+
+        .finding-description {
+            font-size: 14pt;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .finding-reasoning {
+            font-size: 11pt;
+            color: #4b5563;
+        }
+
+        .baseline-match {
+            border-left: 4px solid #E04E39;
+            background-color: #fef2f2;
+            padding: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            font-size: 10.5pt;
+        }
+
+        .provenance {
+            font-size: 8.5pt;
+            color: #9ca3af;
+            margin-top: 10px;
+        }
+
+        .baseline-label {
+            font-weight: 700;
+            color: #1D2329;
+            font-size: 8pt;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Cover Page -->
+    <div class="cover-page">
+        <div class="cover-content">
+            <div class="brand-lacuna">LACUNA</div>
+            <div class="report-title">Regulatory Gap Analysis Report</div>
+            <div class="compare-info">{{ circular_name }}</div>
+            <div class="compare-info">vs</div>
+            <div class="compare-info">{{ baseline_name }}</div>
+            <div class="generated-date">Generated: {{ generated_at }}</div>
+            <div class="cover-footer">
+                Confidential &mdash; Prepared by Capco AI Regulatory Practice
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Page -->
+    <div class="page-break">
+        <h1>Executive Summary</h1>
+        <p>This report presents a detailed gap analysis between the circular requirement and the established baseline.</p>
+        
+        <table class="summary-stats">
+            <tr>
+                <td class="stat-card stat-full">
+                    <span class="stat-number">{{ summary.Full or 0 }}</span>
+                    <span class="stat-label">Full Compliance</span>
+                </td>
+                <td class="stat-card stat-partial">
+                    <span class="stat-number">{{ summary.Partial or 0 }}</span>
+                    <span class="stat-label">Partial Match</span>
+                </td>
+                <td class="stat-card stat-gap">
+                    <span class="stat-number">{{ summary.Gap or 0 }}</span>
+                    <span class="stat-label">Compliance Gap</span>
+                </td>
+            </tr>
+        </table>
+
+        <div style="margin-top: 40px;">
+            <p><strong>Circular:</strong> {{ circular_name }}</p>
+            <p><strong>Baseline:</strong> {{ baseline_name }}</p>
+        </div>
+    </div>
+
+    <!-- Findings Section -->
+    <div class="page-break">
+        <h2>Detailed Findings</h2>
+        {% for finding in findings %}
+        <div class="finding-section {{ loop.cycle('finding-white', 'finding-grey') }}">
+            <span class="status-badge {{ finding.status }}">{{ finding.status }}</span>
+            <h3 class="finding-description">{{ finding.description }}</h3>
+            <p class="finding-reasoning">{{ finding.reasoning }}</p>
+            
+            {% if finding.baseline_match_text %}
+            <div class="baseline-match">
+                <span class="baseline-label">Baseline Reference:</span>
+                {{ finding.baseline_match_text }}
+            </div>
+            {% endif %}
+
+            {% if finding.provenance %}
+            <div class="provenance">
+                <strong>Sources:</strong> 
+                {% for p in finding.provenance %}
+                    {{ p.doc_id }} ({{ p.source_type }}){{ ", " if not loop.last }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
