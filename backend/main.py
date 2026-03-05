@@ -1,11 +1,12 @@
 """FastAPI application for Meridian regulatory analytics platform."""
 
+import hmac
 import logging
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from backend.config import settings
 from backend.routes import (
@@ -38,11 +39,38 @@ app = FastAPI(
     version="0.1.0",
 )
 
+@app.middleware("http")
+async def api_key_middleware(request: Request, call_next):
+    if request.url.path in ("/", "/health", "/docs", "/openapi.json", "/redoc"):
+        return await call_next(request)
+
+    if not settings.lacuna_api_keys:
+        return await call_next(request)
+
+    submitted = request.headers.get("X-API-Key", "")
+    if not submitted:
+        return JSONResponse({"detail": "Invalid or missing API key"}, status_code=401)
+
+    valid = any(
+        hmac.compare_digest(submitted.encode(), key.encode())
+        for key in settings.lacuna_api_keys
+    )
+    if not valid:
+        return JSONResponse({"detail": "Invalid or missing API key"}, status_code=401)
+
+    return await call_next(request)
+
+@app.on_event("startup")
+async def startup_auth_warning():
+    if not settings.lacuna_api_keys:
+        logger.warning("LACUNA_API_KEYS not set - API key auth is DISABLED. Set before production use.")
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://meridian-production-1bdb.up.railway.app",
+        "https://lacuna.sh",
+        "https://lacuna-production-8dbb.up.railway.app",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
     ],

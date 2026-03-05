@@ -40,12 +40,38 @@
         }
 
         header {
+            position: relative;
             background: var(--card);
             padding: 30px;
             border-radius: 18px;
             box-shadow: var(--shadow);
             margin-bottom: 30px;
             border: 1px solid var(--border);
+        }
+
+        .settings-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 38px;
+            height: 38px;
+            border-radius: 999px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #f1f5f2;
+            color: var(--ink-1);
+            border: 1px solid var(--border);
+            box-shadow: none;
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .settings-btn:hover {
+            transform: none;
+            box-shadow: 0 2px 8px rgba(23, 29, 33, 0.12);
+            border-color: rgba(23, 122, 107, 0.4);
         }
 
         h1 {
@@ -95,6 +121,7 @@
         }
 
         input[type="text"],
+        input[type="password"],
         input[type="file"],
         select {
             width: 100%;
@@ -107,9 +134,61 @@
         }
 
         input[type="text"]:focus,
+        input[type="password"]:focus,
         select:focus {
             outline: none;
             border-color: var(--accent);
+        }
+
+        .auth-banner {
+            background: #f6e3d9;
+            color: #7c2d1a;
+            border: 1px solid rgba(216, 122, 42, 0.45);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .auth-banner button {
+            margin-left: 10px;
+            padding: 6px 12px;
+            font-size: 12px;
+            background: #7c2d1a;
+            color: #fff;
+        }
+
+        .settings-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(16, 23, 28, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .settings-modal {
+            width: min(420px, 100%);
+            background: #fff;
+            border-radius: 14px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .settings-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .settings-status {
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--accent);
+            min-height: 18px;
         }
 
         button {
@@ -516,7 +595,12 @@
 </head>
 <body>
     <div class="container">
+        <div id="authBanner" class="auth-banner hidden" role="alert" aria-live="assertive">
+            Authentication required - open ⚙ Settings to enter your API key.
+            <button type="button" id="authBannerSettingsBtn">Open Settings</button>
+        </div>
         <header>
+            <button type="button" id="settingsBtn" class="settings-btn" aria-label="Open settings">⚙</button>
             <h1>Lacuna</h1>
             <p class="subtitle">Cross-jurisdiction regulatory analytics for financial institutions</p>
             <div class="top-bar">
@@ -1323,6 +1407,19 @@
         </div>
 
         <div id="statusMessage" class="hidden" role="status" aria-live="polite"></div>
+        <div id="settingsModal" class="settings-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+            <div class="settings-modal">
+                <h3 id="settingsTitle" style="margin-bottom: 12px;">Settings</h3>
+                <label for="apiKeyInput">API Key</label>
+                <input type="password" id="apiKeyInput" placeholder="Enter API key" autocomplete="off">
+                <div class="settings-actions">
+                    <button type="button" id="saveApiKeyBtn">Save</button>
+                    <button type="button" id="clearApiKeyBtn" class="btn-secondary">Clear</button>
+                    <button type="button" id="closeSettingsBtn" class="btn-secondary">Close</button>
+                </div>
+                <div id="settingsSavedStatus" class="settings-status"></div>
+            </div>
+        </div>
         
         <div id="results" class="results hidden">
             <h2>Results</h2>
@@ -1332,6 +1429,7 @@
 
     <script>
         const API_BASE_STORAGE_KEY = 'lacuna_api_base';
+        const API_KEY_STORAGE_KEY = 'lacuna_api_key';
 
         function defaultApiBase() {
             if (window.location.protocol.startsWith('http')) {
@@ -1339,6 +1437,36 @@
             }
             return 'http://localhost:8000';
         }
+
+        function apiHeaders() {
+            const key = localStorage.getItem('lacuna_api_key') || '';
+            return key ? { 'X-API-Key': key } : {};
+        }
+
+        function showAuthBanner() {
+            const banner = document.getElementById('authBanner');
+            if (banner) {
+                banner.classList.remove('hidden');
+            }
+        }
+
+        function hideAuthBanner() {
+            const banner = document.getElementById('authBanner');
+            if (banner) {
+                banner.classList.add('hidden');
+            }
+        }
+
+        const nativeFetch = window.fetch.bind(window);
+        async function apiFetch(resource, init = {}) {
+            const mergedHeaders = { ...(init.headers || {}), ...apiHeaders() };
+            const response = await nativeFetch(resource, { ...init, headers: mergedHeaders });
+            if (response.status === 401) {
+                showAuthBanner();
+            }
+            return response;
+        }
+        window.fetch = apiFetch;
 
         let API_BASE = localStorage.getItem(API_BASE_STORAGE_KEY) || defaultApiBase();
         let selectedBaselineUploadFile = null;
@@ -1402,6 +1530,45 @@
             API_BASE = value.replace(/\/$/, '');
             localStorage.setItem(API_BASE_STORAGE_KEY, API_BASE);
             checkApiStatus();
+        }
+
+        function openSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            const input = document.getElementById('apiKeyInput');
+            const saved = localStorage.getItem(API_KEY_STORAGE_KEY) || '';
+            const status = document.getElementById('settingsSavedStatus');
+            if (status) status.textContent = '';
+            if (input) {
+                input.value = saved;
+                input.focus();
+            }
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function saveApiKey() {
+            const input = document.getElementById('apiKeyInput');
+            const status = document.getElementById('settingsSavedStatus');
+            if (!input) return;
+            localStorage.setItem(API_KEY_STORAGE_KEY, input.value.trim());
+            if (status) status.textContent = 'Saved ✓';
+            hideAuthBanner();
+            window.setTimeout(() => {
+                closeSettingsModal();
+                if (status) status.textContent = '';
+            }, 1000);
+        }
+
+        function clearApiKey() {
+            const input = document.getElementById('apiKeyInput');
+            const status = document.getElementById('settingsSavedStatus');
+            localStorage.removeItem(API_KEY_STORAGE_KEY);
+            if (input) input.value = '';
+            if (status) status.textContent = 'Cleared';
         }
 
         function requirementsCountForDoc(doc) {
@@ -2629,6 +2796,16 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             apiBaseInput.value = API_BASE;
+            document.getElementById('settingsBtn').addEventListener('click', openSettingsModal);
+            document.getElementById('closeSettingsBtn').addEventListener('click', closeSettingsModal);
+            document.getElementById('saveApiKeyBtn').addEventListener('click', saveApiKey);
+            document.getElementById('clearApiKeyBtn').addEventListener('click', clearApiKey);
+            document.getElementById('authBannerSettingsBtn').addEventListener('click', openSettingsModal);
+            document.getElementById('settingsModal').addEventListener('click', (event) => {
+                if (event.target.id === 'settingsModal') {
+                    closeSettingsModal();
+                }
+            });
             initBaselineUploadCard();
             loadStats();
             loadDocuments();

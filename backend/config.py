@@ -3,7 +3,7 @@
 import os
 from pathlib import Path
 from pydantic_settings import BaseSettings
-from pydantic import Field
+from pydantic import Field, field_validator
 
 
 class Settings(BaseSettings):
@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     openai_api_key: str | None = None
     openai_base_url: str = "https://openrouter.ai/api/v1"
     no_llm: bool = Field(False, env="REG_ATLAS_NO_LLM")
+    lacuna_api_keys: list[str] = Field(default_factory=list, env="LACUNA_API_KEYS")
     
     # Application Settings
     log_level: str = "INFO"
@@ -27,6 +28,13 @@ class Settings(BaseSettings):
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
     llm_model: str = "openai/gpt-4o-mini"  # Default for extraction
     gap_analysis_model: str = "anthropic/claude-sonnet-4"  # For structured regulatory reasoning
+
+    @field_validator("lacuna_api_keys", mode="before")
+    @classmethod
+    def parse_keys(cls, v):
+        if isinstance(v, str):
+            return [k.strip() for k in v.split(",") if k.strip()]
+        return v or []
     
     class Config:
         env_file = ".env"
