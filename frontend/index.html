@@ -555,6 +555,52 @@
             </form>
         </div>
 
+        <div class="card">
+            <h2>Comparison Matrix</h2>
+            <p class="muted" style="margin-bottom: 15px;">Compare multiple circulars against a baseline framework to visualize compliance coverage across jurisdictions.</p>
+            <div class="form-row" style="margin-bottom: 20px; align-items: flex-end;">
+                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                    <label for="matrixBaseline">Baseline Framework</label>
+                    <select id="matrixBaseline">
+                        <option value="2dc4de40-a058-4906-bff4-9aa11e1e6ba4">Codex Argentum v1.1</option>
+                        <option value="bca67e5b-babe-4870-b0a1-e99e87e327a4">NIST AI RMF 1.0</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                    <label>Jurisdiction Filter</label>
+                    <div style="display: flex; gap: 15px; padding-top: 10px;">
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; margin-bottom: 0;">
+                            <input type="radio" name="matrixJurisdiction" value="HK" checked> HK
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; margin-bottom: 0;">
+                            <input type="radio" name="matrixJurisdiction" value="SG"> SG
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; margin-bottom: 0;">
+                            <input type="radio" name="matrixJurisdiction" value="EU"> EU
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; margin-bottom: 0;">
+                            <input type="radio" name="matrixJurisdiction" value="All"> All
+                        </label>
+                    </div>
+                </div>
+                <button type="button" id="runMatrixBtn" style="height: 42px;">Run Matrix</button>
+            </div>
+            <div id="matrixResultsWrap" class="hidden">
+                <table class="table" id="matrixTable">
+                    <thead>
+                        <tr>
+                            <th>Circular Document</th>
+                            <th style="text-align: center;">Full</th>
+                            <th style="text-align: center;">Partial</th>
+                            <th style="text-align: center;">Gap</th>
+                            <th style="text-align: center;">Total Reqs</th>
+                        </tr>
+                    </thead>
+                    <tbody id="matrixTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="main-grid">
             <div class="card">
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
@@ -1766,54 +1812,7 @@
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.detail || 'Gap analysis failed');
                 
-                let html = `
-                    <h3>Gap Analysis Report</h3>
-                    <div class="stats" style="margin-bottom: 20px;">
-                        <div class="stat-item">
-                            <div class="stat-value" style="color: var(--accent);">${data.summary.Full}</div>
-                            <div class="stat-label">Full Coverage</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value" style="color: var(--accent-2);">${data.summary.Partial}</div>
-                            <div class="stat-label">Partial</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value" style="color: #7c2d1a;">${data.summary.Gap}</div>
-                            <div class="stat-label">Gaps</div>
-                        </div>
-                    </div>
-                `;
-                
-                html += `<table class="table">
-                    <thead>
-                        <tr>
-                            <th>Status</th>
-                            <th>Requirement</th>
-                            <th>Reasoning & Evidence</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
-                
-                data.findings.forEach(f => {
-                    const statusClass = f.status === 'Full' ? 'badge' : (f.status === 'Partial' ? 'badge warn' : 'badge warn');
-                    const color = f.status === 'Full' ? 'var(--accent)' : (f.status === 'Partial' ? 'var(--accent-2)' : '#7c2d1a');
-                    
-                    html += `<tr>
-                        <td><span class="${statusClass}" style="background-color: ${color}22; color: ${color};">${f.status}</span></td>
-                        <td><strong>${f.description}</strong></td>
-                        <td>
-                            <div style="margin-bottom: 8px;">${f.reasoning}</div>
-                            ${f.provenance.map(p => `
-                                <div class="evidence">
-                                    <strong>Source [${p.chunk_id.split('_').pop()}]:</strong> ${p.text_segment}
-                                    <div class="muted" style="margin-top: 4px;">Doc ID: ${p.doc_id}</div>
-                                </div>`).join('')}
-                        </td>
-                    </tr>`;
-                });
-                
-                html += `</tbody></table>`;
-                showResults(html);
+                showResults(renderGapFindingsTable(data));
                 showStatus('Gap analysis complete', 'success');
             } catch (error) {
                 showStatus(error.message, 'error');
@@ -1822,6 +1821,57 @@
                 gapBtn.textContent = 'Run Audit-Grade Gap Analysis';
             }
         });
+
+        function renderGapFindingsTable(data) {
+            let html = `
+                <h3>Gap Analysis Report</h3>
+                <div class="stats" style="margin-bottom: 20px;">
+                    <div class="stat-item">
+                        <div class="stat-value" style="color: var(--accent);">${data.summary.Full}</div>
+                        <div class="stat-label">Full Coverage</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" style="color: var(--accent-2);">${data.summary.Partial}</div>
+                        <div class="stat-label">Partial</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" style="color: #7c2d1a;">${data.summary.Gap}</div>
+                        <div class="stat-label">Gaps</div>
+                    </div>
+                </div>
+            `;
+            
+            html += `<table class="table">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Requirement</th>
+                        <th>Reasoning & Evidence</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            
+            data.findings.forEach(f => {
+                const statusClass = f.status === 'Full' ? 'badge' : (f.status === 'Partial' ? 'badge warn' : 'badge warn');
+                const color = f.status === 'Full' ? 'var(--accent)' : (f.status === 'Partial' ? 'var(--accent-2)' : '#7c2d1a');
+                
+                html += `<tr>
+                    <td><span class="${statusClass}" style="background-color: ${color}22; color: ${color};">${f.status}</span></td>
+                    <td><strong>${f.description}</strong></td>
+                    <td>
+                        <div style="margin-bottom: 8px;">${f.reasoning}</div>
+                        ${f.provenance.map(p => `
+                            <div class="evidence">
+                                <strong>Source [${p.chunk_id.split('_').pop()}]:</strong> ${p.text_segment}
+                                <div class="muted" style="margin-top: 4px;">Doc ID: ${p.doc_id}</div>
+                            </div>`).join('')}
+                    </td>
+                </tr>`;
+            });
+            
+            html += `</tbody></table>`;
+            return html;
+        }
 
         document.getElementById('gapIsPolicy').addEventListener('change', updateGapSelectors);
 
@@ -2452,6 +2502,107 @@
                 btn.textContent = 'Update Policy';
             }
         });
+
+        const CIRCULARS = [
+            { id: '86bcafef-0fbb-4e04-932b-75bd1d2c7b3f', name: 'HKMA Consumer Protection 2024', jurisdiction: 'HK' },
+            { id: 'b49334de-4f79-4dde-99ca-52c861b3351c', name: 'HKMA GenAI Financial Services 2024', jurisdiction: 'HK' },
+            { id: '6abfcf50-d0ac-44c9-9608-b187cd683009', name: 'HKMA GenAI Sandbox Arrangement 2024', jurisdiction: 'HK' },
+            { id: 'ec614bf1-4962-4c77-b40b-e35461e8d54b', name: 'HKMA SPM CA-G-1 Revised 2024', jurisdiction: 'HK' },
+            { id: '42af8c8b-ff0a-4431-a89f-320e0cfd7c04', name: 'MAS AI Risk Management Consultation 2025', jurisdiction: 'SG' },
+            { id: '7aa4d4a2-d707-4508-82af-78958a36dc68', name: 'MAS AI Model Risk Management 2024', jurisdiction: 'SG' },
+            { id: '4a8de9c2-027a-4799-af3a-afff5b72528f', name: 'EU AI Act (Regulation 2024/1689)', jurisdiction: 'EU' },
+            { id: '0b9af5df-3c6a-4b33-8ea5-741161122e17', name: 'FCA AI Update 2024', jurisdiction: 'EU' }
+        ];
+
+        const matrixResults = {};
+
+        async function runMatrix() {
+            const baselineId = document.getElementById('matrixBaseline').value;
+            const jurisdiction = document.querySelector('input[name="matrixJurisdiction"]:checked').value;
+            const tableBody = document.getElementById('matrixTableBody');
+            const wrap = document.getElementById('matrixResultsWrap');
+            const runBtn = document.getElementById('runMatrixBtn');
+
+            wrap.classList.remove('hidden');
+            tableBody.innerHTML = '';
+            runBtn.disabled = true;
+
+            const targetCirculars = CIRCULARS.filter(c => jurisdiction === 'All' || c.jurisdiction === jurisdiction);
+
+            const matrixPromises = targetCirculars.map(async (circular) => {
+                const row = document.createElement('tr');
+                row.id = `matrix-row-${circular.id}`;
+                row.innerHTML = `
+                    <td><strong>${circular.name}</strong></td>
+                    <td colspan="4" style="text-align: center;"><span class="muted">Analyzing...</span></td>
+                `;
+                tableBody.appendChild(row);
+
+                try {
+                    const response = await fetch(`${API_BASE}/gap-analysis`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            circular_doc_id: circular.id,
+                            baseline_id: baselineId,
+                            is_policy_baseline: false,
+                            no_llm: isNoLlmMode()
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.detail || 'Failed');
+
+                    matrixResults[circular.id] = data;
+
+                    row.style.cursor = 'pointer';
+                    row.onclick = () => toggleMatrixExpansion(circular.id);
+                    row.innerHTML = `
+                        <td>
+                            <strong>${circular.name}</strong>
+                            <div class="muted" style="font-size: 10px;">Click to toggle findings</div>
+                        </td>
+                        <td style="text-align: center;"><span class="badge" style="background: #e0f1ea; color: var(--accent); min-width: 40px; display: inline-block;">${data.summary.Full}</span></td>
+                        <td style="text-align: center;"><span class="badge" style="background: #fdf4e3; color: var(--accent-2); min-width: 40px; display: inline-block;">${data.summary.Partial}</span></td>
+                        <td style="text-align: center;"><span class="badge" style="background: #f6e3d9; color: #7c2d1a; min-width: 40px; display: inline-block;">${data.summary.Gap}</span></td>
+                        <td style="text-align: center; font-weight: 600;">${data.findings.length}</td>
+                    `;
+                } catch (err) {
+                    row.innerHTML = `
+                        <td><strong>${circular.name}</strong></td>
+                        <td colspan="4" style="text-align: center; color: #7c2d1a;">Error: ${err.message}</td>
+                    `;
+                }
+            });
+
+            await Promise.all(matrixPromises);
+            runBtn.disabled = false;
+        }
+
+        function toggleMatrixExpansion(circularId) {
+            const existingExpansion = document.getElementById(`expansion-${circularId}`);
+            if (existingExpansion) {
+                existingExpansion.remove();
+                return;
+            }
+
+            const data = matrixResults[circularId];
+            if (!data) return;
+
+            const mainRow = document.getElementById(`matrix-row-${circularId}`);
+            const expansionRow = document.createElement('tr');
+            expansionRow.id = `expansion-${circularId}`;
+            expansionRow.innerHTML = `
+                <td colspan="5" style="background: #fbfbfa; padding: 20px; border-bottom: 2px solid var(--accent);">
+                    <div class="findings-container">
+                        ${renderGapFindingsTable(data)}
+                    </div>
+                </td>
+            `;
+            mainRow.after(expansionRow);
+        }
+
+        document.getElementById('runMatrixBtn').addEventListener('click', runMatrix);
     </script>
 </body>
 </html>
