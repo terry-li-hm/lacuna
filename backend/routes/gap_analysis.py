@@ -1,5 +1,6 @@
 """Gap analysis routes for Meridian API."""
 
+import asyncio
 import logging
 from typing import Dict, Any
 from fastapi import APIRouter, HTTPException, Depends
@@ -10,6 +11,9 @@ from backend.state import (
 from backend.models.schemas import (
     GapAnalysisRequest,
     GapAnalysisResponse,
+    BatchGapAnalysisRequest,
+    BatchGapAnalysisResponse,
+    BatchGapAnalysisResult,
 )
 
 logger = logging.getLogger(__name__)
@@ -51,3 +55,64 @@ async def gap_analysis(
     except Exception as e:
         logger.error(f"Error performing gap analysis: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.post("/gap-analysis/batch", response_model=BatchGapAnalysisResponse)
+async def batch_gap_analysis(
+    request: BatchGapAnalysisRequest, service=Depends(get_gap_analysis_service)
+):
+    """
+    Perform gap analysis for one baseline against multiple circulars in parallel.
+    Individual failures are returned per circular without failing the whole batch.
+    """
+
+    async def _analyze_single(circular_doc_id: str) -> BatchGapAnalysisResult:
+        cache_key = (circular_doc_id, request.baseline_id, request.is_policy_baseline)
+        if cache_key in _gap_cache and not request.no_llm:
+            logger.info(
+                f"Gap analysis cache hit — returning cached result for {circular_doc_id}"
+            )
+            return BatchGapAnalysisResult(
+                circular_doc_id=circular_doc_id, result=_gap_cache[cache_key]
+            )
+
+        try:
+            result = await service.perform_gap_analysis(
+                circular_doc_id=circular_doc_id,
+                baseline_id=request.baseline_id,
+                is_policy_baseline=request.is_policy_baseline,
+                no_llm=request.no_llm,
+            )
+            if not request.no_llm:
+                _gap_cache[cache_key] = result
+            return BatchGapAnalysisResult(circular_doc_id=circular_doc_id, result=result)
+        except ValueError as e:
+            return BatchGapAnalysisResult(circular_doc_id=circular_doc_id, error=str(e))
+        except Exception as e:
+            logger.error(
+                f"Error performing gap analysis for {circular_doc_id}: {e}",
+                exc_info=True,
+            )
+            return BatchGapAnalysisResult(
+                circular_doc_id=circular_doc_id, error="Internal server error"
+            )
+
+    tasks = [_analyze_single(circular_doc_id) for circular_doc_id in request.circular_doc_ids]
+    gathered_results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    results = []
+    for circular_doc_id, item in zip(request.circular_doc_ids, gathered_results):
+        if isinstance(item, Exception):
+            logger.error(
+                f"Error performing gap analysis for {circular_doc_id}: {item}",
+                exc_info=True,
+            )
+            results.append(
+                BatchGapAnalysisResult(
+                    circular_doc_id=circular_doc_id, error="Internal server error"
+                )
+            )
+        else:
+            results.append(item)
+
+    return BatchGapAnalysisResponse(baseline_id=request.baseline_id, results=results)

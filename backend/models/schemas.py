@@ -113,6 +113,30 @@ class GapAnalysisResponse(BaseModel):
     findings: List[GapRequirementMapping]
 
 
+class BatchGapAnalysisRequest(BaseModel):
+    """Request model for batch gap analysis."""
+
+    circular_doc_ids: List[str]
+    baseline_id: str
+    is_policy_baseline: bool = False
+    no_llm: bool = False
+
+
+class BatchGapAnalysisResult(BaseModel):
+    """Result model for a single circular in a batch gap analysis."""
+
+    circular_doc_id: str
+    result: GapAnalysisResponse | None = None
+    error: str | None = None
+
+
+class BatchGapAnalysisResponse(BaseModel):
+    """Response model for batch gap analysis."""
+
+    baseline_id: str
+    results: List[BatchGapAnalysisResult]
+
+
 __all__ = [
     "QueryRequest",
     "QueryResponse",
@@ -125,4 +149,7 @@ __all__ = [
     "GapRequirementMapping",
     "GapAnalysisRequest",
     "GapAnalysisResponse",
+    "BatchGapAnalysisRequest",
+    "BatchGapAnalysisResult",
+    "BatchGapAnalysisResponse",
 ]
