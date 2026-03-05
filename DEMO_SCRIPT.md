@@ -8,7 +8,7 @@
 
 ## Setup (before the demo)
 
-1. `lacuna preflight` — full health check (API + all docs + cache warmup). Expected: `PASS — demo ready.`
+1. `lacuna preflight` — full health check (API + 9 docs + cache warmup). Expected: `PASS — demo ready.` with Full:1 Partial:5 Gap:2
 2. Open https://lacuna.sh in Chrome, full screen
 3. Verify the dashboard loads with documents and stats
 4. Have these queries ready to paste:
@@ -22,7 +22,7 @@
 > "Tobin, I built something I think directly addresses the delta problem — when a new circular drops, how much does it add to what your existing standard already covers?"
 
 Open Lacuna. The dashboard loads showing:
-- 8 real regulatory documents across 4 jurisdictions
+- 9 real regulatory documents across 4 jurisdictions
 - Overdue alerts badge in the corner
 - The Regulatory Radar section at the top with a live HKMA/PCPD detection
 
@@ -54,25 +54,25 @@ Set jurisdiction to **European Union**.
 
 Navigate to the **Gap Analysis** section. Select:
 - **Circular:** HKMA Consumer Protection 2024
-- **Baseline:** Codex Argentum v1.0 (the illustrative policy baseline, already in the system)
+- **Baseline:** Codex Argentum v1.1 (the illustrative policy baseline, already in the system)
 
 Submit. Result returns instantly (pre-cached):
 
 ```
-Full:    0
-Partial: 3   ← Governance accountability, fairness/bias, customer opt-out
-Gap:     4   ← BDAI Guiding Principles, transparency, PDPO/data privacy, proactive consumer protection
+Full:    1   ← Customer opt-out / human escalation
+Partial: 5   ← Board accountability, human-in-loop, fairness/bias, disclosure, PDPO/data privacy
+Gap:     2   ← BDAI Guiding Principles (×2: apply principles + proactive consumer protection)
 ```
 
-> ⚠ Results reflect **Codex Argentum v1.1** (updated Mar 3 — §3.9, §8.1e added). Re-run `lacuna preflight` before each demo to confirm counts are still 0/3/4.
+Click into a **Partial** finding — show the reasoning. Best one: **Board accountability**
 
-Click into a **Partial** finding — show the reasoning:
+> *"[Partial] The board and senior management must be accountable for GenAI-driven decisions. The baseline addresses governance mechanisms and requires a named AI System Owner at an appropriately senior level, and governance body approval for autonomous deployment. However, there is no specific provision establishing board and senior management accountability for GenAI-driven decisions. The baseline focuses on operational controls rather than executive-level accountability frameworks."*
 
-> *"[Partial] Customer opt-out — The baseline provides a human escalation pathway and states customers shall not be required to interact solely with an AI system. However, it does not explicitly address the HKMA's specific requirement for a customer-initiated opt-out from GenAI-generated decisions at their discretion, nor the alternative measures required where opt-out cannot be provided."*
+Click into a **Gap** finding — **BDAI Guiding Principles**:
 
-Click into a **Gap** finding:
+> *"[Gap] The circular requires institutions to apply and extend the 2019 BDAI Guiding Principles to the use of GenAI in customer-facing applications. The baseline contains detailed GenAI governance requirements but makes no reference to the 2019 BDAI Guiding Principles. While it includes ethical AI principles assessment, disclosure requirements, and third-party vendor management, it does not explicitly connect these controls to the BDAI Guiding Principles framework."*
 
-> *"[Gap] BDAI Guiding Principles — The baseline does not reference or incorporate the 2019 BDAI Guiding Principles. While it draws on publicly available frameworks, there is no explicit requirement to apply or extend the BDAI Guiding Principles to GenAI in customer-facing applications."*
+> ⚠ **Full:1 Partial:5 Gap:2 is the calibrated result for Codex Argentum v1.1 as of Mar 6 2026.** Re-run `lacuna preflight` before each demo to confirm counts haven't changed (cache resets on Railway restart).
 
 > "The Partial findings are where the work actually lives. Each one isn't 'mostly fine' — each one is a governance decision: does the existing control language satisfy this requirement, or does it need to be amended? That question currently takes a compliance team days of manual cross-referencing. This produces the same output in seconds, with citations ready for the drafter."
 
@@ -80,7 +80,7 @@ Click into a **Gap** finding:
 
 **If Tobin asks to run it against a real HSBC document:** "That's exactly the point. This baseline is illustrative — it's showing you the workflow. The moment you drop in your actual Chapter 5, the analysis runs the same way against real text. The interesting test is whether it performs just as cleanly on messier internal language. Happy to try that live if you have something accessible."
 
-**If asked — second credibility test:** Run `lacuna gap --circular hkma-cp --baseline nist-rmf`. "This is the NIST AI Risk Management Framework — a document I had no hand in writing. The tool handling it with the same precision is how you know it's not optimised for a specific input."
+**If asked — second credibility test:** Run `lacuna gap --circular hkma-cp --baseline mas-mrmf`. "This is the MAS AI Model Risk Management Framework — a document I had no hand in writing. The tool handling it with the same precision is how you know it's not optimised for a specific input."
 
 ---
 
@@ -124,6 +124,9 @@ Briefly mention the RSS feed sources:
 - 2 MAS documents (AI Model Risk Management, AI Risk Management Consultation)
 - 1 EU AI Act (full Regulation 2024/1689, 144 pages)
 - 1 FCA AI Update (2024)
+- 1 Codex Argentum v1.1 illustrative baseline (Capco-authored)
+
+**If Tobin asks about the export:** After showing gap results, click **Export PDF** or **Export Word** — downloads a branded report with findings and citations. "You can share this with the policy team directly — it's ready for a Word review."
 
 **If Tobin asks about the AI model:**
 - Extraction: GPT-4o-mini via OpenRouter (fast, cost-effective)
