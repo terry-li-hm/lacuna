@@ -1,3 +1,4 @@
+import asyncio
 import uuid
 import logging
 from datetime import datetime, timezone
@@ -68,9 +69,10 @@ class DocumentService:
             if not full_text.strip():
                 raise ValueError("No text extracted from document")
 
-            # Extract requirements
-            requirements_payload = self.llm_service.extract_requirements(
-                full_text, jurisdiction, force_basic=no_llm
+            # Extract requirements (wrapped in thread to avoid blocking the event loop
+            # during long LLM extraction — hkma-gai takes ~6min with 130 requirements)
+            requirements_payload = await asyncio.to_thread(
+                self.llm_service.extract_requirements, full_text, jurisdiction, no_llm
             )
 
             # Chunk and add to vector store

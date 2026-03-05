@@ -84,6 +84,26 @@ Click into a **Gap** finding — **BDAI Guiding Principles**:
 
 ---
 
+## Act 3b: Export (30s — if Tobin wants to take something away)
+
+After the gap analysis results render, click **Export Word** (or **Export PDF**).
+
+> "The findings download as a Word document — ready for your policy drafting team to mark up directly. Each gap has the requirement text, the reasoning, and the baseline citation."
+
+If he wants to email it to someone on the spot: it downloads as `lacuna-gap-report.docx`. Hand it over. This moment is more impactful than explaining it.
+
+---
+
+## Act 3c: Comparison Matrix (30s — if time permits)
+
+Scroll to the **Comparison Matrix** section.
+
+> "If you wanted to compare the Consumer Protection circular against multiple baselines at once — your current AI Standard *and* the MAS model risk framework — the matrix view runs all the gap analyses in parallel and shows you a heat map. Full/Partial/Gap across every combination."
+
+This is the multi-jurisdiction view that matters for HSBC: same circular, compared against policies from different lines of business or jurisdictions.
+
+---
+
 ## Act 4: Change Tracking & Alerts (60s)
 
 Scroll to the **Regulatory Change Register**.
