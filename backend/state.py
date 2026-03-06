@@ -15,6 +15,7 @@ from backend.storage import (
     DocumentRepository,
     PolicyRepository,
     AuditLogRepository,
+    ConfirmedRequirementRepository,
 )
 
 logger = logging.getLogger(__name__)
@@ -202,6 +203,7 @@ changes_db: Dict[str, Dict[str, Any]] = {}
 _document_repo: Optional[DocumentRepository] = None
 _policy_repo: Optional[PolicyRepository] = None
 _audit_log_repo: Optional[AuditLogRepository] = None
+_confirm_repo: Optional[ConfirmedRequirementRepository] = None
 
 # Service instances
 _llm_service: Optional[Any] = None
@@ -216,6 +218,7 @@ _evidence_service: Optional[Any] = None
 _change_service: Optional[Any] = None
 _scan_service: Optional[Any] = None
 _decompose_service: Optional[Any] = None
+_confirm_service: Optional[Any] = None
 
 # Components - will be initialized in main.py
 doc_processor = None
@@ -246,6 +249,14 @@ def get_audit_log_repo() -> AuditLogRepository:
     if _audit_log_repo is None:
         _audit_log_repo = AuditLogRepository()
     return _audit_log_repo
+
+
+def get_confirm_repo() -> ConfirmedRequirementRepository:
+    """Get or create the confirmed requirement repository singleton."""
+    global _confirm_repo
+    if _confirm_repo is None:
+        _confirm_repo = ConfirmedRequirementRepository()
+    return _confirm_repo
 
 
 def get_llm_service():
@@ -398,6 +409,19 @@ def get_decompose_service():
             req_extractor=req_extractor,
         )
     return _decompose_service
+
+
+def get_confirm_service():
+    """Get or create the confirm service singleton."""
+    global _confirm_service
+    if _confirm_service is None:
+        from backend.services.confirm_service import ConfirmService
+
+        _confirm_service = ConfirmService(
+            doc_repo=get_document_repo(),
+            confirm_repo=get_confirm_repo(),
+        )
+    return _confirm_service
 
 
 def init_state():

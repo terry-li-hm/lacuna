@@ -103,6 +103,7 @@ class RegAtlasClient:
         baseline_id: str,
         is_policy_baseline: bool = False,
         include_completeness_audit: bool = False,
+        use_confirmed: bool = False,
         no_llm: bool = False
     ) -> Dict[str, Any]:
         """Perform gap analysis between circular and baseline."""
@@ -111,6 +112,7 @@ class RegAtlasClient:
             "baseline_id": baseline_id,
             "is_policy_baseline": is_policy_baseline,
             "include_completeness_audit": include_completeness_audit,
+            "use_confirmed": use_confirmed,
             "no_llm": no_llm
         }
         response = self.client.post(f"{self.base_url}/gap-analysis", json=payload)
@@ -124,6 +126,26 @@ class RegAtlasClient:
             json={"doc_id": doc_id, "fresh": fresh},
             timeout=300 if fresh else 30,
         )
+        response.raise_for_status()
+        return response.json()
+
+    def save_confirmed(
+        self,
+        doc_id: str,
+        requirements: list,
+        confirmed_by: str | None = None,
+    ) -> Dict[str, Any]:
+        """Save a confirmed requirement list for a document."""
+        response = self.client.post(
+            f"{self.base_url}/confirm/{doc_id}",
+            json={"requirements": requirements, "confirmed_by": confirmed_by},
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def get_confirmed(self, doc_id: str) -> Dict[str, Any]:
+        """Get confirmed requirement list by document ID."""
+        response = self.client.get(f"{self.base_url}/confirm/{doc_id}")
         response.raise_for_status()
         return response.json()
 

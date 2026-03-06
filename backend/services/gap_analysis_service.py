@@ -37,6 +37,8 @@ class GapAnalysisService:
         baseline_id: str,
         is_policy_baseline: bool = False,
         include_amendments: bool = False,
+        use_confirmed: bool = False,
+        confirm_repo: Any = None,
         include_completeness_audit: bool = False,
         no_llm: bool = False,
     ) -> GapAnalysisResponse:
@@ -47,9 +49,20 @@ class GapAnalysisService:
         if not circular_doc:
             raise ValueError(f"Circular document {circular_doc_id} not found")
 
-        from backend.state import _extract_requirements_from_doc
+        if use_confirmed:
+            repo = confirm_repo
+            if repo is None:
+                raise ValueError("Confirmed requirement repository is required when use_confirmed=true")
+            confirmed = repo.get(circular_doc_id)
+            if not confirmed:
+                raise ValueError(
+                    f"No confirmed requirement list for {circular_doc_id}. Run 'lacuna confirm' first."
+                )
+            circular_requirements = confirmed.get("requirements", [])
+        else:
+            from backend.state import _extract_requirements_from_doc
 
-        circular_requirements = _extract_requirements_from_doc(circular_doc)
+            circular_requirements = _extract_requirements_from_doc(circular_doc)
 
         if not circular_requirements:
             raise ValueError("Circular document has no extracted requirements")

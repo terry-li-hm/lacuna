@@ -101,6 +101,7 @@ class GapAnalysisRequest(BaseModel):
     baseline_id: str
     is_policy_baseline: bool = False
     include_amendments: bool = False
+    use_confirmed: bool = False
     include_completeness_audit: bool = False
     no_llm: bool = False
 
@@ -163,6 +164,31 @@ class DecomposeResponse(BaseModel):
     requirements: List[AtomicRequirement]
 
 
+class ConfirmRequest(BaseModel):
+    """Request model for confirmed requirement list save."""
+
+    requirements: List[AtomicRequirement]
+    confirmed_by: str | None = None
+
+
+class ConfirmResponse(BaseModel):
+    """Response model for confirmed requirement list save."""
+
+    doc_id: str
+    confirmed_at: str
+    total: int
+
+
+class ConfirmedListResponse(BaseModel):
+    """Response model for confirmed requirement list retrieval."""
+
+    doc_id: str
+    confirmed_at: str
+    confirmed_by: str | None
+    total: int
+    requirements: List[AtomicRequirement]
+
+
 class BatchGapAnalysisRequest(BaseModel):
     """Request model for batch gap analysis."""
 
@@ -205,6 +231,9 @@ __all__ = [
     "AtomicRequirement",
     "DecomposeRequest",
     "DecomposeResponse",
+    "ConfirmRequest",
+    "ConfirmResponse",
+    "ConfirmedListResponse",
     "BatchGapAnalysisRequest",
     "BatchGapAnalysisResult",
     "BatchGapAnalysisResponse",

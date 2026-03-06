@@ -19,7 +19,7 @@ async def remediation_plan(
     requirement_service=Depends(get_requirement_service),
 ):
     """Return enriched and bucketed findings for remediation planning."""
-    cache_key = (circular_doc_id, baseline_id, False)
+    cache_key = (circular_doc_id, baseline_id, False, False, False, False)
     gap_result = _gap_analysis_module._gap_cache.get(cache_key)
 
     if gap_result is None:

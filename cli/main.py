@@ -291,6 +291,7 @@ def gap(
     baseline_id: str = typer.Argument(..., help="ID of the baseline document or policy"),
     is_policy: bool = typer.Option(False, "--policy", help="Treat baseline as a policy ID"),
     audit: bool = typer.Option(False, "--audit", help="Run adversarial completeness check after gap analysis"),
+    use_confirmed: bool = typer.Option(False, "--use-confirmed", help="Use confirmed requirement list"),
     no_llm: bool = typer.Option(False, "--no-llm", help="Disable LLM analysis"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show full provenance details"),
     json_output: bool = typer.Option(False, "--json", help="Output full report as JSON"),
@@ -309,6 +310,7 @@ def gap(
                 baseline_id,
                 is_policy_baseline=is_policy,
                 include_completeness_audit=audit,
+                use_confirmed=use_confirmed,
                 no_llm=no_llm,
             )
         
@@ -430,6 +432,59 @@ def decompose(
             "[red]Error: Decompose request timed out. Try without --fresh or wait for Railway warmup.[/red]"
         )
         raise typer.Exit(1)
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise typer.Exit(1)
+    finally:
+        client.close()
+
+
+@app.command()
+def confirm(
+    doc_id: str = typer.Argument(..., help="Document ID or alias"),
+    confirmed_by: Optional[str] = typer.Option(None, "--by", help="Reviewer name"),
+    api_url: Optional[str] = typer.Option(None, "--api-url", help="Override API URL"),
+):
+    """Interactively review and confirm the requirement list for a circular."""
+    url = api_url or get_api_url()
+    doc_id = ALIASES.get(doc_id, doc_id)
+    client = RegAtlasClient(base_url=url)
+
+    try:
+        with console.status("Fetching requirements..."):
+            decomposed = client.decompose(doc_id)
+
+        requirements = decomposed.get("requirements", [])
+        console.print(f"\n[bold]Reviewing {len(requirements)} requirements for {doc_id}[/bold]")
+        console.print("[dim]y = accept  n = reject  e = edit[/dim]\n")
+
+        confirmed = []
+        for req in requirements:
+            index = req.get("index", "?")
+            description = req.get("description", "")
+            console.print(f"[bold cyan][{index}][/bold cyan] {description}")
+            source_snippet = req.get("source_snippet")
+            if source_snippet:
+                console.print(f"  [dim]↳ {source_snippet[:80]}[/dim]")
+
+            choice = input("  [y/n/e]: ").strip().lower()
+            if choice == "y":
+                confirmed.append(req)
+            elif choice == "e":
+                new_text = input("  New description: ").strip()
+                if new_text:
+                    edited = dict(req)
+                    edited["description"] = new_text
+                    confirmed.append(edited)
+
+        console.print(
+            f"\n[green]Confirmed {len(confirmed)}/{len(requirements)} requirements.[/green]"
+        )
+        with console.status("Saving..."):
+            client.save_confirmed(doc_id, confirmed, confirmed_by)
+        console.print(
+            f"[green]Saved.[/green] Run: lacuna gap {doc_id} <baseline> --use-confirmed"
+        )
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
         raise typer.Exit(1)

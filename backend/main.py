@@ -21,6 +21,7 @@ from backend.routes import (
     changes_router,
     remediation_router,
     decompose_router,
+    confirm_router,
 )
 from backend import state
 
@@ -96,6 +97,7 @@ app.include_router(evidence_router, tags=["evidence"])
 app.include_router(changes_router, tags=["changes"])
 app.include_router(remediation_router, tags=["remediation"])
 app.include_router(decompose_router, tags=["decompose"])
+app.include_router(confirm_router, tags=["confirm"])
 
 @app.get("/", include_in_schema=False)
 async def serve_frontend():

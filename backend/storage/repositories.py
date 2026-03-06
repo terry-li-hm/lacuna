@@ -265,3 +265,58 @@ class AuditLogRepository:
             except (json.JSONDecodeError, TypeError):
                 pass
         return entry
+
+
+class ConfirmedRequirementRepository:
+    """Repository for confirmed requirement list operations."""
+
+    def save(
+        self, doc_id: str, requirements: List[Dict[str, Any]], confirmed_by: str | None = None
+    ) -> None:
+        """Save or replace confirmed requirement list for a document."""
+        conn = get_connection()
+        conn.execute(
+            """
+            INSERT OR REPLACE INTO confirmed_requirements
+            (doc_id, confirmed_at, confirmed_by, requirements)
+            VALUES (?, ?, ?, ?)
+            """,
+            [
+                doc_id,
+                datetime.now(timezone.utc).isoformat(),
+                confirmed_by,
+                json.dumps(requirements),
+            ],
+        )
+        conn.commit()
+
+    def get(self, doc_id: str) -> Optional[Dict[str, Any]]:
+        """Get confirmed requirement list by doc ID."""
+        conn = get_connection()
+        result = conn.execute(
+            "SELECT * FROM confirmed_requirements WHERE doc_id = ?",
+            [doc_id],
+        ).fetchone()
+        if result is None:
+            return None
+        return self._row_to_dict(result)
+
+    def delete(self, doc_id: str) -> None:
+        """Delete confirmed requirement list by doc ID."""
+        conn = get_connection()
+        conn.execute("DELETE FROM confirmed_requirements WHERE doc_id = ?", [doc_id])
+        conn.commit()
+
+    def _row_to_dict(self, row) -> Dict[str, Any]:
+        """Convert a database row to dictionary."""
+        columns = ["doc_id", "confirmed_at", "confirmed_by", "requirements"]
+        item = dict(zip(columns, row))
+        value = item.get("requirements")
+        if isinstance(value, str):
+            try:
+                item["requirements"] = json.loads(value)
+            except (json.JSONDecodeError, TypeError):
+                item["requirements"] = []
+        elif value is None:
+            item["requirements"] = []
+        return item

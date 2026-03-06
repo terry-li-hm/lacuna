@@ -1,5 +1,13 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
+from backend.routes import gap_analysis as gap_analysis_module
+
+
+@pytest.fixture(autouse=True)
+def clear_gap_cache():
+    gap_analysis_module._gap_cache.clear()
+    yield
+    gap_analysis_module._gap_cache.clear()
 
 
 def _make_finding(status, draft_amendment=None):
@@ -143,3 +151,29 @@ def test_gap_analysis_summary_counts(client, mock_gap_analysis_service):
     assert summary["Full"] == 1
     assert summary["Partial"] == 2
     assert summary["Gap"] == 1
+
+
+def test_gap_analysis_use_confirmed_flag(client, mock_gap_analysis_service):
+    """use_confirmed=True is passed through to the service."""
+    mock_gap_analysis_service.perform_gap_analysis.return_value = {
+        "report_id": "gap_confirmed",
+        "circular_id": "doc1",
+        "baseline_id": "base1",
+        "generated_at": "2026-03-07T00:00:00Z",
+        "summary": {"Full": 1, "Partial": 0, "Gap": 0},
+        "findings": [],
+    }
+
+    response = client.post(
+        "/gap-analysis",
+        json={
+            "circular_doc_id": "doc1",
+            "baseline_id": "base1",
+            "use_confirmed": True,
+        },
+    )
+
+    assert response.status_code == 200
+    call_kwargs = mock_gap_analysis_service.perform_gap_analysis.call_args
+    assert call_kwargs.kwargs.get("use_confirmed") is True
+    assert call_kwargs.kwargs.get("confirm_repo") is not None

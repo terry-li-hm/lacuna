@@ -15,6 +15,7 @@ from backend.state import (
     get_gap_analysis_service,
     get_document_service,
     get_policy_service,
+    get_confirm_repo,
 )
 from backend.models.schemas import (
     GapAnalysisRequest,
@@ -31,7 +32,7 @@ router = APIRouter()
 template_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "templates")
 jinja_env = Environment(loader=FileSystemLoader(template_dir))
 
-# In-memory cache: (circular_doc_id, baseline_id, is_policy_baseline, include_amendments) -> result
+# In-memory cache: (circular_doc_id, baseline_id, is_policy_baseline, include_amendments, include_completeness_audit, use_confirmed) -> result
 _gap_cache: Dict[tuple, Any] = {}
 
 
@@ -51,6 +52,7 @@ async def gap_analysis(
         request.is_policy_baseline,
         request.include_amendments,
         request.include_completeness_audit,
+        request.use_confirmed,
     )
     if cache_key in _gap_cache and not request.no_llm:
         logger.info("Gap analysis cache hit — returning cached result")
@@ -62,6 +64,8 @@ async def gap_analysis(
             baseline_id=request.baseline_id,
             is_policy_baseline=request.is_policy_baseline,
             include_amendments=request.include_amendments,
+            use_confirmed=request.use_confirmed,
+            confirm_repo=get_confirm_repo(),
             include_completeness_audit=request.include_completeness_audit,
             no_llm=request.no_llm,
         )
@@ -95,6 +99,7 @@ async def export_gap_analysis(
         request.is_policy_baseline,
         request.include_amendments,
         request.include_completeness_audit,
+        request.use_confirmed,
     )
     
     if cache_key in _gap_cache and not request.no_llm:
@@ -107,6 +112,8 @@ async def export_gap_analysis(
                 baseline_id=request.baseline_id,
                 is_policy_baseline=request.is_policy_baseline,
                 include_amendments=request.include_amendments,
+                use_confirmed=request.use_confirmed,
+                confirm_repo=get_confirm_repo(),
                 include_completeness_audit=request.include_completeness_audit,
                 no_llm=request.no_llm,
             )
@@ -193,6 +200,7 @@ async def export_gap_analysis_docx(
         request.is_policy_baseline,
         request.include_amendments,
         request.include_completeness_audit,
+        request.use_confirmed,
     )
     
     if cache_key in _gap_cache and not request.no_llm:
@@ -205,6 +213,8 @@ async def export_gap_analysis_docx(
                 baseline_id=request.baseline_id,
                 is_policy_baseline=request.is_policy_baseline,
                 include_amendments=request.include_amendments,
+                use_confirmed=request.use_confirmed,
+                confirm_repo=get_confirm_repo(),
                 include_completeness_audit=request.include_completeness_audit,
                 no_llm=request.no_llm,
             )
@@ -331,6 +341,8 @@ async def batch_gap_analysis(
             request.baseline_id,
             request.is_policy_baseline,
             request.include_amendments,
+            False,
+            False,
         )
         if cache_key in _gap_cache and not request.no_llm:
             logger.info(
@@ -346,6 +358,8 @@ async def batch_gap_analysis(
                 baseline_id=request.baseline_id,
                 is_policy_baseline=request.is_policy_baseline,
                 include_amendments=request.include_amendments,
+                use_confirmed=False,
+                confirm_repo=get_confirm_repo(),
                 no_llm=request.no_llm,
             )
             if not request.no_llm:

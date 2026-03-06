@@ -111,5 +111,16 @@ def init_db() -> None:
         )
     """)
 
+    # Confirmed requirement lists
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS confirmed_requirements (
+            doc_id VARCHAR NOT NULL,
+            confirmed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            confirmed_by VARCHAR,
+            requirements JSON NOT NULL,
+            PRIMARY KEY (doc_id)
+        )
+    """)
+
     conn.commit()
     logger.info(f"Database initialized at {DB_PATH}")

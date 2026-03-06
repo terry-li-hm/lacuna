@@ -1,7 +1,12 @@
 """Storage module for DuckDB-based persistence."""
 
 from .database import get_connection, init_db
-from .repositories import DocumentRepository, PolicyRepository, AuditLogRepository
+from .repositories import (
+    DocumentRepository,
+    PolicyRepository,
+    AuditLogRepository,
+    ConfirmedRequirementRepository,
+)
 
 __all__ = [
     "get_connection",
@@ -9,4 +14,5 @@ __all__ = [
     "DocumentRepository",
     "PolicyRepository",
     "AuditLogRepository",
+    "ConfirmedRequirementRepository",
 ]

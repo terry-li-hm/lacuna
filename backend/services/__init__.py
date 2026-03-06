@@ -7,6 +7,7 @@ from .system_service import SystemService
 from .query_service import QueryService
 from .integration_service import IntegrationService
 from .evidence_service import EvidenceService
+from .confirm_service import ConfirmService
 
 __all__ = [
     "LLMService",
@@ -18,4 +19,5 @@ __all__ = [
     "QueryService",
     "IntegrationService",
     "EvidenceService",
+    "ConfirmService",
 ]
