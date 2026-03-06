@@ -8,7 +8,6 @@ from typing import Dict, Any
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import Response
 from jinja2 import Environment, FileSystemLoader
-import weasyprint
 from docx import Document
 from docx.shared import RGBColor, Inches
 
@@ -154,6 +153,8 @@ async def export_gap_analysis(
         html_content = template.render(**template_data)
 
         # Generate PDF using WeasyPrint in a thread to avoid blocking event loop
+        # Lazy import to avoid crashing app startup if system libs are missing
+        import weasyprint
         pdf_bytes = await asyncio.to_thread(
             lambda: weasyprint.HTML(string=html_content).write_pdf()
         )

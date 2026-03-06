@@ -12,6 +12,7 @@ RUN apt-get update \
        libpangoft2-1.0-0 \
        libcairo2 \
        libgdk-pixbuf2.0-0 \
+       libgobject-2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml .
