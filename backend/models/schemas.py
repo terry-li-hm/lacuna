@@ -90,6 +90,7 @@ class GapRequirementMapping(BaseModel):
     reasoning: str
     baseline_match_id: str | None = None
     baseline_match_text: str | None = None
+    draft_amendment: str | None = None
     provenance: List[Provenance] = []
 
 
@@ -99,6 +100,7 @@ class GapAnalysisRequest(BaseModel):
     circular_doc_id: str
     baseline_id: str
     is_policy_baseline: bool = False
+    include_amendments: bool = False
     no_llm: bool = False
 
 
@@ -119,6 +121,7 @@ class BatchGapAnalysisRequest(BaseModel):
     circular_doc_ids: List[str]
     baseline_id: str
     is_policy_baseline: bool = False
+    include_amendments: bool = False
     no_llm: bool = False
 
 

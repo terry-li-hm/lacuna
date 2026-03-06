@@ -400,6 +400,55 @@ Response Format:
                 "provenance": []
             }
 
+    def generate_draft_amendment(
+        self,
+        circular_req: Dict[str, Any],
+        baseline_chunks: List[Dict[str, Any]],
+        status: str,
+        reasoning: str
+    ) -> str:
+        """Generate concise policy amendment language for partial/gap findings."""
+        if not self.client:
+            return ""
+
+        try:
+            context_text = ""
+            for chunk in baseline_chunks:
+                text = chunk.get("document", "")
+                if text:
+                    context_text += f"- {text[:1200]}\n"
+
+            prompt = f"""You are a policy drafting assistant. Given a regulatory requirement that is {status} covered by an existing policy, write a concise policy amendment (2-4 sentences) in formal governance language that would close the coverage gap. The amendment should be specific to the requirement, directly actionable, and ready for insertion into a policy document.
+
+Regulatory Requirement:
+{circular_req.get('description', 'No description')}
+
+Requirement Details:
+{circular_req.get('details', 'No specific details')}
+
+Current Gap Reasoning:
+{reasoning}
+
+Relevant Baseline Context:
+{context_text if context_text else "No baseline context available"}
+"""
+
+            response = self.client.chat.completions.create(
+                model=self.gap_analysis_model,
+                messages=[
+                    {"role": "system", "content": "You are a governance policy drafting expert."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.1,
+                max_tokens=400
+            )
+
+            return (response.choices[0].message.content or "").strip()
+
+        except Exception as e:
+            logger.error(f"Error generating draft amendment: {e}")
+            return ""
+
     def _basic_comparison(self, req1: Dict[str, Any], req2: Dict[str, Any]) -> str:
         """Basic comparison without LLM."""
         j1 = req1.get("jurisdiction", "Jurisdiction 1")

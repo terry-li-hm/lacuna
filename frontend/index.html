@@ -396,6 +396,23 @@
             border-radius: 4px;
         }
 
+        .suggested-amendment {
+            margin-top: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+            background: #eff6ff;
+            color: #1e3a8a;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .suggested-amendment-label {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #1e40af;
+        }
+
         .top-bar {
             display: flex;
             flex-wrap: wrap;
@@ -805,6 +822,12 @@
                             <option value="true">Policy</option>
                         </select>
                     </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label class="inline-check">
+                        <input type="checkbox" id="gapIncludeAmendments">
+                        Include draft amendments (slower)
+                    </label>
                 </div>
                 <button type="submit" id="gapBtn">Run Audit-Grade Gap Analysis</button>
             </form>
@@ -1953,6 +1976,7 @@
                         circular_doc_id: circular_id,
                         baseline_id: baseline_id,
                         is_policy_baseline: is_policy_baseline,
+                        include_amendments: isIncludeAmendmentsEnabled(),
                         no_llm: isNoLlmMode()
                     })
                 });
@@ -1995,10 +2019,15 @@
                     
                     html += `<tr>
                         <td><span class="badge" style="background-color: ${color}22; color: ${color}; font-weight: bold;">${statusText}</span></td>
-                        <td><strong>${f.description}</strong></td>
-                        <td>
-                            <div style="margin-bottom: 8px;">${f.reasoning}</div>
-                            ${f.provenance.map(p => `
+                    <td><strong>${f.description}</strong></td>
+                    <td>
+                        <div style="margin-bottom: 8px;">${f.reasoning}</div>
+                        ${f.draft_amendment ? `
+                            <div class="suggested-amendment">
+                                <div class="suggested-amendment-label">Suggested amendment:</div>
+                                ${f.draft_amendment}
+                            </div>` : ''}
+                        ${f.provenance.map(p => `
                                 <div class="evidence" style="background: #fdfaf4; padding: 10px; border-radius: 8px; font-size: 12px; border: 1px solid #efeae0; margin-top: 5px;">
                                     <strong style="color: var(--ink-2);">Verified Source [${p.chunk_id.split('_').pop()}]:</strong> <em>"${p.text_segment}..."</em>
                                 </div>`).join('')}
@@ -2016,6 +2045,11 @@
 
         function isNoLlmMode() {
             return document.getElementById('noLlmToggle').checked;
+        }
+
+        function isIncludeAmendmentsEnabled() {
+            const checkbox = document.getElementById('gapIncludeAmendments');
+            return checkbox ? checkbox.checked : false;
         }
 
         function setTableLoading(tableId, message = 'Loading...', colspan = 8) {
@@ -2107,6 +2141,7 @@
                         circular_doc_id: circularId,
                         baseline_id: baselineId,
                         is_policy_baseline: false,
+                        include_amendments: isIncludeAmendmentsEnabled(),
                         no_llm: isNoLlmMode()
                     })
                 });
@@ -2147,6 +2182,7 @@
                         circular_doc_id: circularId,
                         baseline_id: baselineId,
                         is_policy_baseline: false,
+                        include_amendments: isIncludeAmendmentsEnabled(),
                         no_llm: isNoLlmMode()
                     })
                 });
@@ -2655,6 +2691,7 @@
                         circular_doc_id,
                         baseline_id,
                         is_policy_baseline,
+                        include_amendments: isIncludeAmendmentsEnabled(),
                         no_llm: isNoLlmMode()
                     })
                 });
@@ -2741,6 +2778,11 @@
                     <td><strong>${f.description}</strong></td>
                     <td>
                         <div style="margin-bottom: 8px;">${f.reasoning}</div>
+                        ${f.draft_amendment ? `
+                            <div class="suggested-amendment">
+                                <div class="suggested-amendment-label">Suggested amendment:</div>
+                                ${f.draft_amendment}
+                            </div>` : ''}
                         ${f.provenance.map(p => `
                             <div class="evidence">
                                 <strong>Source [${p.chunk_id.split('_').pop()}]:</strong> ${p.text_segment}
