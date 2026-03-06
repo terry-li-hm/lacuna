@@ -104,33 +104,21 @@ This is the multi-jurisdiction view that matters for HSBC: same circular, compar
 
 ---
 
-## Act 3d: "Run It Against Your Framework" (60s — if Tobin shared a doc beforehand)
+## Act 3d: Credibility Test + Follow-up Hook (60s)
 
-**Pre-condition:** Before the meeting, ask Tobin (via Simon or directly): "If you can share one chapter of your AI Standard before we meet, I'll pre-load it so we can run the analysis against your actual framework."
+After the primary gap analysis, run against a second baseline to show the tool isn't tuned to a single input:
 
-Upload the night before:
-```bash
-lacuna upload --file <tobin-doc> --name "HSBC AI Governance Chapter" --no-llm
-# Takes ~5 min; run overnight. Note the doc_id for demo.
-lacuna gap --circular hkma-cp --baseline <doc_id>  # verify results look coherent
-```
-
-If he shared a doc, show it during Act 3:
-
-> "Before we met, I pre-loaded a chapter of your framework. Let me run the same HKMA gap analysis against it — not the illustrative baseline, your actual text."
-
-[Run gap analysis. Show results.]
-
-> "Same workflow. The findings now reference your policy language directly. That's what the tool is for — this is the paragraph-level map between what HKMA requires and what your Standard currently says."
-
-**If Tobin didn't share a doc:**
-Use `mas-mrmf` as proxy (already in system, not Capco-authored):
 ```bash
 lacuna gap --circular hkma-cp --baseline mas-mrmf
 ```
-> "I've pre-loaded the MAS AI Model Risk Management Framework — it's structured the way an internal AI Standard would be. The tool handles it with the same precision, and I didn't write this document. When you're ready to run it against your own Standard, the upload takes a few minutes."
 
-**After the meeting:** If Tobin wants to try it with his own doc but didn't bring one, offer to pre-load it before the next conversation: "Send me any chapter — I'll have the analysis ready before we speak again."
+> "This is the MAS AI Model Risk Management Framework — a document I had no hand in writing. The tool producing coherent findings on it is how you know it's not optimised for a specific input."
+
+**The hook (close of Act 3):**
+
+> "The natural next step is running this against your actual AI Standard — or a draft chapter of it. You upload it, same workflow, findings reference your policy language directly. Happy to set that up before our next conversation if you can share a chapter."
+
+This is the ask — not "give me your document now" but "here's what the follow-up looks like." Plants the seed for a second meeting with real HSBC text.
 
 ---
 
