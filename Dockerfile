@@ -15,15 +15,20 @@ RUN apt-get update \
        libgobject-2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml .
+# Install uv for reproducible locked installs
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+COPY pyproject.toml uv.lock ./
 COPY backend backend
 COPY cli cli
 COPY data data
 COPY frontend frontend
 COPY README.md .
 
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir .
+# Install exact locked versions (no version drift)
+RUN uv sync --frozen --no-dev
+
+ENV PATH="/app/.venv/bin:$PATH"
 
 RUN adduser --disabled-password --gecos "" appuser \
     && chown -R appuser:appuser /app
