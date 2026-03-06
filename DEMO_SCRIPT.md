@@ -8,7 +8,7 @@
 
 ## Setup (before the demo)
 
-1. `lacuna preflight` — full health check (API + 9 docs + cache warmup). Expected: `PASS — demo ready.` with Full:1 Partial:5 Gap:2
+1. `lacuna preflight` — full health check (API + docs + cache warmup). Expected: `PASS — demo ready.` with Full:0 Partial:5 Gap:2
 2. Open https://lacuna.sh in Chrome, full screen
 3. Verify the dashboard loads with documents and stats
 4. Have these queries ready to paste:
@@ -59,8 +59,8 @@ Navigate to the **Gap Analysis** section. Select:
 Submit. Result returns instantly (pre-cached):
 
 ```
-Full:    1   ← Customer opt-out / human escalation
-Partial: 5   ← Board accountability, human-in-loop, fairness/bias, disclosure, PDPO/data privacy
+Full:    0
+Partial: 5   ← Board accountability, human-in-loop, fairness/bias, disclosure, PDPO/data privacy, opt-out
 Gap:     2   ← BDAI Guiding Principles (×2: apply principles + proactive consumer protection)
 ```
 
@@ -72,7 +72,7 @@ Click into a **Gap** finding — **BDAI Guiding Principles**:
 
 > *"[Gap] The circular requires institutions to apply and extend the 2019 BDAI Guiding Principles to the use of GenAI in customer-facing applications. The baseline contains detailed GenAI governance requirements but makes no reference to the 2019 BDAI Guiding Principles. While it includes ethical AI principles assessment, disclosure requirements, and third-party vendor management, it does not explicitly connect these controls to the BDAI Guiding Principles framework."*
 
-> ⚠ **Full:1 Partial:5 Gap:2 is the calibrated result for Codex Argentum v1.1 as of Mar 6 2026.** Re-run `lacuna preflight` before each demo to confirm counts haven't changed (cache resets on Railway restart).
+> ⚠ **Full:0 Partial:5 Gap:2 is the calibrated result for Codex Argentum v1.1 as of Mar 6 2026.** Re-run `lacuna preflight` before each demo to confirm counts haven't changed (cache resets on Railway restart).
 
 > "The Partial findings are where the work actually lives. Each one isn't 'mostly fine' — each one is a governance decision: does the existing control language satisfy this requirement, or does it need to be amended? That question currently takes a compliance team days of manual cross-referencing. This produces the same output in seconds, with citations ready for the drafter."
 
@@ -80,7 +80,7 @@ Click into a **Gap** finding — **BDAI Guiding Principles**:
 
 **If Tobin asks to run it against a real HSBC document:** "That's exactly the point. This baseline is illustrative — it's showing you the workflow. The moment you drop in your actual Chapter 5, the analysis runs the same way against real text. The interesting test is whether it performs just as cleanly on messier internal language. Happy to try that live if you have something accessible."
 
-**If asked — second credibility test:** Run `lacuna gap --circular hkma-cp --baseline mas-mrmf`. "This is the MAS AI Model Risk Management Framework — a document I had no hand in writing. The tool handling it with the same precision is how you know it's not optimised for a specific input."
+**If asked — second credibility test:** Run `lacuna gap --circular hkma-cp --baseline mas-mrmf`. "This is the MAS AI Model Risk Management Framework — a document I had no hand in writing. The tool producing coherent findings on it is how you know it's not tuned for a single input."
 
 ---
 
@@ -101,6 +101,36 @@ Scroll to the **Comparison Matrix** section.
 > "If you wanted to compare the Consumer Protection circular against multiple baselines at once — your current AI Standard *and* the MAS model risk framework — the matrix view runs all the gap analyses in parallel and shows you a heat map. Full/Partial/Gap across every combination."
 
 This is the multi-jurisdiction view that matters for HSBC: same circular, compared against policies from different lines of business or jurisdictions.
+
+---
+
+## Act 3d: "Run It Against Your Framework" (60s — if Tobin shared a doc beforehand)
+
+**Pre-condition:** Before the meeting, ask Tobin (via Simon or directly): "If you can share one chapter of your AI Standard before we meet, I'll pre-load it so we can run the analysis against your actual framework."
+
+Upload the night before:
+```bash
+lacuna upload --file <tobin-doc> --name "HSBC AI Governance Chapter" --no-llm
+# Takes ~5 min; run overnight. Note the doc_id for demo.
+lacuna gap --circular hkma-cp --baseline <doc_id>  # verify results look coherent
+```
+
+If he shared a doc, show it during Act 3:
+
+> "Before we met, I pre-loaded a chapter of your framework. Let me run the same HKMA gap analysis against it — not the illustrative baseline, your actual text."
+
+[Run gap analysis. Show results.]
+
+> "Same workflow. The findings now reference your policy language directly. That's what the tool is for — this is the paragraph-level map between what HKMA requires and what your Standard currently says."
+
+**If Tobin didn't share a doc:**
+Use `mas-mrmf` as proxy (already in system, not Capco-authored):
+```bash
+lacuna gap --circular hkma-cp --baseline mas-mrmf
+```
+> "I've pre-loaded the MAS AI Model Risk Management Framework — it's structured the way an internal AI Standard would be. The tool handles it with the same precision, and I didn't write this document. When you're ready to run it against your own Standard, the upload takes a few minutes."
+
+**After the meeting:** If Tobin wants to try it with his own doc but didn't bring one, offer to pre-load it before the next conversation: "Send me any chapter — I'll have the analysis ready before we speak again."
 
 ---
 
