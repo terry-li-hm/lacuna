@@ -8,6 +8,11 @@ class LLMService:
     def __init__(self, extractor: Optional[RequirementExtractor] = None):
         self.extractor = extractor or RequirementExtractor()
 
+    @property
+    def gap_analysis_model(self) -> str:
+        """Name of the model used for gap analysis and completeness checks."""
+        return self.extractor.gap_analysis_model
+
     def extract_requirements(
         self, text: str, jurisdiction: str, force_basic: bool = False
     ) -> Dict[str, Any]:
@@ -40,4 +45,17 @@ class LLMService:
             baseline_chunks,
             status,
             reasoning,
+        )
+
+    def adversarial_completeness_check(
+        self,
+        circular_text: str,
+        findings: List[Dict[str, Any]],
+        force_basic: bool = False,
+    ) -> Dict[str, Any]:
+        """Adversarial pass: find requirements in the circular not covered by findings."""
+        return self.extractor.adversarial_completeness_check(
+            circular_text,
+            findings,
+            force_basic=force_basic,
         )

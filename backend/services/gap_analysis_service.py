@@ -126,7 +126,7 @@ class GapAnalysisService:
                 )
                 findings_dicts = [f.model_dump() for f in findings]
                 raw_audit = await asyncio.to_thread(
-                    self.llm_service.extractor.adversarial_completeness_check,
+                    self.llm_service.adversarial_completeness_check,
                     circular_text,
                     findings_dicts,
                     bool(no_llm),
@@ -136,7 +136,7 @@ class GapAnalysisService:
                         CompletenessFlag(**flag) for flag in raw_audit.get("flagged", [])
                     ],
                     not_flagged_rationale=raw_audit.get("not_flagged_rationale"),
-                    model=self.llm_service.extractor.gap_analysis_model,
+                    model=self.llm_service.gap_analysis_model,
                 )
             except Exception as e:
                 logger.warning(

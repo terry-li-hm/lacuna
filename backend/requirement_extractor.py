@@ -10,6 +10,43 @@ from openai import OpenAI
 logger = logging.getLogger(__name__)
 
 
+def _extract_json_from_llm_response(text: str) -> str:
+    """
+    Strip markdown fences and leading prose from an LLM response to isolate raw JSON.
+
+    Handles:
+    - ```json ... ``` fences
+    - ``` ... ``` fences
+    - Preamble text before the first '{' or '['
+    """
+    text = text.strip()
+    # Strip markdown fences first (handles preamble + fence in one pass)
+    if "```json" in text:
+        text = text.split("```json", 1)[1].split("```", 1)[0].strip()
+    elif "```" in text:
+        text = text.split("```", 1)[1].split("```", 1)[0].strip()
+    # If there is still leading prose before the JSON object/array, trim it
+    for start_char in ('{', '['):
+        idx = text.find(start_char)
+        if idx > 0:
+            text = text[idx:]
+            break
+    return text
+
+
+def _format_not_flagged(not_flagged: list) -> str:
+    """Render the structured not_flagged list into a human-readable rationale string."""
+    if not not_flagged:
+        return "No candidates were considered and rejected."
+    parts = []
+    for item in not_flagged:
+        if isinstance(item, dict):
+            candidate = item.get("candidate", "Unknown")
+            reason = item.get("reason_excluded", "No reason given")
+            parts.append(f"Considered '{candidate}' but excluded: {reason}")
+    return " | ".join(parts) if parts else "No candidates were considered and rejected."
+
+
 class RequirementExtractor:
     """Extract and categorize regulatory requirements using LLM."""
     
@@ -362,13 +399,7 @@ Response Format:
             )
 
             result_text = response.choices[0].message.content or "{}"
-            
-            # Simple JSON extraction in case of markdown wrapping
-            if "```json" in result_text:
-                result_text = result_text.split("```json")[1].split("```")[0].strip()
-            elif "```" in result_text:
-                result_text = result_text.split("```")[1].split("```")[0].strip()
-            
+            result_text = _extract_json_from_llm_response(result_text)
             result = json.loads(result_text)
             
             # Map indices back to chunk IDs and enrich citations
@@ -430,29 +461,36 @@ Response Format:
                 "\n".join(findings_lines) if findings_lines else "No findings available."
             )
 
-            prompt = f"""You are an adversarial regulatory auditor. Your job is to find what was MISSED.
+            prompt = f"""You are an adversarial regulatory auditor. Your sole job is to find requirements in the circular that were MISSED by the existing gap analysis.
 
-Below is a regulatory circular and a gap analysis that has already been performed.
-Identify requirements in the circular that are NOT addressed in the findings list.
+CRITICAL RULES — read before responding:
+1. HARD CAP: Output AT MOST 5 flagged items. If you identify more than 5 candidates, rank by severity and keep only the top 5.
+2. ANTI-HALLUCINATION: Every flagged item MUST include a `source_quote` field containing a verbatim excerpt (≤100 characters) copied character-for-character from the circular text below. Do not paraphrase or reconstruct — copy exactly.
+3. FALSE-POSITIVE SUPPRESSION: If every material requirement is already covered by the findings, you MUST return an empty `flagged` list and say so explicitly. Do NOT invent omissions. It is correct and acceptable to flag zero items.
+4. NOT-FLAGGED RATIONALE: You MUST provide a `not_flagged` array listing 2–3 requirements you considered but rejected, each with a one-sentence reason. This field is required even when `flagged` is empty.
+5. OUTPUT FORMAT: Return strict JSON only — no preamble, no markdown, no trailing commentary.
 
-Circular text:
+Circular text (truncated to 8000 chars):
 {(circular_text or "")[:8000]}
 
 Requirements already analyzed ({len(findings)} items):
 {formatted_findings}
 
-Instructions:
-- List AT MOST 5 requirements you believe are missing from the analysis.
-- For each, quote the relevant circular text (<100 chars).
-- ALSO include a section named "what I am NOT flagging" with 2-3 items you considered but rejected, and why.
-- If you find nothing missing, say so explicitly and return an empty flagged list.
-
-Response format (JSON only):
+Required JSON schema (all fields mandatory):
 {{
   "flagged": [
-    {{"description": "...", "reasoning": "...", "source_hint": "quoted text"}}
+    {{
+      "description": "concise statement of the missed requirement",
+      "reasoning": "why this was not covered by any finding above",
+      "source_quote": "verbatim excerpt ≤100 chars from circular text"
+    }}
   ],
-  "not_flagged_rationale": "what I am NOT flagging: Considered X but did not flag because ... Considered Y but ..."
+  "not_flagged": [
+    {{
+      "candidate": "brief label of what was considered",
+      "reason_excluded": "one sentence explaining why it was not flagged"
+    }}
+  ]
 }}
 """
 
@@ -470,25 +508,40 @@ Response format (JSON only):
             )
 
             result_text = response.choices[0].message.content or "{}"
-            if "```json" in result_text:
-                result_text = (
-                    result_text.split("```json", 1)[1].split("```", 1)[0].strip()
-                )
-            elif "```" in result_text:
-                result_text = result_text.split("```", 1)[1].split("```", 1)[0].strip()
+            result_text = _extract_json_from_llm_response(result_text)
 
-            parsed = json.loads(result_text)
+            try:
+                parsed = json.loads(result_text)
+            except json.JSONDecodeError as parse_err:
+                logger.warning(f"Adversarial check: JSON parse failed ({parse_err}), returning safe default")
+                return {
+                    "flagged": [],
+                    "not_flagged": [],
+                    "not_flagged_rationale": f"Response could not be parsed as JSON: {parse_err}",
+                }
+
             flagged = parsed.get("flagged", [])
             if not isinstance(flagged, list):
                 flagged = []
+            # Enforce source_quote field presence; drop items that lack it to prevent hallucination
+            validated_flagged = [
+                item for item in flagged
+                if isinstance(item, dict) and item.get("source_quote", "").strip()
+            ]
+            not_flagged = parsed.get("not_flagged", [])
+            if not isinstance(not_flagged, list):
+                not_flagged = []
             return {
-                "flagged": flagged[:5],
-                "not_flagged_rationale": parsed.get("not_flagged_rationale"),
+                "flagged": validated_flagged[:5],
+                "not_flagged": not_flagged,
+                # Keep legacy key for backwards compatibility with callers that read this field
+                "not_flagged_rationale": parsed.get("not_flagged_rationale") or _format_not_flagged(not_flagged),
             }
         except Exception as e:
             logger.error(f"Error in adversarial completeness check: {e}")
             return {
                 "flagged": [],
+                "not_flagged": [],
                 "not_flagged_rationale": f"Adversarial completeness check failed: {e}",
             }
 

@@ -1,7 +1,7 @@
 """Requirement decomposition routes."""
 
 import logging
-from typing import Any, Dict
+import time
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -11,7 +11,10 @@ from backend.state import get_decompose_service
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-_decompose_cache: Dict[tuple[str, bool], Any] = {}
+# Cache non-fresh decompositions for 5 minutes. Keyed by doc_id only — fresh
+# results are never cached. Tuple value is (result, expiry_timestamp).
+_CACHE_TTL_SECONDS = 300
+_decompose_cache: dict[str, tuple[DecomposeResponse, float]] = {}
 
 
 @router.post("/decompose", response_model=DecomposeResponse)
@@ -20,14 +23,18 @@ async def decompose(
     service=Depends(get_decompose_service),
 ):
     """Return atomic requirements for a document, using stored or fresh extraction."""
-    cache_key = (request.doc_id, request.fresh)
-    if cache_key in _decompose_cache and not request.fresh:
-        return _decompose_cache[cache_key]
+    if not request.fresh:
+        cached = _decompose_cache.get(request.doc_id)
+        if cached is not None:
+            result, expiry = cached
+            if time.monotonic() < expiry:
+                return result
+            del _decompose_cache[request.doc_id]
 
     try:
         result = await service.decompose(request.doc_id, fresh=request.fresh)
         if not request.fresh:
-            _decompose_cache[cache_key] = result
+            _decompose_cache[request.doc_id] = (result, time.monotonic() + _CACHE_TTL_SECONDS)
         return result
     except ValueError as e:
         raise HTTPException(
@@ -35,5 +42,5 @@ async def decompose(
             detail=str(e),
         ) from e
     except Exception as e:
-        logger.error(f"Decompose error: {e}", exc_info=True)
+        logger.error("Decompose error: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error") from e

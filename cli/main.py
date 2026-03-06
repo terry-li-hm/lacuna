@@ -384,6 +384,7 @@ def decompose(
     doc_id: str = typer.Argument(..., help="Document ID or alias to decompose"),
     fresh: bool = typer.Option(False, "--fresh", help="Re-run LLM extraction (slow)"),
     json_output: bool = typer.Option(False, "--json", help="Output raw JSON"),
+    save: Optional[Path] = typer.Option(None, "--save", help="Save requirement list as JSON to this path"),
     api_url: Optional[str] = typer.Option(None, "--api-url", help="Override API URL"),
 ):
     """List all atomic requirements extracted from a regulatory circular."""
@@ -399,9 +400,10 @@ def decompose(
             console.print_json(json.dumps(result))
             return
 
+        total = result.get('total', 0)
         fresh_label = " [fresh]" if fresh else ""
         table = Table(
-            title=f"Requirements - {doc_id} ({result.get('total', 0)} total{fresh_label})"
+            title=f"Requirements — {doc_id} ({total} found{fresh_label})"
         )
         table.add_column("#", style="dim", width=4)
         table.add_column("Type", width=20)
@@ -419,6 +421,10 @@ def decompose(
                 source_snippet[:60],
             )
         console.print(table)
+
+        if save:
+            save.write_text(json.dumps(result, indent=2))
+            console.print(f"[green]✓[/green] Saved {total} requirements to {save}")
     except httpx.ReadTimeout:
         console.print(
             "[red]Error: Decompose request timed out. Try without --fresh or wait for Railway warmup.[/red]"
