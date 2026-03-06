@@ -1,5 +1,6 @@
 """LLM-based requirement extraction from regulatory documents."""
 
+import json
 import logging
 from typing import List, Dict, Any
 import os
@@ -368,7 +369,6 @@ Response Format:
             elif "```" in result_text:
                 result_text = result_text.split("```")[1].split("```")[0].strip()
             
-            import json
             result = json.loads(result_text)
             
             # Map indices back to chunk IDs and enrich citations
@@ -398,6 +398,98 @@ Response Format:
                 "status": "Gap",
                 "reasoning": f"Error during analysis: {str(e)}",
                 "provenance": []
+            }
+
+    def adversarial_completeness_check(
+        self,
+        circular_text: str,
+        findings: List[Dict[str, Any]],
+        force_basic: bool = False,
+    ) -> Dict[str, Any]:
+        """
+        Adversarial pass: find requirements in the circular that are not covered by findings.
+        Returns at most 5 flagged items and rationale for what was not flagged.
+        """
+        if force_basic or not self.client:
+            return {
+                "flagged": [],
+                "not_flagged_rationale": "Adversarial completeness audit unavailable (LLM disabled).",
+            }
+
+        try:
+            findings_lines: List[str] = []
+            for idx, finding in enumerate(findings, 1):
+                desc = (finding.get("description") or "No description").strip()
+                status = (finding.get("status") or "Unknown").strip()
+                reasoning = (finding.get("reasoning") or "").strip()
+                findings_lines.append(
+                    f"{idx}. [{status}] {desc}"
+                    + (f" | reasoning: {reasoning}" if reasoning else "")
+                )
+            formatted_findings = (
+                "\n".join(findings_lines) if findings_lines else "No findings available."
+            )
+
+            prompt = f"""You are an adversarial regulatory auditor. Your job is to find what was MISSED.
+
+Below is a regulatory circular and a gap analysis that has already been performed.
+Identify requirements in the circular that are NOT addressed in the findings list.
+
+Circular text:
+{(circular_text or "")[:8000]}
+
+Requirements already analyzed ({len(findings)} items):
+{formatted_findings}
+
+Instructions:
+- List AT MOST 5 requirements you believe are missing from the analysis.
+- For each, quote the relevant circular text (<100 chars).
+- ALSO include a section named "what I am NOT flagging" with 2-3 items you considered but rejected, and why.
+- If you find nothing missing, say so explicitly and return an empty flagged list.
+
+Response format (JSON only):
+{{
+  "flagged": [
+    {{"description": "...", "reasoning": "...", "source_hint": "quoted text"}}
+  ],
+  "not_flagged_rationale": "what I am NOT flagging: Considered X but did not flag because ... Considered Y but ..."
+}}
+"""
+
+            response = self.client.chat.completions.create(
+                model=self.gap_analysis_model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a regulatory compliance auditor. Return strict JSON only.",
+                    },
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.1,
+                max_tokens=1400,
+            )
+
+            result_text = response.choices[0].message.content or "{}"
+            if "```json" in result_text:
+                result_text = (
+                    result_text.split("```json", 1)[1].split("```", 1)[0].strip()
+                )
+            elif "```" in result_text:
+                result_text = result_text.split("```", 1)[1].split("```", 1)[0].strip()
+
+            parsed = json.loads(result_text)
+            flagged = parsed.get("flagged", [])
+            if not isinstance(flagged, list):
+                flagged = []
+            return {
+                "flagged": flagged[:5],
+                "not_flagged_rationale": parsed.get("not_flagged_rationale"),
+            }
+        except Exception as e:
+            logger.error(f"Error in adversarial completeness check: {e}")
+            return {
+                "flagged": [],
+                "not_flagged_rationale": f"Adversarial completeness check failed: {e}",
             }
 
     def generate_draft_amendment(

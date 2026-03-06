@@ -101,7 +101,24 @@ class GapAnalysisRequest(BaseModel):
     baseline_id: str
     is_policy_baseline: bool = False
     include_amendments: bool = False
+    include_completeness_audit: bool = False
     no_llm: bool = False
+
+
+class CompletenessFlag(BaseModel):
+    """Potential requirement omission identified by adversarial pass."""
+
+    description: str
+    reasoning: str | None = None
+    source_hint: str | None = None
+
+
+class CompletenessAudit(BaseModel):
+    """Completeness audit payload attached to gap analysis response."""
+
+    flagged: List[CompletenessFlag]
+    not_flagged_rationale: str | None = None
+    model: str
 
 
 class GapAnalysisResponse(BaseModel):
@@ -113,6 +130,37 @@ class GapAnalysisResponse(BaseModel):
     generated_at: str
     summary: Dict[str, int]
     findings: List[GapRequirementMapping]
+    completeness_audit: CompletenessAudit | None = None
+
+
+class AtomicRequirement(BaseModel):
+    """Atomic requirement item for decomposition review."""
+
+    index: int
+    requirement_id: str
+    requirement_type: str | None = None
+    description: str
+    source_snippet: str | None = None
+    chunk_index: int | None = None
+    mandatory: str | None = None
+    confidence: str | None = None
+
+
+class DecomposeRequest(BaseModel):
+    """Request model for requirement decomposition."""
+
+    doc_id: str
+    fresh: bool = False
+
+
+class DecomposeResponse(BaseModel):
+    """Response model for requirement decomposition."""
+
+    doc_id: str
+    generated_at: str
+    total: int
+    fresh: bool
+    requirements: List[AtomicRequirement]
 
 
 class BatchGapAnalysisRequest(BaseModel):
@@ -150,8 +198,13 @@ __all__ = [
     "WebhookCreateRequest",
     "Provenance",
     "GapRequirementMapping",
+    "CompletenessFlag",
+    "CompletenessAudit",
     "GapAnalysisRequest",
     "GapAnalysisResponse",
+    "AtomicRequirement",
+    "DecomposeRequest",
+    "DecomposeResponse",
     "BatchGapAnalysisRequest",
     "BatchGapAnalysisResult",
     "BatchGapAnalysisResponse",

@@ -1,7 +1,12 @@
 """Meridian models package."""
 
 from .schemas import (
+    AtomicRequirement,
     CompareRequest,
+    CompletenessAudit,
+    CompletenessFlag,
+    DecomposeRequest,
+    DecomposeResponse,
     GapAnalysisRequest,
     GapAnalysisResponse,
     GapRequirementMapping,
@@ -18,12 +23,17 @@ __all__ = [
     "QueryRequest",
     "QueryResponse",
     "CompareRequest",
+    "AtomicRequirement",
+    "DecomposeRequest",
+    "DecomposeResponse",
     "RequirementReviewRequest",
     "SourceCreateRequest",
     "PolicyUpdateRequest",
     "WebhookCreateRequest",
     "Provenance",
     "GapRequirementMapping",
+    "CompletenessFlag",
+    "CompletenessAudit",
     "GapAnalysisRequest",
     "GapAnalysisResponse",
 ]

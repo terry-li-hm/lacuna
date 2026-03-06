@@ -1,11 +1,14 @@
 """RegAtlas CLI - Main entry point."""
 
+import json
+import os
+from pathlib import Path
+from typing import Optional
+
+import httpx
 import typer
 from rich.console import Console
 from rich.table import Table
-from pathlib import Path
-from typing import Optional
-import os
 
 from cli.api import RegAtlasClient
 
@@ -15,6 +18,10 @@ app = typer.Typer(
     add_completion=False
 )
 console = Console()
+ALIASES = {
+    "hkma-cp": "7f247634-cdcb-455a-bd02-7083feb1ed6e",
+    "demo-baseline": "ef3d9bff-a442-443f-97ca-9fc7d0108618",
+}
 
 
 def get_api_url() -> str:
@@ -283,6 +290,7 @@ def gap(
     circular_id: str = typer.Argument(..., help="ID of the new circular document"),
     baseline_id: str = typer.Argument(..., help="ID of the baseline document or policy"),
     is_policy: bool = typer.Option(False, "--policy", help="Treat baseline as a policy ID"),
+    audit: bool = typer.Option(False, "--audit", help="Run adversarial completeness check after gap analysis"),
     no_llm: bool = typer.Option(False, "--no-llm", help="Disable LLM analysis"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show full provenance details"),
     json_output: bool = typer.Option(False, "--json", help="Output full report as JSON"),
@@ -290,14 +298,21 @@ def gap(
 ):
     """Perform a gap analysis between a circular and a baseline."""
     url = api_url or get_api_url()
+    circular_id = ALIASES.get(circular_id, circular_id)
+    baseline_id = ALIASES.get(baseline_id, baseline_id)
     client = RegAtlasClient(base_url=url)
     
     try:
         with console.status(f"[bold green]Performing Gap Analysis..."):
-            result = client.gap_analysis(circular_id, baseline_id, is_policy_baseline=is_policy, no_llm=no_llm)
+            result = client.gap_analysis(
+                circular_id,
+                baseline_id,
+                is_policy_baseline=is_policy,
+                include_completeness_audit=audit,
+                no_llm=no_llm,
+            )
         
         if json_output:
-            import json
             console.print_json(json.dumps(result))
             return
 
@@ -317,10 +332,12 @@ def gap(
             for f in findings:
                 status = f['status']
                 color = "green" if status == "Full" else "yellow" if status == "Partial" else "red"
+                description = f.get("description", "")
+                reasoning = f.get("reasoning", "")
                 table.add_row(
                     f"[{color}]{status}[/{color}]",
-                    f['description'][:50] + "...",
-                    f['reasoning'][:100] + "..."
+                    description[:50] + ("..." if len(description) > 50 else ""),
+                    reasoning[:100] + ("..." if len(reasoning) > 100 else "")
                 )
                 
                 if verbose and f.get('provenance'):
@@ -331,7 +348,82 @@ def gap(
                             f"[italic cyan]\"{p['text_segment'][:150]}...\"[/italic cyan]"
                         )
             console.print(table)
+
+        if audit and result.get("completeness_audit"):
+            audit_result = result["completeness_audit"]
+            console.print("\n[bold cyan]Completeness Audit[/bold cyan]")
+            flagged = audit_result.get("flagged", [])
+            if flagged:
+                audit_table = Table(show_header=True, header_style="bold magenta")
+                audit_table.add_column("#", style="dim", width=4)
+                audit_table.add_column("Potential Omission", style="white")
+                audit_table.add_column("Source Hint", style="dim")
+                for idx, item in enumerate(flagged, 1):
+                    description = item.get("description", "—")
+                    source_hint = item.get("source_hint", "—")
+                    audit_table.add_row(str(idx), description, source_hint)
+                    if verbose and item.get("reasoning"):
+                        audit_table.add_row("", "", f"[dim]{item['reasoning']}[/dim]")
+                console.print(audit_table)
+            else:
+                console.print("[green]No omissions flagged.[/green]")
+
+            rationale = audit_result.get("not_flagged_rationale")
+            if rationale:
+                console.print(f"[dim]{rationale}[/dim]")
             
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise typer.Exit(1)
+    finally:
+        client.close()
+
+
+@app.command()
+def decompose(
+    doc_id: str = typer.Argument(..., help="Document ID or alias to decompose"),
+    fresh: bool = typer.Option(False, "--fresh", help="Re-run LLM extraction (slow)"),
+    json_output: bool = typer.Option(False, "--json", help="Output raw JSON"),
+    api_url: Optional[str] = typer.Option(None, "--api-url", help="Override API URL"),
+):
+    """List all atomic requirements extracted from a regulatory circular."""
+    url = api_url or get_api_url()
+    doc_id = ALIASES.get(doc_id, doc_id)
+    client = RegAtlasClient(base_url=url)
+
+    try:
+        with console.status(f"[bold green]Decomposing {doc_id}..."):
+            result = client.decompose(doc_id, fresh=fresh)
+
+        if json_output:
+            console.print_json(json.dumps(result))
+            return
+
+        fresh_label = " [fresh]" if fresh else ""
+        table = Table(
+            title=f"Requirements - {doc_id} ({result.get('total', 0)} total{fresh_label})"
+        )
+        table.add_column("#", style="dim", width=4)
+        table.add_column("Type", width=20)
+        table.add_column("Mand.", width=8)
+        table.add_column("Description")
+        table.add_column("Source (excerpt)", style="dim", width=40)
+
+        for req in result.get("requirements", []):
+            source_snippet = req.get("source_snippet") or ""
+            table.add_row(
+                str(req.get("index", "")),
+                req.get("requirement_type") or "—",
+                req.get("mandatory") or "—",
+                req.get("description") or "",
+                source_snippet[:60],
+            )
+        console.print(table)
+    except httpx.ReadTimeout:
+        console.print(
+            "[red]Error: Decompose request timed out. Try without --fresh or wait for Railway warmup.[/red]"
+        )
+        raise typer.Exit(1)
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
         raise typer.Exit(1)

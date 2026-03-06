@@ -102,6 +102,7 @@ class RegAtlasClient:
         circular_doc_id: str,
         baseline_id: str,
         is_policy_baseline: bool = False,
+        include_completeness_audit: bool = False,
         no_llm: bool = False
     ) -> Dict[str, Any]:
         """Perform gap analysis between circular and baseline."""
@@ -109,9 +110,20 @@ class RegAtlasClient:
             "circular_doc_id": circular_doc_id,
             "baseline_id": baseline_id,
             "is_policy_baseline": is_policy_baseline,
+            "include_completeness_audit": include_completeness_audit,
             "no_llm": no_llm
         }
         response = self.client.post(f"{self.base_url}/gap-analysis", json=payload)
+        response.raise_for_status()
+        return response.json()
+
+    def decompose(self, doc_id: str, fresh: bool = False) -> Dict[str, Any]:
+        """List atomic requirements for a given document."""
+        response = self.client.post(
+            f"{self.base_url}/decompose",
+            json={"doc_id": doc_id, "fresh": fresh},
+            timeout=300 if fresh else 30,
+        )
         response.raise_for_status()
         return response.json()
 

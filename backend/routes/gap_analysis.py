@@ -50,6 +50,7 @@ async def gap_analysis(
         request.baseline_id,
         request.is_policy_baseline,
         request.include_amendments,
+        request.include_completeness_audit,
     )
     if cache_key in _gap_cache and not request.no_llm:
         logger.info("Gap analysis cache hit — returning cached result")
@@ -61,6 +62,7 @@ async def gap_analysis(
             baseline_id=request.baseline_id,
             is_policy_baseline=request.is_policy_baseline,
             include_amendments=request.include_amendments,
+            include_completeness_audit=request.include_completeness_audit,
             no_llm=request.no_llm,
         )
         if not request.no_llm:
@@ -92,6 +94,7 @@ async def export_gap_analysis(
         request.baseline_id,
         request.is_policy_baseline,
         request.include_amendments,
+        request.include_completeness_audit,
     )
     
     if cache_key in _gap_cache and not request.no_llm:
@@ -104,6 +107,7 @@ async def export_gap_analysis(
                 baseline_id=request.baseline_id,
                 is_policy_baseline=request.is_policy_baseline,
                 include_amendments=request.include_amendments,
+                include_completeness_audit=request.include_completeness_audit,
                 no_llm=request.no_llm,
             )
             if not request.no_llm:
@@ -188,6 +192,7 @@ async def export_gap_analysis_docx(
         request.baseline_id,
         request.is_policy_baseline,
         request.include_amendments,
+        request.include_completeness_audit,
     )
     
     if cache_key in _gap_cache and not request.no_llm:
@@ -200,6 +205,7 @@ async def export_gap_analysis_docx(
                 baseline_id=request.baseline_id,
                 is_policy_baseline=request.is_policy_baseline,
                 include_amendments=request.include_amendments,
+                include_completeness_audit=request.include_completeness_audit,
                 no_llm=request.no_llm,
             )
             if not request.no_llm:

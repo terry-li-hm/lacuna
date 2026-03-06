@@ -215,6 +215,7 @@ _integration_service: Optional[Any] = None
 _evidence_service: Optional[Any] = None
 _change_service: Optional[Any] = None
 _scan_service: Optional[Any] = None
+_decompose_service: Optional[Any] = None
 
 # Components - will be initialized in main.py
 doc_processor = None
@@ -384,6 +385,19 @@ def get_scan_service():
             sources_db=sources_db, change_service=get_change_service()
         )
     return _scan_service
+
+
+def get_decompose_service():
+    """Get or create the decompose service singleton."""
+    global _decompose_service
+    if _decompose_service is None:
+        from backend.services.decompose_service import DecomposeService
+
+        _decompose_service = DecomposeService(
+            doc_repo=get_document_repo(),
+            req_extractor=req_extractor,
+        )
+    return _decompose_service
 
 
 def init_state():

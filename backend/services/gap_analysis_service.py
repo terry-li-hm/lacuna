@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import uuid
 from datetime import datetime, timezone
@@ -7,6 +8,8 @@ from backend.storage.repositories import DocumentRepository, PolicyRepository
 from backend.vector_store import VectorStore
 from backend.services.llm_service import LLMService
 from backend.models.schemas import (
+    CompletenessAudit,
+    CompletenessFlag,
     GapRequirementMapping,
     Provenance,
     GapAnalysisResponse,
@@ -34,6 +37,7 @@ class GapAnalysisService:
         baseline_id: str,
         is_policy_baseline: bool = False,
         include_amendments: bool = False,
+        include_completeness_audit: bool = False,
         no_llm: bool = False,
     ) -> GapAnalysisResponse:
         """Perform a gap analysis between a circular document and a baseline."""
@@ -73,10 +77,11 @@ class GapAnalysisService:
             )
 
             # Analyze gap
-            analysis = self.llm_service.perform_gap_analysis(
-                circular_req=req,
-                baseline_chunks=baseline_chunks,
-                force_basic=bool(no_llm),
+            analysis = await asyncio.to_thread(
+                self.llm_service.perform_gap_analysis,
+                req,
+                baseline_chunks,
+                bool(no_llm),
             )
 
             status = analysis.get("status", "Gap")
@@ -84,11 +89,12 @@ class GapAnalysisService:
 
             draft_amendment: Optional[str] = None
             if include_amendments and not no_llm and status in ("Partial", "Gap"):
-                draft_amendment = self.llm_service.generate_draft_amendment(
-                    circular_req=req,
-                    baseline_chunks=baseline_chunks,
-                    status=status,
-                    reasoning=analysis.get("reasoning", "No reasoning provided"),
+                draft_amendment = await asyncio.to_thread(
+                    self.llm_service.generate_draft_amendment,
+                    req,
+                    baseline_chunks,
+                    status,
+                    analysis.get("reasoning", "No reasoning provided"),
                 )
 
             findings.append(
@@ -105,6 +111,39 @@ class GapAnalysisService:
             )
 
         report_id = f"gap_{uuid.uuid4().hex[:8]}"
+        completeness_audit = None
+        if include_completeness_audit:
+            try:
+                circular_text = (
+                    circular_doc.get("raw_text")
+                    or circular_doc.get("content")
+                    or circular_doc.get("raw_extraction")
+                    or "\n".join(
+                        req.get("source_snippet", "")
+                        for req in circular_requirements
+                        if isinstance(req, dict)
+                    )
+                )
+                findings_dicts = [f.model_dump() for f in findings]
+                raw_audit = await asyncio.to_thread(
+                    self.llm_service.extractor.adversarial_completeness_check,
+                    circular_text,
+                    findings_dicts,
+                    bool(no_llm),
+                )
+                completeness_audit = CompletenessAudit(
+                    flagged=[
+                        CompletenessFlag(**flag) for flag in raw_audit.get("flagged", [])
+                    ],
+                    not_flagged_rationale=raw_audit.get("not_flagged_rationale"),
+                    model=self.llm_service.extractor.gap_analysis_model,
+                )
+            except Exception as e:
+                logger.warning(
+                    f"Completeness audit failed for {circular_doc_id}: {e}",
+                    exc_info=True,
+                )
+                completeness_audit = None
 
         return GapAnalysisResponse(
             report_id=report_id,
@@ -113,4 +152,5 @@ class GapAnalysisService:
             generated_at=datetime.now(timezone.utc).isoformat(),
             summary=summary,
             findings=findings,
+            completeness_audit=completeness_audit,
         )
