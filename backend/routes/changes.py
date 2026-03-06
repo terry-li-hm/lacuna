@@ -6,11 +6,11 @@ import json
 import logging
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from backend.state import get_change_service
+from backend.state import get_change_service, get_gap_analysis_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -30,6 +30,7 @@ class ChangeCreateRequest(BaseModel):
     effective_date: str | None = None
     impacted_areas: List[str] | None = None
     related_requirement_ids: List[str] | None = None
+    circular_doc_id: str | None = None  # if set, auto-run gap analysis vs demo-baseline
 
 
 class ChangeUpdateRequest(BaseModel):
@@ -43,12 +44,40 @@ class ChangeUpdateRequest(BaseModel):
     policy_refs: List[str] | None = None
 
 
+async def _auto_gap_analysis(circular_doc_id: str) -> None:
+    """Background task: run gap analysis vs demo-baseline for a new circular."""
+    import os
+    try:
+        gap_svc = get_gap_analysis_service()
+        baseline_id = os.getenv("LACUNA_DEMO_BASELINE_ID")
+        if not baseline_id:
+            logger.warning("Auto gap analysis skipped: LACUNA_DEMO_BASELINE_ID not set")
+            return
+        logger.info(f"Auto gap analysis: {circular_doc_id} vs {baseline_id}")
+        await gap_svc.perform_gap_analysis(
+            circular_doc_id=circular_doc_id,
+            baseline_id=baseline_id,
+            is_policy_baseline=False,
+        )
+        logger.info(f"Auto gap analysis complete for {circular_doc_id}")
+    except Exception as e:
+        logger.warning(f"Auto gap analysis failed for {circular_doc_id}: {e}")
+
+
 @router.post("/changes")
 async def create_change(
-    request: ChangeCreateRequest, service=Depends(get_change_service)
+    request: ChangeCreateRequest,
+    background_tasks: BackgroundTasks,
+    service=Depends(get_change_service),
 ):
     """Create a new regulatory change item."""
-    return service.create_change(**request.model_dump())
+    circular_doc_id = request.circular_doc_id
+    data = request.model_dump()
+    data.pop("circular_doc_id", None)
+    result = service.create_change(**data)
+    if circular_doc_id:
+        background_tasks.add_task(_auto_gap_analysis, circular_doc_id)
+    return result
 
 
 @router.get("/changes")
