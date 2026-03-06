@@ -26,3 +26,18 @@ class LLMService:
         return self.extractor.perform_gap_analysis(
             circular_req, baseline_chunks, force_basic=force_basic
         )
+
+    def generate_draft_amendment(
+        self,
+        circular_req: Dict[str, Any],
+        baseline_chunks: List[Dict[str, Any]],
+        status: str,
+        reasoning: str,
+    ) -> str:
+        """Generate suggested policy amendment language for partial/gap findings."""
+        return self.extractor.generate_draft_amendment(
+            circular_req,
+            baseline_chunks,
+            status,
+            reasoning,
+        )

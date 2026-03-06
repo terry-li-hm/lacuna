@@ -33,6 +33,7 @@ class GapAnalysisService:
         circular_doc_id: str,
         baseline_id: str,
         is_policy_baseline: bool = False,
+        include_amendments: bool = False,
         no_llm: bool = False,
     ) -> GapAnalysisResponse:
         """Perform a gap analysis between a circular document and a baseline."""
@@ -81,12 +82,22 @@ class GapAnalysisService:
             status = analysis.get("status", "Gap")
             summary[status] = summary.get(status, 0) + 1
 
+            draft_amendment: Optional[str] = None
+            if include_amendments and not no_llm and status in ("Partial", "Gap"):
+                draft_amendment = self.llm_service.generate_draft_amendment(
+                    circular_req=req,
+                    baseline_chunks=baseline_chunks,
+                    status=status,
+                    reasoning=analysis.get("reasoning", "No reasoning provided"),
+                )
+
             findings.append(
                 GapRequirementMapping(
                     circular_req_id=str(uuid.uuid4()),
                     description=req.get("description", "No description"),
                     status=status,
                     reasoning=analysis.get("reasoning", "No reasoning provided"),
+                    draft_amendment=draft_amendment,
                     provenance=[
                         Provenance(**p) for p in analysis.get("provenance", [])
                     ],

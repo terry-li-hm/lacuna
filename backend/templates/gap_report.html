@@ -166,6 +166,23 @@
             color: #4b5563;
         }
 
+        .suggested-amendment {
+            margin-top: 12px;
+            padding: 12px;
+            border-left: 4px solid #2563eb;
+            background-color: #eff6ff;
+            color: #1e3a8a;
+            font-size: 10.5pt;
+        }
+
+        .suggested-amendment-label {
+            display: block;
+            font-size: 8.5pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
         .baseline-match {
             border-left: 4px solid #E04E39;
             background-color: #fef2f2;
@@ -243,6 +260,13 @@
             <span class="status-badge {{ finding.status }}">{{ finding.status }}</span>
             <h3 class="finding-description">{{ finding.description }}</h3>
             <p class="finding-reasoning">{{ finding.reasoning }}</p>
+
+            {% if finding.draft_amendment %}
+            <div class="suggested-amendment">
+                <span class="suggested-amendment-label">Suggested Amendment</span>
+                {{ finding.draft_amendment }}
+            </div>
+            {% endif %}
             
             {% if finding.baseline_match_text %}
             <div class="baseline-match">

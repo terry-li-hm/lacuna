@@ -10,7 +10,7 @@ from fastapi.responses import Response
 from jinja2 import Environment, FileSystemLoader
 import weasyprint
 from docx import Document
-from docx.shared import RGBColor
+from docx.shared import RGBColor, Inches
 
 from backend.state import (
     get_gap_analysis_service,
@@ -32,7 +32,7 @@ router = APIRouter()
 template_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "templates")
 jinja_env = Environment(loader=FileSystemLoader(template_dir))
 
-# In-memory cache: (circular_doc_id, baseline_id, is_policy_baseline) -> result
+# In-memory cache: (circular_doc_id, baseline_id, is_policy_baseline, include_amendments) -> result
 _gap_cache: Dict[tuple, Any] = {}
 
 
@@ -46,7 +46,12 @@ async def gap_analysis(
     """
     logger.info(f"Gap Analysis: {request.circular_doc_id} vs {request.baseline_id}")
 
-    cache_key = (request.circular_doc_id, request.baseline_id, request.is_policy_baseline)
+    cache_key = (
+        request.circular_doc_id,
+        request.baseline_id,
+        request.is_policy_baseline,
+        request.include_amendments,
+    )
     if cache_key in _gap_cache and not request.no_llm:
         logger.info("Gap analysis cache hit — returning cached result")
         return _gap_cache[cache_key]
@@ -56,6 +61,7 @@ async def gap_analysis(
             circular_doc_id=request.circular_doc_id,
             baseline_id=request.baseline_id,
             is_policy_baseline=request.is_policy_baseline,
+            include_amendments=request.include_amendments,
             no_llm=request.no_llm,
         )
         if not request.no_llm:
@@ -82,7 +88,12 @@ async def export_gap_analysis(
     """
     logger.info(f"Exporting Gap Analysis: {request.circular_doc_id} vs {request.baseline_id}")
 
-    cache_key = (request.circular_doc_id, request.baseline_id, request.is_policy_baseline)
+    cache_key = (
+        request.circular_doc_id,
+        request.baseline_id,
+        request.is_policy_baseline,
+        request.include_amendments,
+    )
     
     if cache_key in _gap_cache and not request.no_llm:
         logger.info("Gap analysis cache hit — using cached result for export")
@@ -93,6 +104,7 @@ async def export_gap_analysis(
                 circular_doc_id=request.circular_doc_id,
                 baseline_id=request.baseline_id,
                 is_policy_baseline=request.is_policy_baseline,
+                include_amendments=request.include_amendments,
                 no_llm=request.no_llm,
             )
             if not request.no_llm:
@@ -170,7 +182,12 @@ async def export_gap_analysis_docx(
     """
     logger.info(f"Exporting Gap Analysis to DOCX: {request.circular_doc_id} vs {request.baseline_id}")
 
-    cache_key = (request.circular_doc_id, request.baseline_id, request.is_policy_baseline)
+    cache_key = (
+        request.circular_doc_id,
+        request.baseline_id,
+        request.is_policy_baseline,
+        request.include_amendments,
+    )
     
     if cache_key in _gap_cache and not request.no_llm:
         logger.info("Gap analysis cache hit — using cached result for DOCX export")
@@ -181,6 +198,7 @@ async def export_gap_analysis_docx(
                 circular_doc_id=request.circular_doc_id,
                 baseline_id=request.baseline_id,
                 is_policy_baseline=request.is_policy_baseline,
+                include_amendments=request.include_amendments,
                 no_llm=request.no_llm,
             )
             if not request.no_llm:
@@ -261,9 +279,15 @@ async def export_gap_analysis_docx(
             
             document.add_paragraph(f"Reasoning: {finding.reasoning}")
             
-            if finding.baseline_match:
+            if finding.baseline_match_text:
                 document.add_paragraph("Baseline Match:", style='Intense Quote')
-                document.add_paragraph(finding.baseline_match)
+                document.add_paragraph(finding.baseline_match_text)
+
+            if finding.draft_amendment:
+                amendment_header = document.add_paragraph()
+                amendment_header.add_run("Suggested Amendment: ").bold = True
+                amendment_paragraph = document.add_paragraph(finding.draft_amendment)
+                amendment_paragraph.paragraph_format.left_indent = Inches(0.25)
 
         buf = io.BytesIO()
         document.save(buf)
@@ -295,7 +319,12 @@ async def batch_gap_analysis(
     """
 
     async def _analyze_single(circular_doc_id: str) -> BatchGapAnalysisResult:
-        cache_key = (circular_doc_id, request.baseline_id, request.is_policy_baseline)
+        cache_key = (
+            circular_doc_id,
+            request.baseline_id,
+            request.is_policy_baseline,
+            request.include_amendments,
+        )
         if cache_key in _gap_cache and not request.no_llm:
             logger.info(
                 f"Gap analysis cache hit — returning cached result for {circular_doc_id}"
@@ -309,6 +338,7 @@ async def batch_gap_analysis(
                 circular_doc_id=circular_doc_id,
                 baseline_id=request.baseline_id,
                 is_policy_baseline=request.is_policy_baseline,
+                include_amendments=request.include_amendments,
                 no_llm=request.no_llm,
             )
             if not request.no_llm:
