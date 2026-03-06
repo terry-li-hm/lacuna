@@ -60,7 +60,7 @@ Submit. Result returns instantly (pre-cached):
 
 ```
 Full:    0
-Partial: 5   ← Board accountability, human-in-loop, fairness/bias, disclosure, PDPO/data privacy, opt-out
+Partial: 6   ← Board accountability, human-in-loop, fairness/bias, disclosure, PDPO/data privacy, opt-out, model validation
 Gap:     2   ← BDAI Guiding Principles (×2: apply principles + proactive consumer protection)
 ```
 
@@ -72,7 +72,7 @@ Click into a **Gap** finding — **BDAI Guiding Principles**:
 
 > *"[Gap] The circular requires institutions to apply and extend the 2019 BDAI Guiding Principles to the use of GenAI in customer-facing applications. The baseline contains detailed GenAI governance requirements but makes no reference to the 2019 BDAI Guiding Principles. While it includes ethical AI principles assessment, disclosure requirements, and third-party vendor management, it does not explicitly connect these controls to the BDAI Guiding Principles framework."*
 
-> ⚠ **Full:0 Partial:5 Gap:2 is the calibrated result for Codex Argentum v1.1 as of Mar 6 2026.** Re-run `lacuna preflight` before each demo to confirm counts haven't changed (cache resets on Railway restart).
+> ⚠ **Full:0 Partial:6 Gap:2 is the calibrated result for Codex Argentum v1.1 as of Mar 6 2026 (post re-seed).** Re-run `lacuna preflight` before each demo to confirm counts haven't changed (cache resets on Railway restart).
 
 > "The Partial findings are where the work actually lives. Each one isn't 'mostly fine' — each one is a governance decision: does the existing control language satisfy this requirement, or does it need to be amended? That question currently takes a compliance team days of manual cross-referencing. This produces the same output in seconds, with citations ready for the drafter."
 
