@@ -80,6 +80,20 @@ Click into a **Gap** finding — **BDAI Guiding Principles**:
 
 **If Tobin asks to run it against a real HSBC document:** "That's exactly the point. This baseline is illustrative — it's showing you the workflow. The moment you drop in your actual Chapter 5, the analysis runs the same way against real text. The interesting test is whether it performs just as cleanly on messier internal language. Happy to try that live if you have something accessible."
 
+**If Tobin asks "can it suggest what to add?"** — run with amendments:
+
+```bash
+lacuna gap --circular hkma-cp --baseline demo-baseline --amendments
+```
+
+This re-runs the analysis and appends a draft amendment clause per Partial/Gap finding. Takes ~30s extra (one LLM call per finding). Show one:
+
+> *"Draft amendment: The Board of Directors shall establish and maintain explicit accountability for the use of GenAI in customer-facing applications, including approval of the institution's GenAI governance framework and periodic review of GenAI-driven decision outcomes. Senior management shall designate a named executive responsible for GenAI risk, with escalation paths to the Board for material incidents or policy breaches."*
+
+> "This isn't a final clause — it's a drafting prompt. Your policy team takes this, marks it up against your existing language, and that's the amendment. We've just compressed three days of gap identification into the input to a 30-minute drafting session."
+
+The DOCX export includes these amendments — each finding has requirement, reasoning, citation, and draft clause. Ready to hand to the drafter.
+
 **If asked — second credibility test:** Run `lacuna gap --circular hkma-cp --baseline mas-mrmf`. "This is the MAS AI Model Risk Management Framework — a document I had no hand in writing. The tool producing coherent findings on it is how you know it's not tuned for a single input."
 
 ---
