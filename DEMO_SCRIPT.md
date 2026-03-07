@@ -201,3 +201,11 @@ Briefly mention the RSS feed sources:
 - **Don't present the Codex Argentum as if it reflects real HSBC policy.** It's a demo input. If Tobin asks about it: "It's a Capco-authored illustrative baseline — structured like what a policy chapter would look like, so the gap analysis has something realistic to work against. The real test is running it against your actual standard."
 - **Don't let the output leave the meeting without context.** If Tobin wants to share the gap analysis results, make sure the framing travels with it: "This is a demo run against the Codex Argentum illustrative baseline, not an assessment of HSBC's actual compliance position."
 - **Don't claim legal equivalence.** If a finding says "Partial," that's a signal for human review — not a determination that the policy partially satisfies a legal obligation. Make this explicit if Tobin probes the methodology.
+
+
+
+---
+
+## Product Strategy
+
+See [[Lacuna - Product Strategy]] for CLI-first principle and completeness verification workflow design decisions.
