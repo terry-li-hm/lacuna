@@ -2,16 +2,15 @@ import asyncio
 import logging
 import uuid
 from datetime import datetime, timezone
-from typing import List, Dict, Any, Optional
+from typing import Any
 
 from backend.storage.repositories import DocumentRepository, PolicyRepository
 from backend.vector_store import VectorStore
 from backend.services.llm_service import LLMService
+from backend.services.gap_graph import build_gap_graph
 from backend.models.schemas import (
     CompletenessAudit,
     CompletenessFlag,
-    GapRequirementMapping,
-    Provenance,
     GapAnalysisResponse,
 )
 
@@ -30,6 +29,7 @@ class GapAnalysisService:
         self.policy_repo = policy_repo
         self.vector_store = vector_store
         self.llm_service = llm_service
+        self.gap_graph = build_gap_graph()
 
     async def perform_gap_analysis(
         self,
@@ -77,51 +77,23 @@ class GapAnalysisService:
             if not baseline:
                 raise ValueError(f"Document baseline {baseline_id} not found")
 
-        findings = []
+        result = await self.gap_graph.ainvoke(
+            {
+                "circular_doc_id": circular_doc_id,
+                "baseline_id": baseline_id,
+                "requirements": circular_requirements,
+                "current_req": None,
+                "findings": [],
+                "include_amendments": include_amendments,
+                "no_llm": bool(no_llm),
+                "vector_store": self.vector_store,
+                "llm_service": self.llm_service,
+            }
+        )
+        findings = result["findings"]
         summary = {"Full": 0, "Partial": 0, "Gap": 0}
-
-        # 3. Perform Gap Analysis for each Circular Requirement
-        for req in circular_requirements:
-            # Search baseline for relevant context
-            filters = {"doc_id": baseline_id}
-
-            baseline_chunks = self.vector_store.query(
-                query_text=req.get("description", ""), n_results=3, filters=filters
-            )
-
-            # Analyze gap
-            analysis = await asyncio.to_thread(
-                self.llm_service.perform_gap_analysis,
-                req,
-                baseline_chunks,
-                bool(no_llm),
-            )
-
-            status = analysis.get("status", "Gap")
-            summary[status] = summary.get(status, 0) + 1
-
-            draft_amendment: Optional[str] = None
-            if include_amendments and not no_llm and status in ("Partial", "Gap"):
-                draft_amendment = await asyncio.to_thread(
-                    self.llm_service.generate_draft_amendment,
-                    req,
-                    baseline_chunks,
-                    status,
-                    analysis.get("reasoning", "No reasoning provided"),
-                )
-
-            findings.append(
-                GapRequirementMapping(
-                    circular_req_id=str(uuid.uuid4()),
-                    description=req.get("description", "No description"),
-                    status=status,
-                    reasoning=analysis.get("reasoning", "No reasoning provided"),
-                    draft_amendment=draft_amendment,
-                    provenance=[
-                        Provenance(**p) for p in analysis.get("provenance", [])
-                    ],
-                )
-            )
+        for f in findings:
+            summary[f.status] = summary.get(f.status, 0) + 1
 
         report_id = f"gap_{uuid.uuid4().hex[:8]}"
         completeness_audit = None
