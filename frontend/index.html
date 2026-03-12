@@ -829,6 +829,12 @@
                         Include draft amendments (slower)
                     </label>
                 </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label class="inline-check">
+                        <input type="checkbox" id="gapInteractive">
+                        Pause for human review before finalising (interactive mode)
+                    </label>
+                </div>
                 <button type="submit" id="gapBtn">Run Audit-Grade Gap Analysis</button>
             </form>
         </div>
@@ -877,6 +883,33 @@
                     <tbody id="matrixTableBody"></tbody>
                 </table>
             </div>
+        </div>
+
+        <div class="card">
+            <h2>Cross-Jurisdiction Synthesis</h2>
+            <p class="muted" style="margin-bottom: 15px;">Run gap analysis across multiple circulars simultaneously and synthesise commonalities, divergences, and coverage gaps.</p>
+            <form id="synthesisForm">
+                <div class="form-group">
+                    <label for="synthesisBaseline">Baseline Framework</label>
+                    <select id="synthesisBaseline" required>
+                        <option value="">Select Baseline...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Circulars to Compare (select multiple)</label>
+                    <select id="synthesisCirculars" multiple size="5" style="height: auto; min-height: 120px;">
+                    </select>
+                    <small class="muted">Hold Ctrl/Cmd to select multiple</small>
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label class="inline-check">
+                        <input type="checkbox" id="synthesisIncludeAmendments">
+                        Include draft amendments
+                    </label>
+                </div>
+                <button type="submit" id="synthesisBtn">Run Cross-Jurisdiction Synthesis</button>
+            </form>
+            <div id="synthesisResult" style="margin-top: 20px;"></div>
         </div>
 
         <div class="main-grid">
@@ -1670,17 +1703,32 @@
                 const docData = await docRes.json();
                 const circularSel = document.getElementById('gapCircular');
                 const baselineSel = document.getElementById('gapBaseline');
+                const synthCircularSel = document.getElementById('synthesisCirculars');
+                const synthBaselineSel = document.getElementById('synthesisBaseline');
                 
                 const docs = docData.documents || [];
                 
                 const currentCircular = circularSel.value;
                 const currentBaseline = baselineSel.value;
+                const currentSynthCirculars = Array.from(synthCircularSel.selectedOptions).map(o => o.value);
+                const currentSynthBaseline = synthBaselineSel.value;
 
                 clearAndSetPlaceholder(circularSel, 'Select Circular...');
+                if (synthCircularSel) synthCircularSel.innerHTML = '';
+                
                 const circularDocs = docs.filter(doc => isRegulatoryCircular(doc));
-                circularDocs.forEach(doc => appendOption(circularSel, doc.doc_id, docDisplayLabel(doc, false)));
+                circularDocs.forEach(doc => {
+                    appendOption(circularSel, doc.doc_id, docDisplayLabel(doc, false));
+                    if (synthCircularSel) appendOption(synthCircularSel, doc.doc_id, docDisplayLabel(doc, false));
+                });
+                
                 if (currentCircular && Array.from(circularSel.options).some(opt => opt.value === currentCircular)) {
                     circularSel.value = currentCircular;
+                }
+                if (synthCircularSel) {
+                    Array.from(synthCircularSel.options).forEach(opt => {
+                        if (currentSynthCirculars.includes(opt.value)) opt.selected = true;
+                    });
                 }
 
                 const isPolicy = document.getElementById('gapIsPolicy').value === 'true';
@@ -1689,12 +1737,19 @@
                     if (!polRes.ok) throw new Error('Failed to load policies');
                     const polData = await polRes.json();
                     clearAndSetPlaceholder(baselineSel, 'Select Policy...');
+                    if (synthBaselineSel) clearAndSetPlaceholder(synthBaselineSel, 'Select Baseline Policy...');
+                    
                     const policies = Array.isArray(polData) ? polData : (polData.policies || []);
                     policies.forEach(p => {
-                        appendOption(baselineSel, p.policy_id || p.id, p.name || p.title);
+                        const id = p.policy_id || p.id;
+                        const name = p.name || p.title;
+                        appendOption(baselineSel, id, name);
+                        if (synthBaselineSel) appendOption(synthBaselineSel, id, name);
                     });
                 } else {
                     clearAndSetPlaceholder(baselineSel, 'Select Baseline Document...');
+                    if (synthBaselineSel) clearAndSetPlaceholder(synthBaselineSel, 'Select Baseline Document...');
+                    
                     const baselineDocs = docs.filter(doc => {
                         const reqCount = requirementsCountForDoc(doc);
                         return isIllustrativeDoc(doc) || (reqCount > 0 && !isRegulatoryCircular(doc));
@@ -1709,9 +1764,17 @@
 
                     appendOptionGroup(baselineSel, 'Capco baselines', capcoBaselines);
                     appendOptionGroup(baselineSel, 'Uploaded baselines', uploadedBaselines);
+                    
+                    if (synthBaselineSel) {
+                        appendOptionGroup(synthBaselineSel, 'Capco baselines', capcoBaselines);
+                        appendOptionGroup(synthBaselineSel, 'Uploaded baselines', uploadedBaselines);
+                    }
                 }
                 if (currentBaseline && Array.from(baselineSel.options).some(opt => opt.value === currentBaseline)) {
                     baselineSel.value = currentBaseline;
+                }
+                if (synthBaselineSel && currentSynthBaseline && Array.from(synthBaselineSel.options).some(opt => opt.value === currentSynthBaseline)) {
+                    synthBaselineSel.value = currentSynthBaseline;
                 }
             } catch (err) {
                 console.error('Error updating gap selectors:', err);
@@ -2672,12 +2735,86 @@
             }
         });
 
+        // Synthesis form handler
+        document.getElementById('synthesisForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('synthesisBtn');
+            const resultDiv = document.getElementById('synthesisResult');
+            const baselineId = document.getElementById('synthesisBaseline').value;
+            const circularIds = Array.from(document.getElementById('synthesisCirculars').selectedOptions).map(o => o.value);
+            const includeAmendments = document.getElementById('synthesisIncludeAmendments').checked;
+
+            if (circularIds.length === 0) {
+                showStatus('Please select at least one circular', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Synthesising...';
+            resultDiv.innerHTML = '<div class="status info"><span class="spinner-dot"></span> Running Cross-Jurisdiction Synthesis...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/synthesis`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        circular_ids: circularIds,
+                        baseline_id: baselineId,
+                        is_policy_baseline: document.getElementById('gapIsPolicy').value === 'true',
+                        include_amendments: includeAmendments
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.detail || 'Synthesis failed');
+
+                let html = `<h3>Synthesis Results</h3>`;
+                
+                // Jurisdiction summaries
+                html += `<div class="main-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-top: 15px;">`;
+                (data.jurisdiction_summaries || []).forEach(js => {
+                    const counts = js.summary || { Full: 0, Partial: 0, Gap: 0 };
+                    html += `
+                        <div class="card" style="padding: 15px; margin-bottom: 0; box-shadow: none; border: 1px solid var(--border);">
+                            <h4 style="margin-bottom: 10px; border-bottom: 2px solid var(--accent); padding-bottom: 5px; font-size: 15px;">${js.jurisdiction}</h4>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                <span class="badge" style="background: var(--accent); color: white; border-radius: 4px;">Full: ${counts.Full}</span>
+                                <span class="badge" style="background: var(--accent-2); color: white; border-radius: 4px;">Partial: ${counts.Partial}</span>
+                                <span class="badge" style="background: #7c2d1a; color: white; border-radius: 4px;">Gap: ${counts.Gap}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+
+                // Cross-jurisdiction summary
+                if (data.cross_jurisdiction_summary) {
+                    html += `
+                        <div class="summary" style="margin-top: 20px; border-left: 4px solid var(--accent-2);">
+                            <h3 style="color: var(--accent-2);">Cross-Jurisdiction Summary</h3>
+                            <div class="result-text">${data.cross_jurisdiction_summary.replace(/\n/g, '<br>')}</div>
+                        </div>
+                    `;
+                }
+
+                resultDiv.innerHTML = html;
+                showStatus('Synthesis complete', 'success');
+            } catch (error) {
+                showStatus(error.message, 'error');
+                resultDiv.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Run Cross-Jurisdiction Synthesis';
+            }
+        });
+
         // Gap form handler
         document.getElementById('gapForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const circular_doc_id = document.getElementById('gapCircular').value;
             const baseline_id = document.getElementById('gapBaseline').value;
             const is_policy_baseline = document.getElementById('gapIsPolicy').value === 'true';
+            const interactive = document.getElementById('gapInteractive').checked;
             const gapBtn = document.getElementById('gapBtn');
             
             gapBtn.disabled = true;
@@ -2692,16 +2829,21 @@
                         baseline_id,
                         is_policy_baseline,
                         include_amendments: isIncludeAmendmentsEnabled(),
-                        no_llm: isNoLlmMode()
+                        no_llm: isNoLlmMode(),
+                        interactive
                     })
                 });
                 
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.detail || 'Gap analysis failed');
                 
-                showResults(renderGapFindingsTable(data, { enableRemediation: true }));
-                await setupGapRemediation(data);
-                showStatus('Gap analysis complete', 'success');
+                if (data.status === 'interrupted') {
+                    showResults(renderInterruptedGapAnalysis(data));
+                } else {
+                    showResults(renderGapFindingsTable(data, { enableRemediation: true }));
+                    await setupGapRemediation(data);
+                    showStatus('Gap analysis complete', 'success');
+                }
             } catch (error) {
                 showStatus(error.message, 'error');
             } finally {
@@ -2709,6 +2851,54 @@
                 gapBtn.textContent = 'Run Audit-Grade Gap Analysis';
             }
         });
+
+        function renderInterruptedGapAnalysis(data) {
+            let html = `
+                <div class="summary" style="background: #fff4e5; border-left: 4px solid #d87a2a; margin-bottom: 20px;">
+                    <h3>Paused for Review</h3>
+                    <p>The analysis has identified the following findings. Please review and approve to generate the final report.</p>
+                    <div style="margin-top: 15px; display: flex; gap: 10px;">
+                        <button id="gapApproveBtn" onclick="resumeGapAnalysis('${data.report_id}', true)">Approve & Generate Final Report</button>
+                        <button id="gapRejectBtn" class="btn-secondary" onclick="rejectGapAnalysis()">Reject</button>
+                    </div>
+                </div>
+                ${renderGapFindingsTable(data, { enableRemediation: false })}
+            `;
+            return html;
+        }
+
+        async function resumeGapAnalysis(threadId, approved) {
+            const btn = document.getElementById('gapApproveBtn');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = 'Processing...';
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/gap-analysis/resume`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ thread_id: threadId, approved })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.detail || 'Resume failed');
+                
+                showResults(renderGapFindingsTable(data, { enableRemediation: true }));
+                await setupGapRemediation(data);
+                showStatus('Analysis finalised', 'success');
+            } catch (error) {
+                showStatus(error.message, 'error');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Approve & Generate Final Report';
+                }
+            }
+        }
+
+        function rejectGapAnalysis() {
+            document.getElementById('results').classList.add('hidden');
+            showStatus('Analysis rejected.', 'info');
+        }
 
         function renderGapFindingsTable(data, options = {}) {
             const enableRemediation = options.enableRemediation === true;
