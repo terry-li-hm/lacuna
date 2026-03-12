@@ -8,6 +8,14 @@
 - **Volume:** `lacuna-volume` mounted at `/app/data` (persists DuckDB + ChromaDB + JSON stores) — created Mar 6 2026; was missing before, data was ephemeral
 - **Deploy:** `railway up --detach` (not GitHub auto-deploy)
 
+**Why Railway (not Fly.io/Render/Vercel) — decided Mar 2026:**
+- Already deployed with persistent volume mounted — migration friction not justified mid-demo cycle
+- Vercel: no persistent POSIX disk → ChromaDB (SQLite) won't work without replacing vector store
+- Render: persistent disk blocks zero-downtime deploys (volume unmounts on redeploy)
+- Fly.io is the stronger choice on reliability (fewer 2025 incidents, better volume semantics)
+- Railway's $100M Series B (Jan 2026) + bare-metal rebuild is a positive signal for stability
+- **Revisit trigger:** Lacuna moves from demo → live client access → migrate to Fly.io
+
 > Old project (meridian): `c2b227f0` — deleted Mar 3 2026.
 
 ## Package Names
