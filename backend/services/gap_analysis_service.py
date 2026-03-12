@@ -1,17 +1,20 @@
 import asyncio
 import logging
+import os
 import uuid
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 from backend.storage.repositories import DocumentRepository, PolicyRepository
 from backend.vector_store import VectorStore
 from backend.services.llm_service import LLMService
-from backend.services.gap_graph import build_gap_graph
+from backend.services.gap_graph import SqliteSaver, build_gap_graph
 from backend.models.schemas import (
     CompletenessAudit,
     CompletenessFlag,
     GapAnalysisResponse,
+    GapRequirementMapping,
 )
 
 logger = logging.getLogger(__name__)
@@ -29,7 +32,53 @@ class GapAnalysisService:
         self.policy_repo = policy_repo
         self.vector_store = vector_store
         self.llm_service = llm_service
-        self.gap_graph = build_gap_graph()
+        self.checkpoint_db_path = self._detect_checkpoint_db_path()
+        self.gap_graph = build_gap_graph(self.checkpoint_db_path)
+        self.checkpointing_enabled = self.checkpoint_db_path is not None and SqliteSaver is not None
+
+    def _detect_checkpoint_db_path(self) -> str | None:
+        if os.environ.get("PYTEST_CURRENT_TEST"):
+            return None
+        if os.path.isdir("/app/data"):
+            return "/app/data/checkpoints.sqlite"
+
+        local_path = Path.home() / ".local" / "share" / "lacuna" / "checkpoints.sqlite"
+        local_path.parent.mkdir(parents=True, exist_ok=True)
+        return str(local_path)
+
+    def _make_response(
+        self,
+        report_id: str,
+        circular_doc_id: str,
+        baseline_id: str,
+        findings: list[GapRequirementMapping],
+        *,
+        completeness_audit: CompletenessAudit | None = None,
+        status: str = "completed",
+    ) -> GapAnalysisResponse:
+        summary = {"Full": 0, "Partial": 0, "Gap": 0}
+        for finding in findings:
+            summary[finding.status] = summary.get(finding.status, 0) + 1
+
+        return GapAnalysisResponse(
+            report_id=report_id,
+            circular_id=circular_doc_id,
+            baseline_id=baseline_id,
+            generated_at=datetime.now(timezone.utc).isoformat(),
+            status=status,
+            summary=summary,
+            findings=findings,
+            completeness_audit=completeness_audit,
+        )
+
+    @staticmethod
+    def _normalize_findings(raw_findings: list[Any]) -> list[GapRequirementMapping]:
+        return [
+            finding
+            if isinstance(finding, GapRequirementMapping)
+            else GapRequirementMapping.model_validate(finding)
+            for finding in raw_findings
+        ]
 
     async def perform_gap_analysis(
         self,
@@ -40,6 +89,7 @@ class GapAnalysisService:
         use_confirmed: bool = False,
         confirm_repo: Any = None,
         include_completeness_audit: bool = False,
+        interactive: bool = False,
         no_llm: bool = False,
     ) -> GapAnalysisResponse:
         """Perform a gap analysis between a circular document and a baseline."""
@@ -77,27 +127,40 @@ class GapAnalysisService:
             if not baseline:
                 raise ValueError(f"Document baseline {baseline_id} not found")
 
-        result = await self.gap_graph.ainvoke(
-            {
-                "circular_doc_id": circular_doc_id,
-                "baseline_id": baseline_id,
-                "requirements": circular_requirements,
-                "current_req": None,
-                "findings": [],
-                "include_amendments": include_amendments,
-                "no_llm": bool(no_llm),
-                "vector_store": self.vector_store,
-                "llm_service": self.llm_service,
-            }
-        )
-        findings = result["findings"]
-        summary = {"Full": 0, "Partial": 0, "Gap": 0}
-        for f in findings:
-            summary[f.status] = summary.get(f.status, 0) + 1
-
         report_id = f"gap_{uuid.uuid4().hex[:8]}"
+        graph_input = {
+            "circular_doc_id": circular_doc_id,
+            "baseline_id": baseline_id,
+            "requirements": circular_requirements,
+            "current_req": None,
+            "findings": [],
+            "interactive": interactive,
+            "include_amendments": include_amendments,
+            "no_llm": bool(no_llm),
+            "vector_store": self.vector_store,
+            "llm_service": self.llm_service,
+        }
+        graph_config = {"configurable": {"thread_id": report_id}} if self.checkpointing_enabled else None
+        invoke_kwargs = {}
+        if interactive and self.checkpointing_enabled:
+            invoke_kwargs["interrupt_before"] = ["human_review_node"]
+
+        result = await self.gap_graph.ainvoke(graph_input, config=graph_config, **invoke_kwargs)
+        findings = self._normalize_findings(result["findings"])
+
         completeness_audit = None
-        if include_completeness_audit:
+        interrupted = False
+        if interactive and self.checkpointing_enabled and graph_config is not None:
+            try:
+                snapshot = await self.gap_graph.aget_state(graph_config)
+                interrupted = bool(getattr(snapshot, "next", ()))
+            except Exception as e:
+                logger.warning(
+                    f"Could not inspect checkpoint state for {report_id}: {e}",
+                    exc_info=True,
+                )
+
+        if include_completeness_audit and not interrupted:
             try:
                 circular_text = (
                     circular_doc.get("raw_text")
@@ -130,12 +193,40 @@ class GapAnalysisService:
                 )
                 completeness_audit = None
 
-        return GapAnalysisResponse(
+        return self._make_response(
             report_id=report_id,
-            circular_id=circular_doc_id,
+            circular_doc_id=circular_doc_id,
             baseline_id=baseline_id,
-            generated_at=datetime.now(timezone.utc).isoformat(),
-            summary=summary,
             findings=findings,
             completeness_audit=completeness_audit,
+            status="interrupted" if interrupted else "completed",
+        )
+
+    async def resume_gap_analysis(
+        self,
+        thread_id: str,
+        override_findings: list[dict] | None = None,
+    ) -> GapAnalysisResponse:
+        if not self.checkpointing_enabled:
+            raise ValueError("Checkpointing is not enabled")
+
+        config = {"configurable": {"thread_id": thread_id}}
+        snapshot = await self.gap_graph.aget_state(config)
+        values = getattr(snapshot, "values", None) or {}
+        if not values:
+            raise ValueError(f"No paused analysis found for thread {thread_id}")
+
+        if override_findings is not None:
+            findings = self._normalize_findings(override_findings)
+            await self.gap_graph.aupdate_state(config, {"findings": findings})
+
+        result = await self.gap_graph.ainvoke(None, config=config)
+        findings = self._normalize_findings(result["findings"])
+
+        return self._make_response(
+            report_id=thread_id,
+            circular_doc_id=result["circular_doc_id"],
+            baseline_id=result["baseline_id"],
+            findings=findings,
+            status="completed",
         )

@@ -103,6 +103,7 @@ class GapAnalysisRequest(BaseModel):
     include_amendments: bool = False
     use_confirmed: bool = False
     include_completeness_audit: bool = False
+    interactive: bool = False
     no_llm: bool = False
 
 
@@ -129,9 +130,16 @@ class GapAnalysisResponse(BaseModel):
     circular_id: str
     baseline_id: str
     generated_at: str
+    status: str = "completed"
     summary: Dict[str, int]
     findings: List[GapRequirementMapping]
     completeness_audit: CompletenessAudit | None = None
+
+
+class GapResumeRequest(BaseModel):
+    thread_id: str
+    approved: bool = True
+    override_findings: list[dict] | None = None
 
 
 class AtomicRequirement(BaseModel):
@@ -228,6 +236,7 @@ __all__ = [
     "CompletenessAudit",
     "GapAnalysisRequest",
     "GapAnalysisResponse",
+    "GapResumeRequest",
     "AtomicRequirement",
     "DecomposeRequest",
     "DecomposeResponse",

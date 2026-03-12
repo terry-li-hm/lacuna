@@ -20,6 +20,7 @@ from backend.state import (
 from backend.models.schemas import (
     GapAnalysisRequest,
     GapAnalysisResponse,
+    GapResumeRequest,
     BatchGapAnalysisRequest,
     BatchGapAnalysisResponse,
     BatchGapAnalysisResult,
@@ -54,7 +55,7 @@ async def gap_analysis(
         request.include_completeness_audit,
         request.use_confirmed,
     )
-    if cache_key in _gap_cache and not request.no_llm:
+    if cache_key in _gap_cache and not request.no_llm and not request.interactive:
         logger.info("Gap analysis cache hit — returning cached result")
         return _gap_cache[cache_key]
 
@@ -67,9 +68,10 @@ async def gap_analysis(
             use_confirmed=request.use_confirmed,
             confirm_repo=get_confirm_repo(),
             include_completeness_audit=request.include_completeness_audit,
+            interactive=request.interactive,
             no_llm=request.no_llm,
         )
-        if not request.no_llm:
+        if not request.no_llm and not request.interactive:
             _gap_cache[cache_key] = result
         return result
     except ValueError as e:
@@ -78,6 +80,25 @@ async def gap_analysis(
         )
     except Exception as e:
         logger.error(f"Error performing gap analysis: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.post("/gap-analysis/resume", response_model=GapAnalysisResponse)
+async def resume_gap_analysis(
+    req: GapResumeRequest, service=Depends(get_gap_analysis_service)
+):
+    if not req.approved:
+        raise HTTPException(status_code=409, detail="analysis rejected by reviewer")
+
+    try:
+        return await service.resume_gap_analysis(
+            thread_id=req.thread_id,
+            override_findings=req.override_findings,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error resuming gap analysis: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
