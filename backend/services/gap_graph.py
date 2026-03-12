@@ -77,8 +77,9 @@ def route_requirements(state: GapState) -> List[Send]:
     ]
 
 
-def human_review_node(state: GapState) -> GapState:
-    return state
+def human_review_node(state: GapState) -> dict:
+    # No-op interrupt point — returns no state changes to avoid re-accumulating findings
+    return {}
 
 
 def build_gap_graph(checkpoint_db_path: str | None = None) -> CompiledGraph:

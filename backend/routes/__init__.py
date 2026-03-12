@@ -12,6 +12,7 @@ from .changes import router as changes_router
 from .remediation import router as remediation_router
 from .decompose import router as decompose_router
 from .confirm import router as confirm_router
+from .synthesis import router as synthesis_router
 
 __all__ = [
     "documents_router",
@@ -26,4 +27,5 @@ __all__ = [
     "remediation_router",
     "decompose_router",
     "confirm_router",
+    "synthesis_router",
 ]
