@@ -130,10 +130,14 @@ class GapAnalysisService:
             "interactive": interactive,
             "include_amendments": include_amendments,
             "no_llm": bool(no_llm),
-            "vector_store": self.vector_store,
-            "llm_service": self.llm_service,
         }
-        graph_config = {"configurable": {"thread_id": report_id}}
+        graph_config = {
+            "configurable": {
+                "thread_id": report_id,
+                "vector_store": self.vector_store,
+                "llm_service": self.llm_service,
+            }
+        }
 
         completeness_audit = None
         interrupted = False
@@ -199,7 +203,13 @@ class GapAnalysisService:
         if False:  # MemorySaver always active
             raise ValueError("Checkpointing is not enabled")
 
-        config = {"configurable": {"thread_id": thread_id}}
+        config = {
+            "configurable": {
+                "thread_id": thread_id,
+                "vector_store": self.vector_store,
+                "llm_service": self.llm_service,
+            }
+        }
         snapshot = await self.gap_graph.aget_state(config)
         values = getattr(snapshot, "values", None) or {}
         if not values:

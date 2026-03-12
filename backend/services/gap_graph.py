@@ -4,6 +4,7 @@ import uuid
 from typing import Annotated, Any, Dict, List, Optional
 
 from typing_extensions import NotRequired, TypedDict
+from langgraph.config import get_config
 
 from langgraph.types import Send, interrupt
 from langgraph.graph import END, START, StateGraph
@@ -16,6 +17,7 @@ CompiledGraph = CompiledStateGraph
 
 
 class GapState(TypedDict):
+    """Only serializable fields — service objects passed via config["configurable"]."""
     circular_doc_id: str
     baseline_id: str
     requirements: List[Dict[str, Any]]
@@ -24,22 +26,25 @@ class GapState(TypedDict):
     interactive: NotRequired[bool]
     include_amendments: bool
     no_llm: bool
-    vector_store: Any
-    llm_service: Any
 
 
 async def analyze_requirement_node(state: GapState) -> Dict[str, List[GapRequirementMapping]]:
+    # Services injected via config["configurable"] — never serialized to checkpoint
+    cfg = get_config()["configurable"]
+    vector_store = cfg["vector_store"]
+    llm_service = cfg["llm_service"]
+
     req = state["current_req"] or {}
     baseline_id = state["baseline_id"]
 
-    baseline_chunks = state["vector_store"].query(
+    baseline_chunks = vector_store.query(
         query_text=req.get("description", ""),
         n_results=3,
         filters={"doc_id": baseline_id},
     )
 
     analysis = await asyncio.to_thread(
-        state["llm_service"].perform_gap_analysis,
+        llm_service.perform_gap_analysis,
         req,
         baseline_chunks,
         state["no_llm"],
@@ -49,7 +54,7 @@ async def analyze_requirement_node(state: GapState) -> Dict[str, List[GapRequire
     draft_amendment: Optional[str] = None
     if state["include_amendments"] and not state["no_llm"] and status in ("Partial", "Gap"):
         draft_amendment = await asyncio.to_thread(
-            state["llm_service"].generate_draft_amendment,
+            llm_service.generate_draft_amendment,
             req,
             baseline_chunks,
             status,
@@ -84,8 +89,11 @@ def human_review_node(state: GapState) -> dict:
 def build_gap_graph(checkpointer=None) -> CompiledGraph:
     """Build the gap analysis graph.
 
-    Pass a checkpointer (e.g. MemorySaver()) to enable interrupt/resume.
-    Pass None (default) for test use — graph runs without persistence.
+    Services (vector_store, llm_service) are passed via config["configurable"]
+    at invocation time — they are never part of state and never serialized.
+
+    Pass a checkpointer to enable interrupt/resume (e.g. MemorySaver()).
+    Pass None for test use where mocks aren't serializable.
     """
     graph = StateGraph(GapState)
     graph.add_node("analyze_requirement", analyze_requirement_node)

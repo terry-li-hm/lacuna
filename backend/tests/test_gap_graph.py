@@ -54,9 +54,8 @@ def test_gap_graph_collects_findings_and_draft_amendments():
                 "findings": [],
                 "include_amendments": True,
                 "no_llm": False,
-                "vector_store": vector_store,
-                "llm_service": llm_service,
             },
+            config={"configurable": {"vector_store": vector_store, "llm_service": llm_service}},
         )
     )
 
@@ -69,9 +68,10 @@ def test_gap_graph_collects_findings_and_draft_amendments():
     llm_service.generate_draft_amendment.assert_called_once()
 
 
-def _invoke(state):
-    # No checkpointer in tests — mocks aren't msgpack-serializable
-    return asyncio.run(build_gap_graph().ainvoke(state))
+def _invoke(state, vs=None, ls=None):
+    # Services passed via config["configurable"], not state — never serialized
+    config = {"configurable": {"vector_store": vs or MagicMock(), "llm_service": ls or MagicMock()}}
+    return asyncio.run(build_gap_graph().ainvoke(state, config=config))
 
 
 def _base_state(**overrides):
@@ -88,38 +88,36 @@ def _base_state(**overrides):
         "findings": [],
         "include_amendments": False,
         "no_llm": False,
-        "vector_store": vs,
-        "llm_service": ls,
     }
     state.update(overrides)
     return state, vs, ls
 
 
 def test_empty_requirements_returns_no_findings():
-    state, _, _ = _base_state(requirements=[])
-    result = _invoke(state)
+    state, vs, ls = _base_state(requirements=[])
+    result = _invoke(state, vs, ls)
     assert result["findings"] == []
 
 
 def test_no_llm_flag_passed_to_service():
-    state, _, ls = _base_state(no_llm=True)
-    _invoke(state)
+    state, vs, ls = _base_state(no_llm=True)
+    _invoke(state, vs, ls)
     _, _, force_basic = ls.perform_gap_analysis.call_args[0]
     assert force_basic is True
 
 
 def test_amendments_not_generated_when_flag_false():
-    state, _, ls = _base_state(include_amendments=False)
+    state, vs, ls = _base_state(include_amendments=False)
     # Gap status would trigger amendment if flag were True
     ls.perform_gap_analysis.return_value = {"status": "Gap", "reasoning": "r", "provenance": []}
-    _invoke(state)
+    _invoke(state, vs, ls)
     ls.generate_draft_amendment.assert_not_called()
 
 
 def test_amendments_not_generated_for_full_status():
-    state, _, ls = _base_state(include_amendments=True)
+    state, vs, ls = _base_state(include_amendments=True)
     ls.perform_gap_analysis.return_value = {"status": "Full", "reasoning": "r", "provenance": []}
-    _invoke(state)
+    _invoke(state, vs, ls)
     ls.generate_draft_amendment.assert_not_called()
 
 
