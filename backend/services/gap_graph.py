@@ -8,10 +8,7 @@ from typing_extensions import NotRequired, TypedDict
 from langgraph.types import Send, interrupt
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
-try:
-    from langgraph.checkpoint.sqlite import SqliteSaver
-except ImportError:  # pragma: no cover - optional dependency for runtime persistence
-    SqliteSaver = None
+from langgraph.checkpoint.memory import MemorySaver
 
 from backend.models.schemas import GapRequirementMapping, Provenance
 
@@ -84,17 +81,16 @@ def human_review_node(state: GapState) -> dict:
     return {}
 
 
-def build_gap_graph(checkpoint_db_path: str | None = None) -> CompiledGraph:
+def build_gap_graph(checkpointer=None) -> CompiledGraph:
+    """Build the gap analysis graph.
+
+    Pass a checkpointer (e.g. MemorySaver()) to enable interrupt/resume.
+    Pass None (default) for test use — graph runs without persistence.
+    """
     graph = StateGraph(GapState)
     graph.add_node("analyze_requirement", analyze_requirement_node)
     graph.add_node("human_review_node", human_review_node)
     graph.add_conditional_edges(START, route_requirements, ["analyze_requirement"])
     graph.add_edge("analyze_requirement", "human_review_node")
     graph.add_edge("human_review_node", END)
-
-    if checkpoint_db_path and SqliteSaver is not None:
-        # Don't use context manager — checkpointer must stay alive for the graph's lifetime
-        checkpointer = SqliteSaver.from_conn_string(checkpoint_db_path)
-        return graph.compile(checkpointer=checkpointer)
-
-    return graph.compile()
+    return graph.compile(checkpointer=checkpointer)

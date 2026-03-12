@@ -5,6 +5,12 @@ from unittest.mock import AsyncMock, MagicMock
 from backend.services.gap_graph import build_gap_graph
 from backend.services.gap_analysis_service import GapAnalysisService
 
+# Patch MemorySaver out for service integration tests — mocks aren't serializable
+import unittest.mock
+_no_checkpointer_patch = unittest.mock.patch(
+    "backend.services.gap_analysis_service.MemorySaver", return_value=None
+)
+
 
 def test_gap_graph_compiles():
     graph = build_gap_graph()
@@ -50,7 +56,7 @@ def test_gap_graph_collects_findings_and_draft_amendments():
                 "no_llm": False,
                 "vector_store": vector_store,
                 "llm_service": llm_service,
-            }
+            },
         )
     )
 
@@ -64,6 +70,7 @@ def test_gap_graph_collects_findings_and_draft_amendments():
 
 
 def _invoke(state):
+    # No checkpointer in tests — mocks aren't msgpack-serializable
     return asyncio.run(build_gap_graph().ainvoke(state))
 
 
@@ -131,7 +138,8 @@ def _make_service(requirements=None):
     return svc, ls
 
 
-def test_service_summary_counts_match_findings():
+@_no_checkpointer_patch
+def test_service_summary_counts_match_findings(_mock):
     svc, ls = _make_service(requirements=[
         {"description": "R1"},
         {"description": "R2"},
@@ -147,7 +155,8 @@ def test_service_summary_counts_match_findings():
     assert len(result.findings) == 3
 
 
-def test_service_raises_on_missing_circular():
+@_no_checkpointer_patch
+def test_service_raises_on_missing_circular(_mock):
     svc, _ = _make_service()
     svc.doc_repo.get.return_value = None
     with pytest.raises(ValueError, match="not found"):

@@ -1,15 +1,14 @@
 import asyncio
 import logging
-import os
 import uuid
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any
 
 from backend.storage.repositories import DocumentRepository, PolicyRepository
 from backend.vector_store import VectorStore
 from backend.services.llm_service import LLMService
-from backend.services.gap_graph import SqliteSaver, build_gap_graph
+from langgraph.checkpoint.memory import MemorySaver
+from backend.services.gap_graph import build_gap_graph
 from backend.models.schemas import (
     CompletenessAudit,
     CompletenessFlag,
@@ -32,17 +31,11 @@ class GapAnalysisService:
         self.policy_repo = policy_repo
         self.vector_store = vector_store
         self.llm_service = llm_service
-        self.checkpoint_db_path = self._detect_checkpoint_db_path()
-        self.gap_graph = build_gap_graph(self.checkpoint_db_path)
-        self.checkpointing_enabled = self.checkpoint_db_path is not None and SqliteSaver is not None
+        self.gap_graph = build_gap_graph(checkpointer=MemorySaver())
 
     def _detect_checkpoint_db_path(self) -> str | None:
-        if os.environ.get("PYTEST_CURRENT_TEST"):
-            return None
-        if os.path.isdir("/app/data"):
-            return "/app/data/checkpoints.sqlite"
-
-        local_path = Path.home() / ".local" / "share" / "lacuna" / "checkpoints.sqlite"
+        # Kept for future SQLite persistence — currently unused (MemorySaver is always active)
+        local_path = None  # placeholder
         local_path.parent.mkdir(parents=True, exist_ok=True)
         return str(local_path)
 
@@ -140,7 +133,7 @@ class GapAnalysisService:
             "vector_store": self.vector_store,
             "llm_service": self.llm_service,
         }
-        graph_config = {"configurable": {"thread_id": report_id}} if self.checkpointing_enabled else None
+        graph_config = {"configurable": {"thread_id": report_id}}
 
         completeness_audit = None
         interrupted = False
@@ -149,7 +142,7 @@ class GapAnalysisService:
             findings = self._normalize_findings(result["findings"])
         except Exception as exc:
             # LangGraph raises GraphInterrupt when interrupt() is called inside a node
-            if type(exc).__name__ == "GraphInterrupt" and self.checkpointing_enabled:
+            if type(exc).__name__ == "GraphInterrupt":
                 interrupted = True
                 snapshot = await self.gap_graph.aget_state(graph_config)
                 findings = self._normalize_findings(snapshot.values.get("findings", []))
@@ -203,7 +196,7 @@ class GapAnalysisService:
         thread_id: str,
         override_findings: list[dict] | None = None,
     ) -> GapAnalysisResponse:
-        if not self.checkpointing_enabled:
+        if False:  # MemorySaver always active
             raise ValueError("Checkpointing is not enabled")
 
         config = {"configurable": {"thread_id": thread_id}}
