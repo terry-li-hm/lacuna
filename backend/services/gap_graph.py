@@ -3,11 +3,15 @@ import operator
 import uuid
 from typing import Annotated, Any, Dict, List, Optional
 
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 from langgraph.types import Send
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
+try:
+    from langgraph.checkpoint.sqlite import SqliteSaver
+except ImportError:  # pragma: no cover - optional dependency for runtime persistence
+    SqliteSaver = None
 
 from backend.models.schemas import GapRequirementMapping, Provenance
 
@@ -20,6 +24,7 @@ class GapState(TypedDict):
     requirements: List[Dict[str, Any]]
     current_req: Optional[Dict[str, Any]]
     findings: Annotated[List[GapRequirementMapping], operator.add]
+    interactive: NotRequired[bool]
     include_amendments: bool
     no_llm: bool
     vector_store: Any
@@ -72,9 +77,20 @@ def route_requirements(state: GapState) -> List[Send]:
     ]
 
 
-def build_gap_graph() -> CompiledGraph:
+def human_review_node(state: GapState) -> GapState:
+    return state
+
+
+def build_gap_graph(checkpoint_db_path: str | None = None) -> CompiledGraph:
     graph = StateGraph(GapState)
     graph.add_node("analyze_requirement", analyze_requirement_node)
+    graph.add_node("human_review_node", human_review_node)
     graph.add_conditional_edges(START, route_requirements, ["analyze_requirement"])
-    graph.add_edge("analyze_requirement", END)
+    graph.add_edge("analyze_requirement", "human_review_node")
+    graph.add_edge("human_review_node", END)
+
+    if checkpoint_db_path and SqliteSaver is not None:
+        with SqliteSaver.from_conn_string(checkpoint_db_path) as checkpointer:
+            return graph.compile(checkpointer=checkpointer)
+
     return graph.compile()

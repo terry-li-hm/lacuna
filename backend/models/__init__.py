@@ -12,6 +12,7 @@ from .schemas import (
     DecomposeResponse,
     GapAnalysisRequest,
     GapAnalysisResponse,
+    GapResumeRequest,
     GapRequirementMapping,
     PolicyUpdateRequest,
     Provenance,
@@ -42,4 +43,5 @@ __all__ = [
     "CompletenessAudit",
     "GapAnalysisRequest",
     "GapAnalysisResponse",
+    "GapResumeRequest",
 ]
