@@ -26,13 +26,11 @@ def _extract_json_from_llm_response(text: str) -> str:
         text = text.split("```json", 1)[1].split("```", 1)[0].strip()
     elif "```" in text:
         text = text.split("```", 1)[1].split("```", 1)[0].strip()
-    # If there is still leading prose before the JSON object/array, trim it
-    for start_char in ('{', '['):
-        idx = text.find(start_char)
-        if idx > 0:
-            text = text[idx:]
-            break
-    # Use raw_decode to stop at first complete JSON value — tolerates trailing content
+    # Trim to first '{' — we always expect an object, not an array
+    brace_idx = text.find('{')
+    if brace_idx > 0:
+        text = text[brace_idx:]
+    # Use raw_decode to stop at first complete JSON object — tolerates trailing content
     try:
         obj, _ = json.JSONDecoder().raw_decode(text)
         return json.dumps(obj)
