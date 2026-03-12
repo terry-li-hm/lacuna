@@ -5,7 +5,7 @@ from typing import Annotated, Any, Dict, List, Optional
 
 from typing_extensions import NotRequired, TypedDict
 
-from langgraph.types import Send
+from langgraph.types import Send, interrupt
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 try:
@@ -78,7 +78,9 @@ def route_requirements(state: GapState) -> List[Send]:
 
 
 def human_review_node(state: GapState) -> dict:
-    # No-op interrupt point — returns no state changes to avoid re-accumulating findings
+    # Pause for human review when interactive=True; no-op otherwise
+    if state.get("interactive"):
+        interrupt("Pause for human review — approve findings before generating report")
     return {}
 
 
@@ -91,7 +93,8 @@ def build_gap_graph(checkpoint_db_path: str | None = None) -> CompiledGraph:
     graph.add_edge("human_review_node", END)
 
     if checkpoint_db_path and SqliteSaver is not None:
-        with SqliteSaver.from_conn_string(checkpoint_db_path) as checkpointer:
-            return graph.compile(checkpointer=checkpointer)
+        # Don't use context manager — checkpointer must stay alive for the graph's lifetime
+        checkpointer = SqliteSaver.from_conn_string(checkpoint_db_path)
+        return graph.compile(checkpointer=checkpointer)
 
     return graph.compile()

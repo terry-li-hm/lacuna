@@ -141,24 +141,20 @@ class GapAnalysisService:
             "llm_service": self.llm_service,
         }
         graph_config = {"configurable": {"thread_id": report_id}} if self.checkpointing_enabled else None
-        invoke_kwargs = {}
-        if interactive and self.checkpointing_enabled:
-            invoke_kwargs["interrupt_before"] = ["human_review_node"]
-
-        result = await self.gap_graph.ainvoke(graph_input, config=graph_config, **invoke_kwargs)
-        findings = self._normalize_findings(result["findings"])
 
         completeness_audit = None
         interrupted = False
-        if interactive and self.checkpointing_enabled and graph_config is not None:
-            try:
+        try:
+            result = await self.gap_graph.ainvoke(graph_input, config=graph_config)
+            findings = self._normalize_findings(result["findings"])
+        except Exception as exc:
+            # LangGraph raises GraphInterrupt when interrupt() is called inside a node
+            if type(exc).__name__ == "GraphInterrupt" and self.checkpointing_enabled:
+                interrupted = True
                 snapshot = await self.gap_graph.aget_state(graph_config)
-                interrupted = bool(getattr(snapshot, "next", ()))
-            except Exception as e:
-                logger.warning(
-                    f"Could not inspect checkpoint state for {report_id}: {e}",
-                    exc_info=True,
-                )
+                findings = self._normalize_findings(snapshot.values.get("findings", []))
+            else:
+                raise
 
         if include_completeness_audit and not interrupted:
             try:
