@@ -91,3 +91,9 @@ BASE="https://lacuna.sh"
 4. Get new doc ID: `python3 -c "import json; d=json.load(open('/tmp/lacuna-upload.json')); print(d['doc_id'])"`
 5. Update both doc ID entries in CLAUDE.md (corpus list + demo gap analysis config)
 6. Flag demo cache as stale — re-warm before next demo
+
+
+
+## Product Strategy
+
+See [[Lacuna - Product Strategy]] — CLI-first principle, completeness verification workflow, web UI sequencing.
