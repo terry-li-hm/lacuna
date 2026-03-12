@@ -23,6 +23,7 @@ from backend.routes import (
     decompose_router,
     confirm_router,
 )
+from backend.routes import synthesis
 from backend import state
 
 # Configure logging
@@ -98,6 +99,7 @@ app.include_router(changes_router, tags=["changes"])
 app.include_router(remediation_router, tags=["remediation"])
 app.include_router(decompose_router, tags=["decompose"])
 app.include_router(confirm_router, tags=["confirm"])
+app.include_router(synthesis.router, tags=["synthesis"])
 
 @app.get("/", include_in_schema=False)
 async def serve_frontend():

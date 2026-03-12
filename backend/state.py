@@ -219,6 +219,7 @@ _change_service: Optional[Any] = None
 _scan_service: Optional[Any] = None
 _decompose_service: Optional[Any] = None
 _confirm_service: Optional[Any] = None
+_synthesis_service: Optional[Any] = None
 
 # Components - will be initialized in main.py
 doc_processor = None
@@ -422,6 +423,18 @@ def get_confirm_service():
             confirm_repo=get_confirm_repo(),
         )
     return _confirm_service
+
+
+def get_synthesis_service():
+    """Get or create the synthesis service singleton."""
+    global _synthesis_service
+    if _synthesis_service is None:
+        from backend.services.synthesis_service import SynthesisService
+
+        _synthesis_service = SynthesisService(
+            gap_analysis_service=get_gap_analysis_service(),
+        )
+    return _synthesis_service
 
 
 def init_state():

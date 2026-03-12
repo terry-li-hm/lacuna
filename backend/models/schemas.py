@@ -134,6 +134,34 @@ class GapAnalysisResponse(BaseModel):
     completeness_audit: CompletenessAudit | None = None
 
 
+class JurisdictionResult(BaseModel):
+    """Gap analysis result for a single jurisdiction or circular."""
+
+    circular_id: str
+    jurisdiction: str
+    summary: Dict[str, int]
+    findings: List[GapRequirementMapping]
+
+
+class SynthesisRequest(BaseModel):
+    """Request model for cross-jurisdiction synthesis."""
+
+    circular_ids: List[str]
+    baseline_id: str
+    is_policy_baseline: bool = False
+    include_amendments: bool = False
+
+
+class SynthesisResponse(BaseModel):
+    """Response model for cross-jurisdiction synthesis."""
+
+    synthesis_id: str
+    baseline_id: str
+    generated_at: str
+    jurisdictions: List[JurisdictionResult]
+    cross_jurisdiction_summary: str
+
+
 class AtomicRequirement(BaseModel):
     """Atomic requirement item for decomposition review."""
 
@@ -228,6 +256,9 @@ __all__ = [
     "CompletenessAudit",
     "GapAnalysisRequest",
     "GapAnalysisResponse",
+    "JurisdictionResult",
+    "SynthesisRequest",
+    "SynthesisResponse",
     "AtomicRequirement",
     "DecomposeRequest",
     "DecomposeResponse",
