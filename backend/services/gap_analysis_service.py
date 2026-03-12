@@ -140,18 +140,11 @@ class GapAnalysisService:
         }
 
         completeness_audit = None
-        interrupted = False
-        try:
-            result = await self.gap_graph.ainvoke(graph_input, config=graph_config)
-            findings = self._normalize_findings(result["findings"])
-        except Exception as exc:
-            # LangGraph raises GraphInterrupt when interrupt() is called inside a node
-            if type(exc).__name__ == "GraphInterrupt":
-                interrupted = True
-                snapshot = await self.gap_graph.aget_state(graph_config)
-                findings = self._normalize_findings(snapshot.values.get("findings", []))
-            else:
-                raise
+        result = await self.gap_graph.ainvoke(graph_input, config=graph_config)
+        # In LangGraph 1.1, interrupt() returns __interrupt__ in the result dict
+        # rather than raising GraphInterrupt. Check for that key.
+        interrupted = bool(result.get("__interrupt__"))
+        findings = self._normalize_findings(result.get("findings", []))
 
         if include_completeness_audit and not interrupted:
             try:

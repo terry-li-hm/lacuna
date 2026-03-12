@@ -12,12 +12,13 @@ logger = logging.getLogger(__name__)
 
 def _extract_json_from_llm_response(text: str) -> str:
     """
-    Strip markdown fences and leading prose from an LLM response to isolate raw JSON.
+    Strip markdown fences and leading/trailing prose from an LLM response to isolate raw JSON.
 
     Handles:
     - ```json ... ``` fences
     - ``` ... ``` fences
     - Preamble text before the first '{' or '['
+    - Trailing text after the JSON object (uses raw_decode to stop at first complete value)
     """
     text = text.strip()
     # Strip markdown fences first (handles preamble + fence in one pass)
@@ -31,7 +32,12 @@ def _extract_json_from_llm_response(text: str) -> str:
         if idx > 0:
             text = text[idx:]
             break
-    return text
+    # Use raw_decode to stop at first complete JSON value — tolerates trailing content
+    try:
+        obj, _ = json.JSONDecoder().raw_decode(text)
+        return json.dumps(obj)
+    except json.JSONDecodeError:
+        return text
 
 
 def _format_not_flagged(not_flagged: list) -> str:
