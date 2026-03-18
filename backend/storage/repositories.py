@@ -150,11 +150,14 @@ class PolicyRepository:
         )
         conn.commit()
 
+    # Explicit column order — SELECT * breaks when ALTER TABLE appends columns
+    _COLUMNS = "policy_id, title, path, summary, content, status, version, owner, created_at, updated_at"
+
     def get(self, policy_id: str) -> Optional[Dict[str, Any]]:
         """Get a policy by ID."""
         conn = get_connection()
         result = conn.execute(
-            "SELECT * FROM policies WHERE policy_id = ?", [policy_id]
+            f"SELECT {self._COLUMNS} FROM policies WHERE policy_id = ?", [policy_id]
         ).fetchone()
         if result is None:
             return None
@@ -164,7 +167,7 @@ class PolicyRepository:
         """List all policies, sorted by created_at descending."""
         conn = get_connection()
         results = conn.execute(
-            "SELECT * FROM policies ORDER BY created_at DESC"
+            f"SELECT {self._COLUMNS} FROM policies ORDER BY created_at DESC"
         ).fetchall()
         return [self._row_to_dict(r) for r in results]
 
