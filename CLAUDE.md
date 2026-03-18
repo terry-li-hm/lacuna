@@ -36,22 +36,22 @@
 
 ## Key Doc IDs (current deployment)
 
-- `962e5a48-c8b9-4448-95af-75ccbc772c0a` — HKMA Consumer Protection 2024 (7 reqs) — alias: `hkma-cp`
-- `1ae38d57-d575-430e-a4a5-08092f170dcd` — HKMA GenAI Financial Services 2024 (130 reqs) — alias: `hkma-gai`
-- `badf0e14-e048-4fe3-ac03-67d7785f5499` — HKMA Sandbox Arrangement (9 reqs) — alias: `hkma-sandbox`
-- `c5e1c50a-c12e-48d0-8c8d-4af5da7a69c8` — HKMA SPM CA-G-1 (1 req) — alias: `hkma-spm`
-- `31cf6728-4f3f-4d6e-8083-ea7705e266d1` — EU AI Act (no_llm) — alias: `eu-ai-act`
-- `be081e2d-4e5f-4f6d-aabb-ac9edaa72097` — FCA AI Update (no_llm) — alias: `fca`
-- `5e0a17db-687c-4035-963b-f29bb36183bf` — MAS AI Risk Management Consultation 2025 — alias: `mas-consult`
-- `486b9019-83b7-4e3f-94fd-749257cdee2b` — MAS AI Model Risk Management 2024 — alias: `mas-mrmf`
-- `72e641bf-6f19-4266-a64c-6582b83a8c1e` — **Codex Argentum v1.1 (illustrative AI governance baseline, Capco-authored, no HSBC branding)** — alias: `demo-baseline`
+- `f49e7b31-bbc1-445d-b31f-ec5ac8397b28` — HKMA Consumer Protection 2024 (7 reqs) — alias: `hkma-cp`
+- `8a2c389f-fcf4-4d5d-80a2-abde8980ea5b` — HKMA GenAI Financial Services 2024 (130 reqs) — alias: `hkma-gai`
+- `9ff0b0cc-d39b-4a1c-877b-0d5a161d5a64` — HKMA Sandbox Arrangement (9 reqs) — alias: `hkma-sandbox`
+- `2ab7d62f-c6ed-4d89-a02a-0c8966f0d03d` — HKMA SPM CA-G-1 (1 req) — alias: `hkma-spm`
+- `98719ac7-bc70-490c-9eb7-89bd28247375` — EU AI Act (no_llm) — alias: `eu-ai-act`
+- `76d51ae3-e193-4b90-8836-f92d5405cecc` — FCA AI Update (no_llm) — alias: `fca`
+- `c6221a19-2438-48be-8363-693f7e779b3b` — MAS AI Risk Management Consultation 2025 — alias: `mas-consult`
+- `1c855025-a01f-4a81-859e-0cecbe39eec8` — MAS AI Model Risk Management 2024 — alias: `mas-mrmf`
+- `4f4115d5-034e-4112-a938-2fbad051a998` — **Codex Argentum v1.1 (illustrative AI governance baseline, Capco-authored, no HSBC branding)** — alias: `demo-baseline`
 - *(nist-rmf, nist-iso42001, sg-genai not re-uploaded — source PDFs not in repo. Upload manually if needed for demo.)*
 
 ## Demo Gap Analysis (pre-calibrated, cached)
 
 **Primary demo — HKMA Consumer Protection vs Codex Argentum v1.1:**
-- circular_doc_id: `962e5a48-c8b9-4448-95af-75ccbc772c0a`
-- baseline_id: `72e641bf-6f19-4266-a64c-6582b83a8c1e`
+- circular_doc_id: `f49e7b31-bbc1-445d-b31f-ec5ac8397b28`
+- baseline_id: `4f4115d5-034e-4112-a938-2fbad051a998`
 - is_policy_baseline: false
 - Result: 0 Full, 5 Partial, 2 Gap — paragraph-level reasoning + provenance citations
 - ⚠ Codex Argentum updated to v1.1 (§3.9, §8.1e added Mar 3) — re-warm before next demo, results will differ
