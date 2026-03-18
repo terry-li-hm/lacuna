@@ -71,13 +71,31 @@ def init_db() -> None:
         )
     """)
 
-    # Migration: add content column if it doesn't exist (for existing DBs)
+    # Migration: add content column for existing DBs
+    # DuckDB segfaults on ALTER TABLE ADD COLUMN in some versions.
+    # Workaround: try a SELECT on the column — if it fails, recreate the table.
     try:
-        cols = [r[0] for r in conn.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'policies'").fetchall()]
-        if "content" not in cols:
-            conn.execute("ALTER TABLE policies ADD COLUMN content TEXT")
+        conn.execute("SELECT content FROM policies LIMIT 0")
     except Exception:
-        pass
+        try:
+            conn.execute("ALTER TABLE policies ADD COLUMN content TEXT")
+        except Exception:
+            # Nuclear option: drop and recreate (policies are re-seeded on startup)
+            conn.execute("DROP TABLE IF EXISTS policies")
+            conn.execute("""
+                CREATE TABLE policies (
+                    policy_id VARCHAR PRIMARY KEY,
+                    title VARCHAR NOT NULL,
+                    path VARCHAR,
+                    summary TEXT,
+                    content TEXT,
+                    status VARCHAR DEFAULT 'active',
+                    version VARCHAR DEFAULT '1.0',
+                    owner VARCHAR,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP
+                )
+            """)
 
     # Audit log table
     conn.execute("""
