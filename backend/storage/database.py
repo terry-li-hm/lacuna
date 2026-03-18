@@ -62,6 +62,7 @@ def init_db() -> None:
             title VARCHAR NOT NULL,
             path VARCHAR,
             summary TEXT,
+            content TEXT,
             status VARCHAR DEFAULT 'active',
             version VARCHAR DEFAULT '1.0',
             owner VARCHAR,
@@ -69,6 +70,12 @@ def init_db() -> None:
             updated_at TIMESTAMP
         )
     """)
+
+    # Migration: add content column if it doesn't exist (for existing DBs)
+    try:
+        conn.execute("ALTER TABLE policies ADD COLUMN IF NOT EXISTS content TEXT")
+    except Exception:
+        pass
 
     # Audit log table
     conn.execute("""

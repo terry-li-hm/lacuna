@@ -5,16 +5,68 @@ import io
 import logging
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from fastapi.responses import StreamingResponse
 
 from backend.state import (
     get_policy_service,
+    vector_store,
 )
 from backend.models.schemas import PolicyUpdateRequest
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+
+@router.post("/policies/upload")
+async def upload_policy(
+    file: UploadFile = File(...),
+    title: str | None = None,
+    owner: str | None = None,
+    service=Depends(get_policy_service),
+):
+    """Upload an internal policy document as a gap analysis baseline."""
+    content_bytes = await file.read()
+    content = content_bytes.decode("utf-8", errors="replace")
+    filename = file.filename or "untitled"
+    policy_title = title or filename.rsplit(".", 1)[0]
+
+    policy = service.create_from_upload(
+        content=content,
+        title=policy_title,
+        filename=filename,
+        owner=owner,
+    )
+
+    # Index in vector store for gap analysis retrieval
+    try:
+        if vector_store is not None:
+            sections = content.split("\n\n")
+            chunks = []
+            current = ""
+            for section in sections:
+                if len(current) + len(section) > 2000 and current:
+                    chunks.append(current.strip())
+                    current = section
+                else:
+                    current += "\n\n" + section if current else section
+            if current.strip():
+                chunks.append(current.strip())
+
+            vector_store.add_document(
+                doc_id=policy["policy_id"],
+                chunks=chunks,
+                metadata={
+                    "policy_id": policy["policy_id"],
+                    "filename": filename,
+                    "source": "policy",
+                    "jurisdiction": "INTERNAL",
+                },
+            )
+    except Exception as e:
+        logger.warning(f"Failed to index policy in vector store: {e}")
+
+    return policy
 
 
 @router.get("/policies")

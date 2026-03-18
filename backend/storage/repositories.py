@@ -132,14 +132,15 @@ class PolicyRepository:
         conn.execute(
             """
             INSERT OR REPLACE INTO policies
-            (policy_id, title, path, summary, status, version, owner, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (policy_id, title, path, summary, content, status, version, owner, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
             [
                 policy["policy_id"],
                 policy["title"],
                 policy.get("path"),
                 policy.get("summary"),
+                policy.get("content"),
                 policy.get("status", "active"),
                 policy.get("version", "1.0"),
                 policy.get("owner"),
@@ -180,13 +181,18 @@ class PolicyRepository:
             "title",
             "path",
             "summary",
+            "content",
             "status",
             "version",
             "owner",
             "created_at",
             "updated_at",
         ]
-        return dict(zip(columns, row))
+        result = dict(zip(columns, row))
+        # Handle case where content column may not exist in older rows
+        if len(row) < len(columns):
+            result = dict(zip(columns[:len(row)], row))
+        return result
 
 
 class AuditLogRepository:
