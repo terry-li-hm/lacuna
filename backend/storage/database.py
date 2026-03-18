@@ -73,7 +73,9 @@ def init_db() -> None:
 
     # Migration: add content column if it doesn't exist (for existing DBs)
     try:
-        conn.execute("ALTER TABLE policies ADD COLUMN IF NOT EXISTS content TEXT")
+        cols = [r[0] for r in conn.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'policies'").fetchall()]
+        if "content" not in cols:
+            conn.execute("ALTER TABLE policies ADD COLUMN content TEXT")
     except Exception:
         pass
 
