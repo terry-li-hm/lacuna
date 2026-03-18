@@ -108,28 +108,7 @@ class RequirementExtractor:
 
             for i, chunk in enumerate(chunks):
                 chunk_label = f" (section {i+1}/{len(chunks)})" if len(chunks) > 1 else ""
-                prompt = f"""Analyze the following regulatory text from {jurisdiction}{chunk_label} and extract key requirements.
-
-For each requirement, identify:
-1. Requirement type (e.g., Capital Adequacy, Liquidity, AML/KYC, Reporting, Governance, AI/Technology, Consumer Protection, Data Privacy, Risk Management)
-2. Brief description of the requirement
-3. Any specific thresholds, ratios, or deadlines mentioned
-4. Whether it's mandatory or recommended
-5. Confidence level (High/Medium/Low)
-6. A short source snippet (<= 200 chars) quoted from the text
-
-Text:
-{chunk}
-
-Provide output in the following structured format:
-REQUIREMENT_TYPE: [type]
-DESCRIPTION: [brief description]
-DETAILS: [specific numbers, dates, thresholds]
-MANDATORY: [Yes/No]
-CONFIDENCE: [High/Medium/Low]
-SOURCE_SNIPPET: [quoted excerpt]
----
-"""
+                prompt = self._build_extraction_prompt(chunk, jurisdiction, chunk_label)
 
                 response = self.client.chat.completions.create(
                     model=self.model,
@@ -158,6 +137,34 @@ SOURCE_SNIPPET: [quoted excerpt]
             logger.error(f"Error extracting requirements: {e}")
             return self._basic_extraction(text, jurisdiction)
     
+    def _build_extraction_prompt(self, chunk: str, jurisdiction: str, chunk_label: str = "") -> str:
+        """Build the extraction prompt for a regulatory text chunk."""
+        return f"""Analyze the following regulatory text from {jurisdiction}{chunk_label} and extract key requirements.
+
+For each requirement, identify:
+1. Requirement type — choose the BEST fit from:
+   Banking: Capital Adequacy, Liquidity, AML/KYC, Credit Risk, Market Risk, Operational Risk
+   AI Governance: Model Governance, AI Safety & Robustness, Fairness & Bias, Transparency & Explainability, Data Quality & Privacy, Human Oversight, Accountability & Audit
+   General: Risk Management, Consumer Protection, Data Privacy, Reporting & Disclosure, Governance, Cyber Security
+2. Brief description of the requirement
+3. Any specific thresholds, ratios, or deadlines mentioned
+4. Whether it's mandatory or recommended
+5. Confidence level (High/Medium/Low)
+6. A short source snippet (<= 200 chars) quoted from the text
+
+Text:
+{chunk}
+
+Provide output in the following structured format:
+REQUIREMENT_TYPE: [type]
+DESCRIPTION: [brief description]
+DETAILS: [specific numbers, dates, thresholds]
+MANDATORY: [Yes/No]
+CONFIDENCE: [High/Medium/Low]
+SOURCE_SNIPPET: [quoted excerpt]
+---
+"""
+
     def _chunk_text(self, text: str) -> List[str]:
         """Split text into overlapping chunks for processing."""
         if len(text) <= self.CHUNK_SIZE:
