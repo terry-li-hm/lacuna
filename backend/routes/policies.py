@@ -8,9 +8,9 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from fastapi.responses import StreamingResponse
 
+import backend.state as _state
 from backend.state import (
     get_policy_service,
-    vector_store,
 )
 from backend.models.schemas import PolicyUpdateRequest
 
@@ -40,7 +40,7 @@ async def upload_policy(
 
     # Index in vector store for gap analysis retrieval
     try:
-        if vector_store is not None:
+        if _state.vector_store is not None:
             sections = content.split("\n\n")
             chunks = []
             current = ""
@@ -53,7 +53,7 @@ async def upload_policy(
             if current.strip():
                 chunks.append(current.strip())
 
-            vector_store.add_document(
+            _state.vector_store.add_document(
                 doc_id=policy["policy_id"],
                 chunks=chunks,
                 metadata={
