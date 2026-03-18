@@ -155,6 +155,29 @@ class RegAtlasClient:
         response.raise_for_status()
         return response.json()
 
+    def upload_policy(
+        self,
+        file_path: Path,
+        title: str | None = None,
+        owner: str | None = None,
+    ) -> Dict[str, Any]:
+        """Upload an internal policy document."""
+        with open(file_path, "rb") as f:
+            files = {"file": (file_path.name, f, "application/octet-stream")}
+            params = {}
+            if title:
+                params["title"] = title
+            if owner:
+                params["owner"] = owner
+            response = self.client.post(
+                f"{self.base_url}/policies/upload",
+                files=files,
+                params=params,
+                timeout=120,
+            )
+        response.raise_for_status()
+        return response.json()
+
     def close(self):
         """Close the HTTP client."""
         self.client.close()

@@ -534,6 +534,37 @@ def list_policies(
 
 
 @app.command()
+def upload_policy(
+    file: Path = typer.Argument(..., help="Path to policy document (PDF, TXT, MD)"),
+    title: Optional[str] = typer.Option(None, "--title", "-t", help="Policy title (defaults to filename)"),
+    owner: Optional[str] = typer.Option(None, "--owner", help="Policy owner (e.g., 'Compliance')"),
+    api_url: Optional[str] = typer.Option(None, "--api-url", help="Override API URL"),
+):
+    """Upload an internal policy document as a gap analysis baseline."""
+    if not file.exists():
+        console.print(f"[red]Error: File not found: {file}[/red]")
+        raise typer.Exit(1)
+
+    url = api_url or get_api_url()
+    client = RegAtlasClient(base_url=url)
+
+    try:
+        with console.status(f"[bold green]Uploading policy {file.name}..."):
+            result = client.upload_policy(file, title=title, owner=owner)
+
+        console.print(f"[green]✓[/green] Policy uploaded: {result['title']}")
+        console.print(f"[cyan]Policy ID:[/cyan] {result['policy_id']}")
+        console.print(f"[cyan]Status:[/cyan] {result['status']}")
+        console.print(f"[cyan]Version:[/cyan] {result['version']}")
+        console.print(f"\n[dim]Run gap analysis:[/dim] lacuna gap <circular-id> {result['policy_id']} --policy")
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise typer.Exit(1)
+    finally:
+        client.close()
+
+
+@app.command()
 def stats_requirements(
     api_url: Optional[str] = typer.Option(None, "--api-url", help="Override API URL")
 ):
